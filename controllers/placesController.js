@@ -2,10 +2,11 @@ const mssql = require('mssql');
 const logger = require('../utils/logger');
 const {connectToDatabase, sql } = require('../dbConfig')
 
-const getDataReason = async (req, res) => {
+// Маршрут для получения данных
+const getPlaces = async(req, res) => {
   try {
     let pool = await connectToDatabase();
-    let result = await pool.request().query('SELECT * FROM dbo.sqlite_Reason');
+    let result = await pool.request().query('SELECT * FROM dbo.MP_Places');
     res.json(result.recordset);
   } catch (err) {
     logger.error('SQL error', { error: err });
@@ -14,5 +15,5 @@ const getDataReason = async (req, res) => {
 }
 
 module.exports = {
-  getDataReason
+  getPlaces
 };
