@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 /*for gruzy*/
-const dataRouter = require('./routes/data');
+const dataRouter = require('./routes/test');
 const reasonRouter = require('./routes/reason');
 
 /* for market place*/
