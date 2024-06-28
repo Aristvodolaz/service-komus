@@ -1,11 +1,11 @@
 const mssql = require('mssql');
 
 const config = {
-    user: '',
-    password: '',
+    user: 'sa',
+    password: 'icY2eGuyfU',
     server: 'PRM-SRV-MSSQL-01.komus.net',
     port: 59587,
-    database: '',
+    database: 'SPOe_rc',
     pool:{
         max: 500,
         min: 0,
