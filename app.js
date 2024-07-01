@@ -26,7 +26,11 @@ app.use('/reason', reasonRouter);
 
 /* for market place*/
 app.use('/market/pallets', palletsController);
-app.use('/market/places', placesController)
+app.use('/market/places', placesController);
+app.use('/market/palet', palletTController);
+app.use('/market/place', placeController);
+app.use('/market/tasks', tasksController);
+app.use('/market/task', taskController);
 
 
 app.listen(port, () => {

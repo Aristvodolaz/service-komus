@@ -10,7 +10,11 @@ const getPlaces = async(req, res) => {
     res.json(result.recordset);
   } catch (err) {
     logger.error('SQL error', { error: err });
-    res.status(500).send('Internal Server Error');
+    res.status(500).json({
+      success: false,
+      message:"Ошибка работы сервера",
+      errorCode: 500
+    });  
   }
 }
 
