@@ -13,6 +13,11 @@ const placesController = require('./routes/market_place/places');
 const tasksController = require('./routes/market_place/tasks');
 const taskController = require('./routes/market_place/task');
 
+/* for excel*/
+const fileController = require('./routes/market_place/file');
+const filesRouter = require('./routes/market_place/file');
+const downloadController = require('./controllers/downloadController');
+
 const logger = require('./utils/logger');
 
 const app = express();
@@ -32,6 +37,10 @@ app.use('/market/place', placeController);
 app.use('/market/tasks', tasksController);
 app.use('/market/task', taskController);
 
+/* for excel download*/
+app.use('/download/excel', fileController);
+app.use('/download/files', filesRouter);
+app.use('/download', downloadController);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
