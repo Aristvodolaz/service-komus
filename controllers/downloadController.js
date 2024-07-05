@@ -21,17 +21,44 @@ const downloadFile = async (serverInfo, remoteFilePath, localFilePath) => {
   }
 };
 
-// Функция для чтения Excel файла и преобразования его в JSON
+// Функция для чтения Excel файла и преобразования его в JSON с включением пустых строк
 const readExcelToJson = (filePath) => {
   try {
     const workbook = xlsx.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const jsonData = xlsx.utils.sheet_to_json(worksheet);
+
+    // Преобразование листа в JSON с включением пустых строк
+    const jsonData = xlsx.utils.sheet_to_json(worksheet, { raw: true, defval: null });
     return jsonData;
   } catch (error) {
     console.error(`Ошибка при чтении Excel файла ${path.basename(filePath)}`, error);
     throw error;
+  }
+};
+
+// Функция для получения списка файлов в директории и её поддиректориях
+const listFiles = async (serverInfo, remoteDir) => {
+  try {
+    await sftp.connect(serverInfo);
+    const files = await sftp.list(remoteDir);
+
+    const fileTree = {};
+
+    for (const file of files) {
+      if (file.type === 'd') {
+        fileTree[file.name] = await listFiles(serverInfo, path.join(remoteDir, file.name));
+      } else {
+        if (!fileTree[remoteDir]) {
+          fileTree[remoteDir] = [];
+        }
+        fileTree[remoteDir].push(file.name);
+      }
+    }
+
+    return fileTree;
+  } finally {
+    sftp.end();
   }
 };
 
@@ -65,6 +92,36 @@ router.post('/download-excel', async (req, res) => {
     res.status(500).json({
       success: false,
       message: `Ошибка при загрузке и обработке файла ${fileName}`,
+      error: error.message,
+    });
+  }
+});
+
+// Маршрут для получения списка файлов
+router.post('/list-files', async (req, res) => {
+  const { host, port, username, password } = req.body;
+  const remoteDir = '/root/task_file/wait'; // Директория на сервере SFTP
+
+  const serverInfo = {
+    host,
+    port: parseInt(port, 10),
+    username,
+    password,
+  };
+
+  try {
+    // Получение списка файлов с сервера SFTP
+    const files = await listFiles(serverInfo, remoteDir);
+    console.log('Список файлов:');
+    console.log(files);
+
+    // Отправка списка файлов клиенту
+    res.json(files);
+  } catch (error) {
+    console.error('Ошибка при получении списка файлов:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Ошибка при получении списка файлов',
       error: error.message,
     });
   }
