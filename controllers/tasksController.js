@@ -16,10 +16,10 @@ const getArticulsByTaskNumber = async (req, res) => {
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskNumber)
       .query('SELECT * FROM Test_MPP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
 
-    res.json(result.recordset);
+    res.status(200).json({success: true, value: result.recordset, errorCode: 200});
   } catch (error) {
     console.error('Ошибка при получении списка артикулов:', error);
-    res.status(500).json({ error: 'Ошибка при получении списка артикулов' });
+    res.status(500).json({ success: false, error: 'Ошибка при получении списка артикулов', errorCode:500 });
   }
 };
 
