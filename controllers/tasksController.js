@@ -113,10 +113,52 @@ const getRecordsByArticul = async (req, res) => {
   }
 };
 
+// Роут для обновления значений в указанных колонках для задания по номеру ШК и названию
+const updateValues = async (req, res) => {
+  const { Nazvanie_Zadaniya, SHK, columnsToUpdate } = req.body;
+
+  try {
+    const pool = await connectToDatabase();
+
+    // Проверка входных данных
+    if (!Array.isArray(columnsToUpdate) || columnsToUpdate.length === 0) {
+      return res.status(400).json({ success: false, message: 'Неверный формат данных для колонок для обновления' });
+    }
+
+    // Формирование части SQL-запроса для обновления колонок
+    const setClause = columnsToUpdate.map(column => `[${column}] = 'V'`).join(', ');
+
+    // SQL-запрос для обновления значений
+    const query = `
+      UPDATE Test_MP
+      SET
+        ${setClause}
+     WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK
+    `;
+
+    // Выполнение запроса с параметрами
+    const result = await pool.request()
+      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), Nazvanie_Zadaniya)
+      .input('SHK', mssql.NVarChar(255), SHK)
+      .query(query);
+
+    // Проверка результатов выполнения запроса
+    if (result.rowsAffected[0] > 0) {
+      res.json({ success: true, message: `Значения успешно обновлены для документа ${Nazvanie_Zadaniya} с номером ШК ${SHK}` });
+    } else {
+      res.status(404).json({ success: false, message: `Запись не найдена для документа ${Nazvanie_Zadaniya} с номером ШК ${SHK}` });
+    }
+  } catch (error) {
+    console.error('Ошибка при обновлении значений в базе данных:', error);
+    res.status(500).json({ success: false, message: 'Ошибка при обновлении значений', error: error.message });
+  }
+};
+
 module.exports = {
   getArticulsByTaskNumber,
   getUniqueTaskNames,
   getByShk,
   updateStatus,
-  getRecordsByArticul
+  getRecordsByArticul,
+  updateValues
 };

@@ -7,4 +7,5 @@ router.get('/names', dataController.getUniqueTaskNames);
 router.get('/searchShk', dataController.getByShk); 
 router.put('/updateStatus', dataController.updateStatus);
 router.get('/serchArticulTask', dataController.getRecordsByArticul)
+router.post('/update-tasks', dataController.updateValues)
 module.exports = router;

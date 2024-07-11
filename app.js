@@ -12,6 +12,7 @@ const tasksController = require('./routes/market_place/tasks');
 const fileController = require('./routes/market_place/file');
 const filesRouter = require('./routes/market_place/file');
 const downloadController = require('./controllers/downloadController');
+const exportRoutes = require('./routes/export');
 
 const logger = require('./utils/logger');
 
@@ -31,6 +32,8 @@ app.use('/market/tasks', tasksController);
 app.use('/download/excel', fileController);
 app.use('/download/files', filesRouter);
 app.use('/download', downloadController);
+
+app.use('/export', exportRoutes);
 
 
 app.listen(port, () => {
