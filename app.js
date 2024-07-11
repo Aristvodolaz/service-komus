@@ -13,11 +13,12 @@ const fileController = require('./routes/market_place/file');
 const filesRouter = require('./routes/market_place/file');
 const downloadController = require('./controllers/downloadController');
 const exportRoutes = require('./routes/export');
+const updateRoutes = require('./routes/finish');
 
 const logger = require('./utils/logger');
 
 const app = express();
-const port = 3005;
+const port = 443;
 
 app.use(bodyParser.json());
 
@@ -34,6 +35,7 @@ app.use('/download/files', filesRouter);
 app.use('/download', downloadController);
 
 app.use('/export', exportRoutes);
+app.use('/send', updateRoutes);
 
 
 app.listen(port, () => {
