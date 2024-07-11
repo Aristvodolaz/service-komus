@@ -14,7 +14,7 @@ const getArticulsByTaskNumber = async (req, res) => {
 
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskNumber)
-      .query('SELECT * FROM Test_MPP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
+      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
 
     res.status(200).json({success: true, value: result.recordset, errorCode: 200});
   } catch (error) {
@@ -32,7 +32,7 @@ const getUniqueTaskNames = async (req, res) => {
       throw new Error('Ошибка подключения к базе данных');
     }
 
-    let query = 'SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MPP';
+    let query = 'SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP';
     const request = pool.request();
 
     if (filter) {
@@ -61,7 +61,7 @@ const getByShk = async (req, res) => {
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('SHK', mssql.NVarChar(50), `%${shk}%`)
-      .query('SELECT * FROM Test_MPP WHERE SHK LIKE @SHK AND Nazvanie_Zadaniya = @Nazvanie_Zadaniya ');
+      .query('SELECT * FROM Test_MP WHERE SHK LIKE @SHK AND Nazvanie_Zadaniya = @Nazvanie_Zadaniya ');
 
     res.json(result.recordset);
   } catch (error) {
@@ -83,7 +83,7 @@ const updateStatus = async (req, res) => {
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('SHK', mssql.NVarChar(50), `%${shk}%`)
       .input('Status', mssql.Int, status)
-      .query('UPDATE Test_MPP SET Status = @Status WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
+      .query('UPDATE Test_MP SET Status = @Status WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
 
     res.json({ message: 'Статус успешно обновлен' });
   } catch (error) {
@@ -104,7 +104,7 @@ const getRecordsByArticul = async (req, res) => {
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('Artikul', mssql.Int, articul)
-      .query('SELECT * FROM Test_MPP WHERE Artikul = @Artikul AND Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
+      .query('SELECT * FROM Test_MP WHERE Artikul = @Artikul AND Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
 
     res.json(result.recordset);
   } catch (error) {

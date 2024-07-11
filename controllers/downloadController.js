@@ -47,7 +47,7 @@ const readExcelToJson = (filePath) => {
   }
 };
 
-const insertDataToDB = async (data, fileName, dbConfig) => {
+const insertDataToDB = async (data, fileName, pref, dbConfig) => {
   const pool = await connectToDatabase(); // Подключение к базе данных
 
   try {
@@ -58,15 +58,18 @@ const insertDataToDB = async (data, fileName, dbConfig) => {
       const request = transaction.request();
 
       const query = `
-        INSERT INTO Test_MPP (Nazvanie_Zadaniya, Status, Artikul, Artikul_Syrya, Nomenklatura, Nazvanie_Tovara, SHK, SHK_SPO, SHK_SPO_1, Kol_vo_Syrya, Itog_Zakaz, Sht_v_MP, Itog_MP, SOH, Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_12_Markirovka_Prom, Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No)
-        VALUES (@Nazvanie_Zadaniya, @Status, @Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, @Sht_v_MP, @Itog_MP, @SOH, @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht, @Op_7_Pereschyot, @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_12_Markirovka_Prom, @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Mesto, @Vlozhennost, @Pallet_No)
+        INSERT INTO Test_MP (Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel,Artikul, Artikul_Syrya, Nomenklatura, Nazvanie_Tovara, SHK, SHK_SPO, SHK_SPO_1, Kol_vo_Syrya, Itog_Zakaz, Sht_v_MP, Itog_MP, SOH, Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_12_Markirovka_Prom, Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Time_Start, Time_End)
+        VALUES (@Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, @Sht_v_MP, @Itog_MP, @SOH, @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht, @Op_7_Pereschyot, @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_12_Markirovka_Prom, @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Mesto, @Vlozhennost, @Pallet_No, @Time_Start,@Time_End)
       `;
 
       // Подготовка запроса для текущей записи
+      request.input('Pref', mssql.NVarChar(50), pref);
       request.input('Nazvanie_Zadaniya', mssql.NVarChar(255), fileName);
+      request.input('Status_Zadaniya', mssql.Int, 0);
       request.input('Status', mssql.Int, 0);
+      request.input('Ispolnitel', mssql.NVarChar(255), "");
       request.input('Artikul', mssql.Int, item['Артикул'])
-      request.input('Artikul_Syrya', mssql.NVarChar(50), item['Артикул Сырья'].toString())
+      request.input('Artikul_Syrya', mssql.NVarChar(50), item['Артикул Сырья'] ? item['Артикул Сырья'].toString() : null);
       request.input('Nomenklatura', mssql.Int, item['Номенклатура'])
       request.input('Nazvanie_Tovara', mssql.NVarChar(255), item['Название товара'])
       request.input('SHK', mssql.NVarChar(255), item['ШК'].toString()); // Преобразуйте SHK в строку
@@ -101,6 +104,9 @@ const insertDataToDB = async (data, fileName, dbConfig) => {
       request.input('Mesto', mssql.NVarChar(50), item['Место'])
       request.input('Vlozhennost', mssql.NVarChar(50), item['Вложенность '])
       request.input('Pallet_No', mssql.NVarChar(50), item['Паллет №'])
+      request.input('Time_Start', mssql.NVarChar(255), "");
+      request.input('Time_End', mssql.NVarChar(255), "");
+
 
       await request.query(query);
     }
@@ -156,6 +162,10 @@ router.get('/list-files', async (req, res) => {
 // Маршрут для скачивания, преобразования и вставки данных в БД, а также перемещения файла
 router.post('/process-excel', async (req, res) => {
   const { fileName, host, port, username, password } = req.body;
+
+  // Извлечение данных до первого пробела из fileName
+  const pref = fileName.split(' ')[0];  // Разделение строки по пробелу и выбор первого элемента
+
   const remoteFilePath = `/root/task_file/wait/${fileName}`; // Путь к файлу на сервере SFTP
   console.log(remoteFilePath);
   const localFilePath = path.join(__dirname, '..', 'downloads', fileName); // Локальный путь для сохранения файла
@@ -182,7 +192,7 @@ router.post('/process-excel', async (req, res) => {
     console.log(jsonData);
 
     // Вставка данных в БД
-    await insertDataToDB(jsonData, fileName);
+    await insertDataToDB(jsonData, fileName, pref);
     console.log('Данные успешно вставлены в БД.');
 
     // Перемещение файла на сервере SFTP
@@ -200,5 +210,6 @@ router.post('/process-excel', async (req, res) => {
     });
   }
 });
+
 
 module.exports = router;
