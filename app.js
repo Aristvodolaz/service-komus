@@ -18,7 +18,7 @@ const updateRoutes = require('./routes/finish');
 const logger = require('./utils/logger');
 
 const app = express();
-const port = 80;
+const port = 3005;
 
 app.use(bodyParser.json());
 
