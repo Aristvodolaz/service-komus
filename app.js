@@ -14,6 +14,7 @@ const filesRouter = require('./routes/market_place/file');
 const downloadController = require('./controllers/downloadController');
 const exportRoutes = require('./routes/export');
 const updateRoutes = require('./routes/finish');
+const articleRoutes = require('./routes/market_place/article');
 
 const logger = require('./utils/logger');
 
@@ -36,6 +37,8 @@ app.use('/download', downloadController);
 
 app.use('/export', exportRoutes);
 app.use('/send', updateRoutes);
+
+app.use('/article', articleRoutes);
 
 
 app.listen(port, () => {
