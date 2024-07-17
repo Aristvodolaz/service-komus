@@ -92,9 +92,9 @@ const updateStatus = async (req, res) => {
 
     await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
-      .input('Article', mssql.NVarChar(50), articul)
+      .input('Artikul', mssql.NVarChar(50), articul)
       .input('Status', mssql.Int, status)
-      .query('UPDATE Test_MP SET Status = @Status WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Article = @Article');
+      .query('UPDATE Test_MP SET Status = @Status WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
 
     res.status(200).json({ success: true, value: 'Статус успешно обновлен', errorCode: 200 });
   } catch (error) {
