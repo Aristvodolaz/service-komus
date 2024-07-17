@@ -15,6 +15,7 @@ const downloadController = require('./controllers/downloadController');
 const exportRoutes = require('./routes/export');
 const updateRoutes = require('./routes/finish');
 const articleRoutes = require('./routes/market_place/article');
+const authRoutes = require('./routes/market_place/auth');
 
 const logger = require('./utils/logger');
 
@@ -39,6 +40,7 @@ app.use('/export', exportRoutes);
 app.use('/send', updateRoutes);
 
 app.use('/article', articleRoutes);
+app.use('/auth', authRoutes);
 
 
 app.listen(port, () => {

@@ -3,7 +3,7 @@ const { connectToDatabase } = require('../dbConfig');
 
 // Контроллер для обновления данных в указанных колонках
 const updateData = async (req, res) => {
-  const { taskName, shk, srokGodnosti, mesto, vlozhennost, palletNo } = req.body;
+  const { taskName, shk, srokGodnosti, mesto, vlozhennost, palletNo, ispolnitel } = req.body;
 
   try {
     // Подключение к базе данных
@@ -19,7 +19,9 @@ const updateData = async (req, res) => {
         Srok_Godnosti = ISNULL(@Srok_Godnosti, Srok_Godnosti),
         Mesto = ISNULL(@Mesto, Mesto),
         Vlozhennost = ISNULL(@Vlozhennost, Vlozhennost),
-        Pallet_No = ISNULL(@Pallet_No, Pallet_No)
+        Pallet_No = ISNULL(@Pallet_No, Pallet_No),
+        Status = 2,
+        Ispolnitel = ISNULL(@Ispolnitel, Ispolnitel)
       WHERE
         Nazvanie_Zadaniya = @Nazvanie_Zadaniya
         AND SHK LIKE @SHK;
@@ -33,6 +35,7 @@ const updateData = async (req, res) => {
       .input('Mesto', mssql.NVarChar(50), mesto)
       .input('Vlozhennost', mssql.NVarChar(50), vlozhennost)
       .input('Pallet_No', mssql.NVarChar(50), palletNo)
+      .input('Ispolnitel', mssql.NVarChar(255), ispolnitel)
       .query(query);
 
     // Проверка результатов выполнения запроса

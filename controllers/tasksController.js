@@ -78,7 +78,7 @@ const getByShk = async (req, res) => {
 };
 
 const updateStatus = async (req, res) => {
-  const { taskName, shk, status } = req.body;
+  const { taskName, articul, status } = req.body;
 
   if (!taskName || !shk || status === undefined) {
     return res.status(400).json({ success: false, value: 'taskName, shk, and status are required', errorCode: 400 });
@@ -92,9 +92,9 @@ const updateStatus = async (req, res) => {
 
     await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
-      .input('SHK', mssql.NVarChar(50), `%${shk}%`)
+      .input('Article', mssql.NVarChar(50), articul)
       .input('Status', mssql.Int, status)
-      .query('UPDATE Test_MP SET Status = @Status WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
+      .query('UPDATE Test_MP SET Status = @Status WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Article = @Article');
 
     res.status(200).json({ success: true, value: 'Статус успешно обновлен', errorCode: 200 });
   } catch (error) {
@@ -176,7 +176,7 @@ const duplicateRecord = async (req, res) => {
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('SHK', mssql.NVarChar(255), shk)
-      .query('SELECT * FROM Test_MPP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK = @SHK');
+      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK = @SHK');
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ error: 'Запись не найдена' });
@@ -229,6 +229,7 @@ const duplicateRecord = async (req, res) => {
       .input('Vlozhennost', mssql.NVarChar(50), vlozhennost)
       .input('Pallet_No', mssql.NVarChar(50), palletNo)
       .input('Time_Start', mssql.NVarChar(255), originalRecord.Time_Start)
+      .input('Time_Middle', mssql.NVarChar(255), originalRecord.Time_Middle)
       .input('Time_End', mssql.NVarChar(255), originalRecord.Time_End)
       .query(`
         INSERT INTO Test_MP (
