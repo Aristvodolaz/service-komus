@@ -53,8 +53,9 @@ const getUniqueTaskNames = async (req, res) => {
 };
 
 const getByShk = async (req, res) => {
-  const { taskName, shk } = req.query;
+  const { taskName, shk } = req.body; // Extract taskName and shk from req.body
 
+  // Check if taskName or shk is missing in the request body
   if (!taskName || !shk) {
     return res.status(400).json({ success: false, value: 'taskName and shk are required', errorCode: 400 });
   }
@@ -62,7 +63,7 @@ const getByShk = async (req, res) => {
   try {
     const pool = await connectToDatabase();
     if (!pool) {
-      throw new Error('Ошибка подключения к базе данных');
+      throw new Error('Failed to connect to the database');
     }
 
     const result = await pool.request()
@@ -72,10 +73,11 @@ const getByShk = async (req, res) => {
 
     res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
   } catch (error) {
-    console.error('Ошибка при получении данных по SHK:', error);
+    console.error('Error fetching data by SHK:', error);
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+
 
 const updateStatus = async (req, res) => {
   const { taskName, articul, status } = req.body;
