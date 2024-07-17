@@ -80,7 +80,7 @@ const getByShk = async (req, res) => {
 const updateStatus = async (req, res) => {
   const { taskName, articul, status } = req.body;
 
-  if (!taskName || !shk || status === undefined) {
+  if (!taskName || !articul || status === undefined) {
     return res.status(400).json({ success: false, value: 'taskName, shk, and status are required', errorCode: 400 });
   }
 
