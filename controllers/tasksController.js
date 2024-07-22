@@ -53,7 +53,7 @@ const getUniqueTaskNames = async (req, res) => {
 };
 
 const getByShk = async (req, res) => {
-  const { taskName, shk } = req.query;
+  const { taskName, shk, timeMiddle } = req.query;
 
   if (!taskName || !shk) {
     return res.status(400).json({ success: false, value: 'taskName and shk are required', errorCode: 400 });
@@ -68,7 +68,7 @@ const getByShk = async (req, res) => {
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('SHK', mssql.NVarChar(50), `%${shk}%`)
-      .query('SELECT * FROM Test_MP WHERE SHK LIKE @SHK AND Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
+      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
 
     res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
   } catch (error) {
@@ -78,10 +78,10 @@ const getByShk = async (req, res) => {
 };
 
 const updateStatus = async (req, res) => {
-  const { taskName, articul, status } = req.body;
+  const { taskName, articul, status, startTime } = req.body;
 
-  if (!taskName || !articul || status === undefined) {
-    return res.status(400).json({ success: false, value: 'taskName, shk, and status are required', errorCode: 400 });
+  if (!taskName || !articul || status === undefined|| !startTime) {
+    return res.status(400).json({ success: false, value: 'taskName, shk, and status, time are required', errorCode: 400 });
   }
 
   try {
@@ -94,7 +94,8 @@ const updateStatus = async (req, res) => {
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('Artikul', mssql.NVarChar(50), articul)
       .input('Status', mssql.Int, status)
-      .query('UPDATE Test_MP SET Status = @Status WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
+      .input('Time_Start', mssql.NVarChar(255), startTime)
+      .query('UPDATE Test_MP SET Status = @Status, Time_Start = @Time_Start  WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
 
     res.status(200).json({ success: true, value: 'Статус успешно обновлен', errorCode: 200 });
   } catch (error) {
@@ -169,7 +170,7 @@ const duplicateRecord = async (req, res) => {
   try {
     const pool = await connectToDatabase();
     if (!pool) {
-      throw new Error('Ошибка подключения к базе данных');
+      return res.status(500).json({ success: false, value: null, errorCode: 'DB_CONNECTION_ERROR' });
     }
 
     // Находим запись по номеру задания и ШК
@@ -179,7 +180,7 @@ const duplicateRecord = async (req, res) => {
       .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK = @SHK');
 
     if (result.recordset.length === 0) {
-      return res.status(404).json({ error: 'Запись не найдена' });
+      return res.status(404).json({ success: false, value: null, errorCode: 'RECORD_NOT_FOUND' });
     }
 
     // Получаем оригинальную запись
@@ -246,20 +247,19 @@ const duplicateRecord = async (req, res) => {
           @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, 
           @Sht_v_MP, @Itog_MP, @SOH, @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, 
           @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht, @Op_7_Pereschyot, 
-          @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_12_Markirovka_Pром, 
-          @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, 
+          @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Pром, @Op_12_Markirovка_Pром, 
+          @Op_13_Markirovка_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, 
           @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Mesto, @Vlozhennost, 
           @Pallet_No, @Time_Start, @Time_End
         )
       `);
 
-    res.json({ message: 'Запись успешно продублирована' });
+    res.json({ success: true, value: 'Запись успешно продублирована', errorCode: null });
   } catch (error) {
     console.error('Ошибка при дублировании записи:', error);
-    res.status(500).json({ error: 'Ошибка при дублировании записи' });
+    res.status(500).json({ success: false, value: null, errorCode: 'DUPLICATION_ERROR' });
   }
 };
-
 
 const updateSHKByTaskAndArticul = async (req, res) => {
   const { taskName, articul, newSHK } = req.body;
@@ -267,7 +267,7 @@ const updateSHKByTaskAndArticul = async (req, res) => {
   try {
     const pool = await connectToDatabase();
     if (!pool) {
-      throw new Error('Ошибка подключения к базе данных');
+      return res.status(500).json({ success: false, value: null, errorCode: 'DB_CONNECTION_ERROR' });
     }
 
     // Обновление записи по названию задания и артиклу
@@ -277,10 +277,10 @@ const updateSHKByTaskAndArticul = async (req, res) => {
       .input('NewSHK', mssql.NVarChar(255), newSHK)
       .query('UPDATE Test_MP SET SHK = @NewSHK WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
 
-    res.json({ message: 'ШК успешно обновлен' });
+    res.json({ success: true, value: 'ШК успешно обновлен', errorCode: null });
   } catch (error) {
     console.error('Ошибка при обновлении ШК:', error);
-    res.status(500).json({ error: 'Ошибка при обновлении ШК' });
+    res.status(500).json({ success: false, value: null, errorCode: 'UPDATE_ERROR' });
   }
 };
 module.exports = {
