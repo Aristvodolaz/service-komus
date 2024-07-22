@@ -53,7 +53,7 @@ const getUniqueTaskNames = async (req, res) => {
 };
 
 const getByShk = async (req, res) => {
-  const { taskName, shk, timeMiddle } = req.query;
+  const { taskName, shk } = req.query;
 
   if (!taskName || !shk) {
     return res.status(400).json({ success: false, value: 'taskName and shk are required', errorCode: 400 });
@@ -62,7 +62,7 @@ const getByShk = async (req, res) => {
   try {
     const pool = await connectToDatabase();
     if (!pool) {
-      throw new Error('Ошибка подключения к базе данных');
+      return res.status(500).json({ success: false, value: null, errorCode: 'DB_CONNECTION_ERROR' });
     }
 
     const result = await pool.request()
@@ -70,12 +70,17 @@ const getByShk = async (req, res) => {
       .input('SHK', mssql.NVarChar(50), `%${shk}%`)
       .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
 
-    res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ success: false, value: null, errorCode: 'RECORD_NOT_FOUND' });
+    }
+
+    res.status(200).json({ success: true, value: result.recordset, errorCode: null });
   } catch (error) {
     console.error('Ошибка при получении данных по SHK:', error);
-    res.status(500).json({ success: false, value: null, errorCode: 500 });
+    res.status(500).json({ success: false, value: null, errorCode: 'RETRIEVAL_ERROR' });
   }
 };
+
 
 const updateStatus = async (req, res) => {
   const { taskName, articul, status, startTime } = req.body;
