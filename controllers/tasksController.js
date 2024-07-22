@@ -71,7 +71,7 @@ const getByShk = async (req, res) => {
       .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
 
     if (result.recordset.length === 0) {
-      return res.status(404).json({ success: false, value: null, errorCode: 'RECORD_NOT_FOUND' });
+      return res.status(200).json({ success: false, value: null, errorCode: 'RECORD_NOT_FOUND' });
     }
 
     res.status(200).json({ success: true, value: result.recordset, errorCode: null });
