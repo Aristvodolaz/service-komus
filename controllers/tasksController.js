@@ -62,7 +62,7 @@ const getByShk = async (req, res) => {
   try {
     const pool = await connectToDatabase();
     if (!pool) {
-      return res.status(500).json({ success: false, value: null, errorCode: 'DB_CONNECTION_ERROR' });
+      return res.status(500).json({ success: false, value: null, errorCode: 500 });
     }
 
     const result = await pool.request()
@@ -71,13 +71,13 @@ const getByShk = async (req, res) => {
       .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
 
     if (result.recordset.length === 0) {
-      return res.status(200).json({ success: false, value: null, errorCode: 'RECORD_NOT_FOUND' });
+      return res.status(200).json({ success: false, value: null, errorCode: 200 });
     }
 
-    res.status(200).json({ success: true, value: result.recordset, errorCode: null });
+    res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
   } catch (error) {
     console.error('Ошибка при получении данных по SHK:', error);
-    res.status(500).json({ success: false, value: null, errorCode: 'RETRIEVAL_ERROR' });
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
 
