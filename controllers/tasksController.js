@@ -175,7 +175,7 @@ const duplicateRecord = async (req, res) => {
   try {
     const pool = await connectToDatabase();
     if (!pool) {
-      return res.status(500).json({ success: false, value: null, errorCode: 'DB_CONNECTION_ERROR' });
+      return res.status(500).json({ success: false, value: null, errorCode: 500 });
     }
 
     // Находим запись по номеру задания и ШК
@@ -185,7 +185,7 @@ const duplicateRecord = async (req, res) => {
       .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK = @SHK');
 
     if (result.recordset.length === 0) {
-      return res.status(404).json({ success: false, value: null, errorCode: 'RECORD_NOT_FOUND' });
+      return res.status(404).json({ success: false, value: null, errorCode: 404 });
     }
 
     // Получаем оригинальную запись
