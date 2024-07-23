@@ -206,7 +206,7 @@ const duplicateRecord = async (req, res) => {
       .input('SHK_SPO', mssql.NVarChar(255), originalRecord.SHK_SPO)
       .input('SHK_SPO_1', mssql.NVarChar(255), originalRecord.SHK_SPO_1)
       .input('Kol_vo_Syrya', mssql.Int, originalRecord.Kol_vo_Syrya)
-      .input('Itog_Zakaz', mssql.Int, originalRecord.Itog_Zakaz)
+      .input('Itog_Zakaz', mssql.Int, 0)
       .input('Sht_v_MP', mssql.Int, originalRecord.Sht_v_MP)
       .input('Itog_MP', mssql.Int, originalRecord.Itog_MP)
       .input('SOH', mssql.NVarChar(10), originalRecord.SOH)
@@ -235,7 +235,7 @@ const duplicateRecord = async (req, res) => {
       .input('Vlozhennost', mssql.NVarChar(50), vlozhennost)
       .input('Pallet_No', mssql.NVarChar(50), palletNo)
       .input('Time_Start', mssql.NVarChar(255), originalRecord.Time_Start)
-      .input('Time_Middle', mssql.NVarChar(255), originalRecord.Time_Middle)
+      // .input('Time_Middle', mssql.NVarChar(255), originalRecord.Time_Middle)
       .input('Time_End', mssql.NVarChar(255), originalRecord.Time_End)
       .query(`
         INSERT INTO Test_MP (
