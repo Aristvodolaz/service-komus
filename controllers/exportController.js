@@ -1,5 +1,5 @@
 const mssql = require('mssql');
-const fs = require('fs');
+const fs = require('fs').promises; // Используем асинхронные методы
 const path = require('path');
 const ExcelJS = require('exceljs');
 const Client = require('ssh2-sftp-client');
@@ -11,16 +11,18 @@ const exportExcel = async (req, res) => {
 
   try {
     // Подключение к базе данных
-    const pool = await connectToDatabase();
-    if (!pool) {
-      throw new Error('Ошибка подключения к базе данных');
-    }
-
+    let pool = await connectToDatabase();
     // Запрос на получение данных из базы данных
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
-      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
+      .query('SELECT * FROM Test_MP where Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
 
+
+      if (result.recordset.length === 0) {
+        console.log('Нет данных для указанного задания');
+      } else {
+        console.log('Данные успешно получены:', result.recordset);
+      }
     // Создание нового Excel workbook
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Data');
@@ -45,10 +47,8 @@ const exportExcel = async (req, res) => {
 
     // Путь к файлу на сервере, куда будет сохранен Excel файл
     const dirPath = path.join(__dirname, '..', 'downloads');
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
-    }
-    const localFilePath = path.join(dirPath, `${taskName}`);
+    await fs.mkdir(dirPath, { recursive: true });
+    const localFilePath = path.join(dirPath, `${taskName}.xlsx`);
 
     // Сохранение Excel файла на сервер
     await workbook.xlsx.writeFile(localFilePath);
@@ -57,12 +57,12 @@ const exportExcel = async (req, res) => {
     const sftp = new Client();
     await sftp.connect({ host, port: parseInt(port, 10), username, password });
 
-    const remoteFilePath = `/root/task_file/done/${taskName}`; // Укажите удаленный путь для загрузки файла
+    const remoteFilePath = `/root/task_file/done/${taskName}.xlsx`; // Укажите удаленный путь для загрузки файла
     await sftp.put(localFilePath, remoteFilePath);
     await sftp.end();
 
     // Удаление локального файла после загрузки на SFTP (опционально)
-    fs.unlinkSync(localFilePath);
+    await fs.unlink(localFilePath);
 
     // Отправка успешного ответа клиенту
     res.json({ success: true, message: `Файл ${taskName} успешно экспортирован и загружен на SFTP сервер.` });
@@ -70,7 +70,7 @@ const exportExcel = async (req, res) => {
   } catch (error) {
     console.error('Ошибка при экспорте данных в Excel и загрузке на SFTP сервер:', error);
     res.status(500).json({ success: false, message: 'Ошибка при экспорте данных в Excel и загрузке на SFTP сервер', error: error.message });
-  }
+  } 
 };
 
 module.exports = {

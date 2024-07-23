@@ -181,10 +181,12 @@ const duplicateRecord = async (req, res) => {
     // Находим запись по номеру задания и ШК
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
-      .input('SHK', mssql.NVarChar(255), shk)
-      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK = @SHK');
+      .input('Artikul', mssql.Int, shk)
+      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
 
     if (result.recordset.length === 0) {
+      console.log("Не найдено")
+
       return res.status(404).json({ success: false, value: null, errorCode: 404 });
     }
 
