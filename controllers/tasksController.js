@@ -259,10 +259,10 @@ const duplicateRecord = async (req, res) => {
         )
       `);
 
-    res.json({ success: true, value: 'Запись успешно продублирована', errorCode: null });
+    res.json({ success: true, value: 'Запись успешно продублирована', errorCode: 200 });
   } catch (error) {
     console.error('Ошибка при дублировании записи:', error);
-    res.status(500).json({ success: false, value: null, errorCode: 'DUPLICATION_ERROR' });
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
 
