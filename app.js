@@ -25,7 +25,7 @@ const port = 3005;
 app.use(bodyParser.json());
 
 /*for gruzy*/
-app.use('/data', dataRouter);
+app.use('/test', dataRouter);
 app.use('/reason', reasonRouter);
 
 /* for market place*/

@@ -1,47 +1,31 @@
 const mssql = require('mssql');
 const logger = require('../utils/logger');
-const {connectToDatabase, sql } = require('../dbConfig')
+const SFTPClient = require('ssh2-sftp-client');
+const sftp = new SFTPClient();
 
-const getDataTest = async(req,res)=>{
-  try {
-    let pool = await connectToDatabase();
-    let result = await pool.request().query('SELECT * FROM dbo.Test');
-    res.json(result.recordset);
-  } catch (err) {
-    logger.error('SQL error', { error: err });
-    res.status(500).json({
-      success: false,
-      message:"Ошибка работы сервера",
-      errorCode: 500
-    });  }
+const testConnection =  async (req, res) => {
+    try {
+        await sftp.connect({
+            host: '31.128.44.48',
+            port: 22,
+            username: 'root',
+            password: 'Arishka_2002!'
+        });
+        
+        console.log('Подключение успешно!');
+        // Попробуйте выполнить простую операцию, например, перечисление файлов
+        const list = await sftp.list('/root/task_file');
+        console.log('Содержимое корневой директории:', list);
+        
+        res.status(200).json({ success: true, value: list, errorCode: 200 });
+
+    } catch (err) {
+        console.error('Ошибка подключения или выполнения:', err.message);
+    } finally {
+        sftp.end();
+    }
 }
 
-
-// Маршрут для записи данных
-const createDataTest= async(req, res) =>{
-  const { ID, Descr} = req.body;
-  try {
-    let pool = await connectToDatabase();
-    let result = await pool.request()
-    .input('ID', mssql.Int, ID)
-      .input('Descr', mssql.NVarChar(50), Descr)
-      .query('INSERT INTO dbo.Test (ID, Descr) VALUES ( @ID, @Descr)');
-
-    res.status(201).json({
-      success: true, 
-      message: "Данные успешно добавлены!", 
-      errorCode: 201})
-  } catch (err) {
-    console.log("error", err)
-    logger.error('SQL error', { error: err });
-    res.status(500).json({
-      success: false,
-      message:"Ошибка работы сервера",
-      errorCode: 500
-    });
-  }
-}
 
 module.exports = {
-  getDataTest,
-  createDataTest};
+  testConnection};
