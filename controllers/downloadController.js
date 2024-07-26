@@ -55,11 +55,16 @@ const insertDataToDB = async (data, fileName, pref, dbConfig) => {
     await transaction.begin();
 
     for (const item of data) {
+      // Check if the 'Artikul_Syrya' field is 'НЕ ПРИМУТ'
+      if (item['Артикул Сырья'] && item['Артикул Сырья'].trim().toUpperCase() === 'НЕ ПРИМУТ') {
+        continue; // Skip this item if the condition is met
+      }
+
       const request = transaction.request();
 
       const query = `
-        INSERT INTO Test_MP (Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel,Artikul, Artikul_Syrya, Nomenklatura, Nazvanie_Tovara, SHK, SHK_SPO, SHK_SPO_1, Kol_vo_Syrya, Itog_Zakaz, Sht_v_MP, Itog_MP, SOH, Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_12_Markirovka_Prom, Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Time_Start, Time_End)
-        VALUES (@Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, @Sht_v_MP, @Itog_MP, @SOH, @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht, @Op_7_Pereschyot, @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_12_Markirovka_Prom, @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Mesto, @Vlozhennost, @Pallet_No, @Time_Start,@Time_End)
+        INSERT INTO Test_MP (Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel, Artikul, Artikul_Syrya, Nomenklatura, Nazvanie_Tovara, SHK, SHK_SPO, SHK_SPO_1, Kol_vo_Syrya, Itog_Zakaz, Sht_v_MP, Itog_MP, SOH, Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_12_Markirovka_Prom, Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent)
+        VALUES (@Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, @Sht_v_MP, @Itog_MP, @SOH, @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht, @Op_7_Pereschyot, @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_12_Markirovka_Prom, @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent)
       `;
 
       // Подготовка запроса для текущей записи
@@ -68,45 +73,46 @@ const insertDataToDB = async (data, fileName, pref, dbConfig) => {
       request.input('Status_Zadaniya', mssql.Int, 0);
       request.input('Status', mssql.Int, 0);
       request.input('Ispolnitel', mssql.NVarChar(255), "");
-      request.input('Artikul', mssql.Int, item['Артикул'])
+      request.input('Artikul', mssql.Int, item['Артикул']);
       request.input('Artikul_Syrya', mssql.NVarChar(50), item['Артикул Сырья'] ? item['Артикул Сырья'].toString() : null);
-      request.input('Nomenklatura', mssql.Int, item['Номенклатура'])
-      request.input('Nazvanie_Tovara', mssql.NVarChar(255), item['Название товара'])
+      request.input('Nomenklatura', mssql.Int, item['Номенклатура']);
+      request.input('Nazvanie_Tovara', mssql.NVarChar(255), item['Название товара']);
       request.input('SHK', mssql.NVarChar(255), item['ШК'].toString()); // Преобразуйте SHK в строку
       request.input('SHK_SPO', mssql.NVarChar(255), item['ШК СПО'].toString()); // Преобразуйте SHK СПО в строку
       request.input('SHK_SPO_1', mssql.NVarChar(255), item['ШК СПО'].toString());
       request.input('Kol_vo_Syrya', mssql.Int, parseInt(item['Кол-во сырья'], 10));
-      request.input('Itog_Zakaz', mssql.Int, item['Итог Заказ'])
-      request.input('Sht_v_MP', mssql.Int, item['шт в мп'])
-      request.input('Itog_MP', mssql.Int, item['итог мп'])
-      request.input('SOH', mssql.NVarChar(10), item['СОХ'])
-      request.input('Tip_Postavki', mssql.NVarChar(50), item['тип поставки'])
-      request.input('Srok_Godnosti', mssql.NVarChar(50), item['Срок годности'])
-      request.input('Op_1_Bl_1_Sht', mssql.NVarChar(10), item['Оп 1 бл. 1 шт'])
-      request.input('Op_2_Bl_2_Sht', mssql.NVarChar(10), item['Оп 2 бл.2 шт'])
-      request.input('Op_3_Bl_3_Sht', mssql.NVarChar(10), item['Оп 3 бл.3 шт'])
-      request.input('Op_4_Bl_4_Sht', mssql.NVarChar(10), item['Оп 4 бл.4шт'])
-      request.input('Op_5_Bl_5_Sht', mssql.NVarChar(10), item['Оп 5 бл.5 шт'])
-      request.input('Op_6_Blis_6_10_Sht', mssql.NVarChar(10), item['Оп 6 блис.6-10шт'])
-      request.input('Op_7_Pereschyot', mssql.NVarChar(10), item['Оп 7 пересчет'])
-      request.input('Op_9_Fasovka_Sborka', mssql.NVarChar(10), item['Оп 9 фасовка/сборка'])
-      request.input('Op_10_Markirovka_SHT', mssql.NVarChar(10), item['Оп 10 Маркировка ШТ'])
-      request.input('Op_11_Markirovka_Prom', mssql.NVarChar(10), item['Оп 11 маркировка пром'])
-      request.input('Op_12_Markirovka_Prom', mssql.NVarChar(10), item['Оп 11 маркировка пром'])
-      request.input('Op_13_Markirovka_Fabr', mssql.NVarChar(10), item['Оп 13 маркировка фабр'])
-      request.input('Op_14_TU_1_Sht', mssql.NVarChar(10), item['Оп 14 ТУ 1шт'])
-      request.input('Op_15_TU_2_Sht', mssql.NVarChar(10), item['Оп 15 ТУ 2 шт'])
-      request.input('Op_16_TU_3_5', mssql.NVarChar(10), item['Оп 16 ТУ 3-5'])
-      request.input('Op_17_TU_6_8', mssql.NVarChar(10), item['Оп 17 ТУ 6-8'])
-      request.input('Op_468_Proverka_SHK', mssql.NVarChar(10), item['Оп 468 проверка ШК'])
-      request.input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), item['Оп 469 Спецификация ТМ'])
-      request.input('Op_470_Dop_Upakovka', mssql.NVarChar(10), item['Оп 470 доп упаковка'])
-      request.input('Mesto', mssql.NVarChar(50), item['Место'])
-      request.input('Vlozhennost', mssql.NVarChar(50), item['Вложенность '])
-      request.input('Pallet_No', mssql.NVarChar(50), item['Паллет №'])
+      request.input('Itog_Zakaz', mssql.Int, item['Итог Заказ']);
+      request.input('Sht_v_MP', mssql.Int, item['шт в мп']);
+      request.input('Itog_MP', mssql.Int, item['итог мп']);
+      request.input('SOH', mssql.NVarChar(10), item['СОХ']);
+      request.input('Tip_Postavki', mssql.NVarChar(50), item['тип поставки']);
+      request.input('Srok_Godnosti', mssql.NVarChar(50), item['Срок годности']);
+      request.input('Op_1_Bl_1_Sht', mssql.NVarChar(10), item['Оп 1 бл. 1 шт']);
+      request.input('Op_2_Bl_2_Sht', mssql.NVarChar(10), item['Оп 2 бл.2 шт']);
+      request.input('Op_3_Bl_3_Sht', mssql.NVarChar(10), item['Оп 3 бл.3 шт']);
+      request.input('Op_4_Bl_4_Sht', mssql.NVarChar(10), item['Оп 4 бл.4шт']);
+      request.input('Op_5_Bl_5_Sht', mssql.NVarChar(10), item['Оп 5 бл.5 шт']);
+      request.input('Op_6_Blis_6_10_Sht', mssql.NVarChar(10), item['Оп 6 блис.6-10шт']);
+      request.input('Op_7_Pereschyot', mssql.NVarChar(10), item['Оп 7 пересчет']);
+      request.input('Op_9_Fasovka_Sborka', mssql.NVarChar(10), item['Оп 9 фасовка/сборка']);
+      request.input('Op_10_Markirovka_SHT', mssql.NVarChar(10), item['Оп 10 Маркировка ШТ']);
+      request.input('Op_11_Markirovka_Prom', mssql.NVarChar(10), item['Оп 11 маркировка пром']);
+      request.input('Op_12_Markirovka_Prom', mssql.NVarChar(10), item['Оп 11 маркировка пром']);
+      request.input('Op_13_Markirovka_Fabr', mssql.NVarChar(10), item['Оп 13 маркировка фабр']);
+      request.input('Op_14_TU_1_Sht', mssql.NVarChar(10), item['Оп 14 ТУ 1шт']);
+      request.input('Op_15_TU_2_Sht', mssql.NVarChar(10), item['Оп 15 ТУ 2 шт']);
+      request.input('Op_16_TU_3_5', mssql.NVarChar(10), item['Оп 16 ТУ 3-5']);
+      request.input('Op_17_TU_6_8', mssql.NVarChar(10), item['Оп 17 ТУ 6-8']);
+      request.input('Op_468_Proverka_SHK', mssql.NVarChar(10), item['Оп 468 проверка ШК']);
+      request.input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), item['Оп 469 Спецификация ТМ']);
+      request.input('Op_470_Dop_Upakovka', mssql.NVarChar(10), item['Оп 470 доп упаковка']);
+      request.input('Mesto', mssql.NVarChar(50), item['Место']);
+      request.input('Vlozhennost', mssql.NVarChar(50), item['Вложенность ']);
+      request.input('Pallet_No', mssql.NVarChar(50), item['Паллет №']);
       request.input('Time_Start', mssql.NVarChar(255), "");
+      request.input('Time_Middle', mssql.NVarChar(255), "");
       request.input('Time_End', mssql.NVarChar(255), "");
-
+      request.input('Persent', mssql.NVarChar(50), "");
 
       await request.query(query);
     }
@@ -118,6 +124,8 @@ const insertDataToDB = async (data, fileName, pref, dbConfig) => {
     throw error;
   }
 };
+
+
 
 
 
