@@ -56,7 +56,7 @@ const insertDataToDB = async (data, fileName, pref, dbConfig) => {
 
     for (const item of data) {
       // Check if the 'Artikul_Syrya' field is 'НЕ ПРИМУТ'
-      const artikulSyrya = item['Артикул Сырья'] ? item['Артикул Сырья'].toString.trim().toUpperCase() : null;
+      const artikulSyrya = item['Артикул Сырья'] ? item['Артикул Сырья'].toString().trim().toUpperCase() : null;
 
       if (artikulSyrya === 'НЕ ПРИМУТ') {
         continue; // Skip this item if the condition is met
