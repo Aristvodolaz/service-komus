@@ -26,9 +26,9 @@ const port = 3005;
 
 // Настройка CORS
 app.use(cors({
-  origin: '*', // Разрешить все домены (для разработки)
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Разрешить методы
-  allowedHeaders: ['Content-Type', 'Authorization'] // Разрешить заголовки
+  origin: 'http://localhost:3000', // Разрешите только ваш локальный клиент
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Разрешите методы
+  allowedHeaders: ['Content-Type', 'Authorization'] // Разрешите заголовки
 }));
 
 app.use(bodyParser.json());
