@@ -83,10 +83,10 @@ const getByShk = async (req, res) => {
 
 
 const updateStatus = async (req, res) => {
-  const { taskName, articul, status, startTime } = req.body;
+  const { taskName, articul, status, startTime, ispolnitel } = req.body;
 
-  if (!taskName || !articul || status === undefined|| !startTime) {
-    return res.status(400).json({ success: false, value: 'taskName, shk, and status, time are required', errorCode: 400 });
+  if (!taskName || !articul || status === undefined|| !startTime || !ispolnitel) {
+    return res.status(400).json({ success: false, value: 'Недостаточно данных для запроса', errorCode: 400 });
   }
 
   try {
@@ -100,7 +100,8 @@ const updateStatus = async (req, res) => {
       .input('Artikul', mssql.NVarChar(50), articul)
       .input('Status', mssql.Int, status)
       .input('Time_Start', mssql.NVarChar(255), startTime)
-      .query('UPDATE Test_MP SET Status = @Status, Time_Start = @Time_Start  WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
+      .input('Ispolnitel', mssql.NVarChar(255), ispolnitel)
+      .query('UPDATE Test_MP SET Status = @Status, Time_Start = @Time_Start , Ispolnitel = @Ispolnitel WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
 
     res.status(200).json({ success: true, value: 'Статус успешно обновлен', errorCode: 200 });
   } catch (error) {
@@ -274,7 +275,7 @@ const updateSHKByTaskAndArticul = async (req, res) => {
   try {
     const pool = await connectToDatabase();
     if (!pool) {
-      return res.status(500).json({ success: false, value: null, errorCode: 'DB_CONNECTION_ERROR' });
+      return res.status(500).json({ success: false, value: null, errorCode:500 });
     }
 
     // Обновление записи по названию задания и артиклу
@@ -284,10 +285,10 @@ const updateSHKByTaskAndArticul = async (req, res) => {
       .input('NewSHK', mssql.NVarChar(255), newSHK)
       .query('UPDATE Test_MP SET SHK = @NewSHK WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
 
-    res.json({ success: true, value: 'ШК успешно обновлен', errorCode: null });
+    res.json({ success: true, value: 'ШК успешно обновлен', errorCode: 200 });
   } catch (error) {
     console.error('Ошибка при обновлении ШК:', error);
-    res.status(500).json({ success: false, value: null, errorCode: 'UPDATE_ERROR' });
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
 module.exports = {

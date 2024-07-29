@@ -27,5 +27,4 @@ const updateSrokGodnosti = async (req, res) => {
   };
 
   module.exports = {
-    updateSrokGodnosti
-};
+    updateSrokGodnosti};
