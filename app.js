@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cors = require('cors'); // Импортируйте пакет cors
 
 /*for gruzy*/
 const dataRouter = require('./routes/test');
@@ -17,24 +16,16 @@ const exportRoutes = require('./routes/export');
 const updateRoutes = require('./routes/finish');
 const articleRoutes = require('./routes/market_place/article');
 const authRoutes = require('./routes/market_place/auth');
-const srokRoutes = require('./routes/market_place/srok');
 
 const logger = require('./utils/logger');
 
 const app = express();
 const port = 3005;
 
-// Настройка CORS
-app.use(cors({
-  origin: 'http://localhost:3000', // Разрешите только ваш локальный клиент
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Разрешите методы
-  allowedHeaders: ['Content-Type', 'Authorization'] // Разрешите заголовки
-}));
-
 app.use(bodyParser.json());
 
 /*for gruzy*/
-app.use('/test', dataRouter);
+app.use('/srok', dataRouter);
 app.use('/reason', reasonRouter);
 
 /* for market place*/
@@ -50,8 +41,8 @@ app.use('/send', updateRoutes);
 
 app.use('/article', articleRoutes);
 app.use('/auth', authRoutes);
-app.use('/srok', srokRoutes);
+
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log('Server is running on port ${port}');
 });
