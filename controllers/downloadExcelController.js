@@ -25,15 +25,14 @@ const uploadFile = async (serverInfo, localFilePath, remoteFilePath) => {
 
 // Маршрут для загрузки файла на SFTP сервер
 router.post('/upload-file', upload.single('file'), async (req, res) => {
-  const { host, port, username, password } = req.body;
   const localFilePath = req.file.path; // Путь к временно сохраненному файлу
   const remoteFilePath = `/root/task_file/wait/${req.file.originalname}`; // Путь для хранения файла на сервере SFTP
 
   const serverInfo = {
-    host,
-    port: parseInt(port, 10),
-    username,
-    password,
+    host: "31.128.44.48",
+    port: 22,
+    username: "root",
+    password: "Arishka_2002!",
   };
 
   try {
