@@ -28,7 +28,7 @@ const uploadFile = async (serverInfo, localFilePath, remoteFilePath) => {
     console.log(`Файл ${localFilePath} успешно загружен на ${remoteFilePath}`);
   } catch (error) {
     console.error(`Ошибка при загрузке файла на SFTP: ${error.message}`);
-    throw error;
+    throw error;  // Пробрасываем ошибку выше
   } finally {
     sftp.end();
   }
@@ -52,7 +52,7 @@ router.post('/upload-file', upload.single('file'), async (req, res) => {
 
   try {
     await uploadFile(serverInfo, localFilePath, remoteFilePath);
-    fs.unlinkSync(localFilePath);
+    fs.unlinkSync(localFilePath);  // Удаляем файл после успешной загрузки
     res.json({ success: true, message: `Файл ${req.file.originalname} успешно загружен на SFTP сервер.` });
   } catch (error) {
     console.error(`Ошибка при загрузке файла на SFTP сервер: ${error.message}`);
@@ -108,8 +108,15 @@ router.use('/proxy', createProxyMiddleware({
   target: 'http://31.129.100.172:3005',
   changeOrigin: true,
   pathRewrite: {
-    '^/proxy': '', // Удаляем '/proxy' из пути
+    '^/proxy': '', // Перенаправляем путь /proxy на корень целевого сервера
   },
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`Proxying request to: ${proxyReq.path}`);
+  },
+  onError: (err, req, res) => {
+    console.error('Proxy error:', err);
+    res.status(500).json({ success: false, message: 'Proxy error', error: err.message });
+  }
 }));
 
 module.exports = router;
