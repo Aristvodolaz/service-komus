@@ -41,7 +41,11 @@ router.post('/upload-file', upload.single('file'), async (req, res) => {
   }
 
   const localFilePath = path.join(__dirname, '..', 'uploads', req.file.originalname);
+  console.log(`Local file path: ${localFilePath}`); // Логирование пути
+
+  // Путь на SFTP сервере
   const remoteFilePath = `/root/task_file/wait/${req.file.originalname}`;
+  console.log(`Remote file path: ${remoteFilePath}`); // Логирование пути
 
   const serverInfo = {
     host: "31.128.44.48",
@@ -51,6 +55,10 @@ router.post('/upload-file', upload.single('file'), async (req, res) => {
   };
 
   try {
+    if (!fs.existsSync(localFilePath)) {
+      return res.status(404).json({ success: false, message: `File not found at path: ${localFilePath}` });
+    }
+
     await uploadFile(serverInfo, localFilePath, remoteFilePath);
     fs.unlinkSync(localFilePath);  // Удаляем файл после успешной загрузки
     res.json({ success: true, message: `Файл ${req.file.originalname} успешно загружен на SFTP сервер.` });
