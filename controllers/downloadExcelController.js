@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const SftpClient = require('ssh2-sftp-client');
 const multer = require('multer');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const router = express.Router();
 const sftp = new SftpClient();
@@ -102,5 +103,13 @@ router.post('/upload-from-local', async (req, res) => {
   }
 });
 
+// Прокси для перенаправления запросов
+router.use('/proxy', createProxyMiddleware({
+  target: 'http://31.129.100.172:3005',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/proxy': '', // Удаляем '/proxy' из пути
+  },
+}));
 
 module.exports = router;
