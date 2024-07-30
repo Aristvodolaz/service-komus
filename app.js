@@ -35,7 +35,7 @@ app.use('/market/tasks', tasksController);
 
 /* for excel download*/
 app.use('/download/excel', fileController);
-app.use('/excel',downloadExcelController)
+app.use('/list',downloadExcelController)
 app.use('/download/files', filesRouter);
 app.use('/download', downloadController);
 

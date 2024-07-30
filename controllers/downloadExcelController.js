@@ -1,130 +1,37 @@
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const SftpClient = require('ssh2-sftp-client');
-const multer = require('multer');
-const { createProxyMiddleware } = require('http-proxy-middleware');
-
 const router = express.Router();
-const sftp = new SftpClient();
+const mssql = require('mssql');
+const { connectToDatabase } = require('../dbConfig');
 
-// Настройка хранения файлов
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  }
-});
-
-const upload = multer({ storage: storage });
-
-// Функция для загрузки файла на сервер SFTP
-const uploadFile = async (serverInfo, localFilePath, remoteFilePath) => {
+router.get('/findAllNamesWithStatusOne', async (req, res) => {
   try {
-    await sftp.connect(serverInfo);
-    await sftp.put(localFilePath, remoteFilePath);
-    console.log(`Файл ${localFilePath} успешно загружен на ${remoteFilePath}`);
-  } catch (error) {
-    console.error(`Ошибка при загрузке файла на SFTP: ${error.message}`);
-    throw error;  // Пробрасываем ошибку выше
-  } finally {
-    sftp.end();
-  }
-};
-
-// Маршрут для загрузки файла на SFTP сервер через форму
-router.post('/upload-file', upload.single('file'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ success: false, message: 'No file uploaded.' });
-  }
-
-  const localFilePath = path.join(__dirname, '..', 'uploads', req.file.originalname);
-  console.log(`Local file path: ${localFilePath}`); // Логирование пути
-
-  // Путь на SFTP сервере
-  const remoteFilePath = `/root/task_file/wait/${req.file.originalname}`;
-  console.log(`Remote file path: ${remoteFilePath}`); // Логирование пути
-
-  const serverInfo = {
-    host: "31.128.44.48",
-    port: 22,
-    username: "root",
-    password: "Arishka_2002!",
-  };
-
-  try {
-    if (!fs.existsSync(localFilePath)) {
-      return res.status(404).json({ success: false, message: `File not found at path: ${localFilePath}` });
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ success: false, value: null, errorCode: 'DB_CONNECTION_ERROR' });
     }
 
-    await uploadFile(serverInfo, localFilePath, remoteFilePath);
-    fs.unlinkSync(localFilePath);  // Удаляем файл после успешной загрузки
-    res.json({ success: true, message: `Файл ${req.file.originalname} успешно загружен на SFTP сервер.` });
-  } catch (error) {
-    console.error(`Ошибка при загрузке файла на SFTP сервер: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: `Ошибка при загрузке файла ${req.file.originalname} на SFTP сервер.`,
-      error: error.message,
-    });
-  }
-});
+    // Запрос для нахождения всех Nazvanie_Zadaniya, у которых все записи имеют Status_Zadaniya = 1
+    const result = await pool.request().query(`
+      SELECT Nazvanie_Zadaniya
+      FROM Test_MP
+      GROUP BY Nazvanie_Zadaniya
+      HAVING NOT EXISTS (
+        SELECT 1
+        FROM Test_MP AS sub
+        WHERE sub.Nazvanie_Zadaniya = Test_MP.Nazvanie_Zadaniya
+        AND sub.Status_Zadaniya <> 1
+      )
+    `);
 
-// Маршрут для загрузки файла на SFTP сервер по пути из внутреннего хранилища
-router.post('/upload-from-local', async (req, res) => {
-  const { filePath } = req.body;
-
-  if (!filePath) {
-    return res.status(400).json({ success: false, message: 'No file path provided.' });
-  }
-
-  // Преобразование относительного пути в абсолютный
-  const absoluteFilePath = path.join(__dirname, '..', filePath);
-  console.log(`Attempting to upload file from path: ${absoluteFilePath}`);
-
-  const fileName = path.basename(absoluteFilePath);
-  const remoteFilePath = `/root/task_file/wait/${fileName}`;
-
-  const serverInfo = {
-    host: "31.128.44.48",
-    port: 22,
-    username: "root",
-    password: "Arishka_2002!",
-  };
-
-  try {
-    if (!fs.existsSync(absoluteFilePath)) {
-      return res.status(404).json({ success: false, message: `File not found at path: ${absoluteFilePath}` });
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ success: false, value: null, errorCode: 'NO_MATCHING_RECORDS' });
     }
 
-    await uploadFile(serverInfo, absoluteFilePath, remoteFilePath);
-    res.json({ success: true, message: `Файл ${fileName} успешно загружен на SFTP сервер.` });
+    res.status(200).json({ success: true, value: result.recordset.map(record => record.Nazvanie_Zadaniya), errorCode: null });
   } catch (error) {
-    console.error(`Ошибка при загрузке файла на SFTP сервер: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: `Ошибка при загрузке файла ${fileName} на SFTP сервер.`,
-      error: error.message,
-    });
+    console.error('Ошибка при поиске записей с статусом 1:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 'SEARCH_ERROR' });
   }
 });
-
-// Прокси для перенаправления запросов
-router.use('/proxy', createProxyMiddleware({
-  target: 'http://31.129.100.172:3005',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/proxy': '', // Перенаправляем путь /proxy на корень целевого сервера
-  },
-  onProxyReq: (proxyReq, req, res) => {
-    console.log(`Proxying request to: ${proxyReq.path}`);
-  },
-  onError: (err, req, res) => {
-    console.error('Proxy error:', err);
-    res.status(500).json({ success: false, message: 'Proxy error', error: err.message });
-  }
-}));
 
 module.exports = router;

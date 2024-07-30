@@ -32,6 +32,10 @@ const exportExcel = async (req, res) => {
       { header: 'Название задания', key: 'Nazvanie_Zadaniya', width: 30 },
       { header: 'Статус', key: 'Status', width: 10 },
       { header: 'Артикул', key: 'Artikul', width: 15 },
+      { header: 'Срок годности', key: 'Srok_Godnosti', width:15},
+      { header: 'Место', key: 'Mesto', width: 10 },
+      { header: 'Вложенность', key: 'Vlozhennost', width:10},
+      { header: 'Палет №', key: 'Pallet_No', width:10}
       // Добавьте другие заголовки столбцов здесь
     ];
 
