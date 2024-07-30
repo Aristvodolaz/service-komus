@@ -1,28 +1,28 @@
 const mssql = require('mssql');
-const fs = require('fs').promises; // Используем асинхронные методы
+const fs = require('fs').promises;
 const path = require('path');
 const ExcelJS = require('exceljs');
 const Client = require('ssh2-sftp-client');
-const { connectToDatabase, sql } = require('../dbConfig'); // Убедитесь, что путь к dbConfig верен
+const { connectToDatabase, sql } = require('../dbConfig');
 
-// Контроллер для экспорта данных в Excel файл и загрузки его на SFTP сервер
 const exportExcel = async (req, res) => {
   const { taskName, host, port, username, password } = req.query;
 
   try {
     // Подключение к базе данных
     let pool = await connectToDatabase();
-    // Запрос на получение данных из базы данных
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
-      .query('SELECT * FROM Test_MP where Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
+      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
 
+    if (result.recordset.length === 0) {
+      console.log('Нет данных для указанного задания');
+      res.status(404).json({ success: false, message: 'Нет данных для указанного задания' });
+      return;
+    }
 
-      if (result.recordset.length === 0) {
-        console.log('Нет данных для указанного задания');
-      } else {
-        console.log('Данные успешно получены:', result.recordset);
-      }
+    console.log('Данные успешно получены:', result.recordset);
+
     // Создание нового Excel workbook
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Data');
@@ -32,10 +32,10 @@ const exportExcel = async (req, res) => {
       { header: 'Название задания', key: 'Nazvanie_Zadaniya', width: 30 },
       { header: 'Статус', key: 'Status', width: 10 },
       { header: 'Артикул', key: 'Artikul', width: 15 },
-      { header: 'Срок годности', key: 'Srok_Godnosti', width:15},
+      { header: 'Срок годности', key: 'Srok_Godnosti', width: 15 },
       { header: 'Место', key: 'Mesto', width: 10 },
-      { header: 'Вложенность', key: 'Vlozhennost', width:10},
-      { header: 'Палет №', key: 'Pallet_No', width:10}
+      { header: 'Вложенность', key: 'Vlozhennost', width: 10 },
+      { header: 'Палет №', key: 'Pallet_No', width: 10 }
       // Добавьте другие заголовки столбцов здесь
     ];
 
@@ -45,6 +45,10 @@ const exportExcel = async (req, res) => {
         Nazvanie_Zadaniya: row.Nazvanie_Zadaniya,
         Status: row.Status,
         Artikul: row.Artikul,
+        Srok_Godnosti: row.Srok_Godnosti,
+        Mesto: row.Mesto,
+        Vlozhennost: row.Vlozhennost,
+        Pallet_No: row.Pallet_No
         // Добавьте другие поля данных здесь
       });
     });
@@ -60,8 +64,7 @@ const exportExcel = async (req, res) => {
     // Подключение к SFTP серверу и загрузка файла
     const sftp = new Client();
     await sftp.connect({ host, port: parseInt(port, 10), username, password });
-
-    const remoteFilePath = `/root/task_file/done/${taskName}.xlsx`; // Укажите удаленный путь для загрузки файла
+    const remoteFilePath = `/root/task_file/done/${taskName}`;
     await sftp.put(localFilePath, remoteFilePath);
     await sftp.end();
 
@@ -74,7 +77,7 @@ const exportExcel = async (req, res) => {
   } catch (error) {
     console.error('Ошибка при экспорте данных в Excel и загрузке на SFTP сервер:', error);
     res.status(500).json({ success: false, message: 'Ошибка при экспорте данных в Excel и загрузке на SFTP сервер', error: error.message });
-  } 
+  }
 };
 
 module.exports = {
