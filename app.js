@@ -18,7 +18,7 @@ const exportRoutes = require('./routes/export');
 const updateRoutes = require('./routes/finish');
 const articleRoutes = require('./routes/market_place/article');
 const authRoutes = require('./routes/market_place/auth');
-const srokRouter = require('./routes/srok');
+const { updateSrokGodnosti } = require('./controllers/srokController');
 
 const logger = require('./utils/logger');
 
@@ -45,7 +45,7 @@ app.use('/send', updateRoutes);
 
 app.use('/article', articleRoutes);
 app.use('/auth', authRoutes);
-app.use('/srok', srokRouter)
+app.post('/srok', updateSrokGodnosti)
 
 
 app.listen(port, () => {

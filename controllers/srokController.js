@@ -24,7 +24,8 @@ const updateSrokGodnosti = async (req, res) => {
       console.error('Ошибка при обновлении ШК:', error);
       res.status(500).json({ success: false, value: null, errorCode: 500 });
     }
-  };
+};
 
-  module.exports = {
-    updateSrokGodnosti};
+module.exports = {
+    updateSrokGodnosti
+};
