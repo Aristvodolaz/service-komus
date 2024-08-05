@@ -18,6 +18,7 @@ const exportRoutes = require('./routes/export');
 const updateRoutes = require('./routes/finish');
 const articleRoutes = require('./routes/market_place/article');
 const authRoutes = require('./routes/market_place/auth');
+const srokRouter = require('./routes/srok');
 
 const logger = require('./utils/logger');
 
@@ -27,7 +28,7 @@ const port = 3005;
 app.use(bodyParser.json());
 
 /*for gruzy*/
-app.use('/srok', dataRouter);
+// app.use('/srok', dataRouter);
 app.use('/reason', reasonRouter);
 
 /* for market place*/
@@ -44,8 +45,9 @@ app.use('/send', updateRoutes);
 
 app.use('/article', articleRoutes);
 app.use('/auth', authRoutes);
+app.use('/srok', srokRouter)
 
 
 app.listen(port, () => {
   console.log('Server is running on port ${port}');
-});
+}); 
