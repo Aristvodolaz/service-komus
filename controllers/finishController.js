@@ -3,7 +3,7 @@ const { connectToDatabase } = require('../dbConfig');
 
 // Контроллер для обновления данных в указанных колонках
 const updateData = async (req, res) => {
-  const { taskName, shk, srokGodnosti, mesto, vlozhennost, palletNo , timeEnd} = req.body;
+  const { taskName, shk, srokGodnosti, mesto, vlozhennost, palletNo, timeEnd } = req.body;
 
   try {
     // Подключение к базе данных
@@ -14,9 +14,8 @@ const updateData = async (req, res) => {
 
     // Формирование запроса на обновление данных
     const query = `
-      UPDATE Test_MP
+      UPDATE TOP (1) Test_MP
       SET
-        Srok_Godnosti = ISNULL(@Srok_Godnosti, Srok_Godnosti),
         Mesto = ISNULL(@Mesto, Mesto),
         Vlozhennost = ISNULL(@Vlozhennost, Vlozhennost),
         Pallet_No = ISNULL(@Pallet_No, Pallet_No),
@@ -25,7 +24,8 @@ const updateData = async (req, res) => {
         Time_End = ISNULL(@Time_End, Time_End)
       WHERE
         Nazvanie_Zadaniya = @Nazvanie_Zadaniya
-        AND SHK LIKE @SHK;
+        AND SHK LIKE @SHK
+      ORDER BY Id; 
     `;
 
     // Выполнение запроса с параметрами
