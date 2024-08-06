@@ -82,7 +82,7 @@ const insertDataToDB = async (data, fileName, pref, dbConfig) => {
       request.input('SHK', mssql.NVarChar(255), item['ШК'].toString()); // Преобразуйте SHK в строку
       request.input('SHK_SPO', mssql.NVarChar(255), item['ШК СПО'].toString()); // Преобразуйте SHK СПО в строку
       request.input('SHK_SPO_1', mssql.NVarChar(255), item['ШК СПО'].toString());
-      request.input('Kol_vo_Syrya', mssql.Int, parseInt(item['Кол-во сырья'], 10));
+      request.input('Kol_vo_Syrya', mssql.NVarChar(255), item['Кол-во сырья'].toString());
       request.input('Itog_Zakaz', mssql.Int, item['Итог Заказ']);
       request.input('Sht_v_MP', mssql.Int, item['шт в мп']);
       request.input('Itog_MP', mssql.Int, item['итог мп']);
