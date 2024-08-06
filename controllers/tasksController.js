@@ -110,6 +110,34 @@ const updateStatus = async (req, res) => {
   }
 };
 
+const endStatus = async (req, res) => {
+  const { taskName, articul, status, endTime, ispolnitel } = req.body;
+
+  if (!taskName || !articul || status === undefined|| !endTime || !ispolnitel) {
+    return res.status(400).json({ success: false, value: 'Недостаточно данных для запроса', errorCode: 400 });
+  }
+
+  try {
+    const pool = await connectToDatabase();
+    if (!pool) {
+      throw new Error('Ошибка подключения к базе данных');
+    }
+
+    await pool.request()
+      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
+      .input('Artikul', mssql.NVarChar(50), articul)
+      .input('Status', mssql.Int, status)
+      .input('Time_End', mssql.NVarChar(255), endTime)
+      .input('Ispolnitel', mssql.NVarChar(255), ispolnitel)
+      .query('UPDATE Test_MP SET Status = @Status, Time_End = @Time_End , Ispolnitel = @Ispolnitel WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
+
+    res.status(200).json({ success: true, value: 'Статус успешно обновлен', errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при обновлении статуса:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
 const getRecordsByArticul = async (req, res) => {
   const { taskName, articul } = req.query;
 
@@ -299,5 +327,6 @@ module.exports = {
   getRecordsByArticul,
   updateValues,
   updateSHKByTaskAndArticul,
-  duplicateRecord
+  duplicateRecord,
+  endStatus
 };

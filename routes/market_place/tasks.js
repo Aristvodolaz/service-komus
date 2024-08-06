@@ -10,5 +10,6 @@ router.get('/serchArticulTask', dataController.getRecordsByArticul)
 router.post('/updateTasks', dataController.updateValues)
 router.post('/duplicate', dataController.duplicateRecord)
 router.post('/recordNewShk', dataController.updateSHKByTaskAndArticul)
+router.put('/endStatus', dataController.endStatus);
 
 module.exports = router;
