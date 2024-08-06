@@ -24,8 +24,7 @@ const updateData = async (req, res) => {
         Time_End = ISNULL(@Time_End, Time_End)
       WHERE
         Nazvanie_Zadaniya = @Nazvanie_Zadaniya
-        AND SHK LIKE @SHK
-      ORDER BY Id; 
+        AND SHK LIKE @SHK 
     `;
 
     // Выполнение запроса с параметрами
