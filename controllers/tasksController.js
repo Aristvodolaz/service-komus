@@ -200,7 +200,7 @@ const updateValues = async (req, res) => {
 };
 
 const duplicateRecord = async (req, res) => {
-  const { taskName, shk, srokGodnosti, ispolnitel, mesto, vlozhennost, palletNo } = req.body;
+  const { taskName, articul, mesto, vlozhennost, palletNo } = req.body;
 
   try {
     const pool = await connectToDatabase();
@@ -211,7 +211,7 @@ const duplicateRecord = async (req, res) => {
     // Находим запись по номеру задания и ШК
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
-      .input('Artikul', mssql.Int, shk)
+      .input('Artikul', mssql.Int, articul)
       .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
 
     if (result.recordset.length === 0) {
@@ -227,9 +227,9 @@ const duplicateRecord = async (req, res) => {
     await pool.request()
       .input('Pref', mssql.NVarChar(50), originalRecord.Pref)
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), originalRecord.Nazvanie_Zadaniya)
-      .input('Status_Zadaniya', mssql.Int, 0)
-      .input('Status', mssql.Int, 0)
-      .input('Ispolnitel', mssql.NVarChar(255), ispolnitel)
+      .input('Status_Zadaniya', mssql.Int, 1)
+      .input('Status', mssql.Int, 2)
+      .input('Ispolnitel', mssql.NVarChar(255), originalRecord.Ispolnitel)
       .input('Artikul', mssql.Int, originalRecord.Artikul)
       .input('Artikul_Syrya', mssql.NVarChar(50), originalRecord.Artikul_Syrya)
       .input('Nomenklatura', mssql.Int, originalRecord.Nomenklatura)
@@ -237,13 +237,13 @@ const duplicateRecord = async (req, res) => {
       .input('SHK', mssql.NVarChar(255), originalRecord.SHK)
       .input('SHK_SPO', mssql.NVarChar(255), originalRecord.SHK_SPO)
       .input('SHK_SPO_1', mssql.NVarChar(255), originalRecord.SHK_SPO_1)
-      .input('Kol_vo_Syrya', mssql.Int, originalRecord.Kol_vo_Syrya)
+      .input('Kol_vo_Syrya', mssql.NVarChar(255), originalRecord.Kol_vo_Syrya)
       .input('Itog_Zakaz', mssql.Int, 0)
       .input('Sht_v_MP', mssql.Int, originalRecord.Sht_v_MP)
       .input('Itog_MP', mssql.Int, originalRecord.Itog_MP)
       .input('SOH', mssql.NVarChar(10), originalRecord.SOH)
       .input('Tip_Postavki', mssql.NVarChar(50), originalRecord.Tip_Postavki)
-      .input('Srok_Godnosti', mssql.NVarChar(50), srokGodnosti)
+      .input('Srok_Godnosti', mssql.NVarChar(50), originalRecord.Srok_Godnosti)
       .input('Op_1_Bl_1_Sht', mssql.NVarChar(10), originalRecord.Op_1_Bl_1_Sht)
       .input('Op_2_Bl_2_Sht', mssql.NVarChar(10), originalRecord.Op_2_Bl_2_Sht)
       .input('Op_3_Bl_3_Sht', mssql.NVarChar(10), originalRecord.Op_3_Bl_3_Sht)
@@ -267,27 +267,28 @@ const duplicateRecord = async (req, res) => {
       .input('Vlozhennost', mssql.NVarChar(50), vlozhennost)
       .input('Pallet_No', mssql.NVarChar(50), palletNo)
       .input('Time_Start', mssql.NVarChar(255), originalRecord.Time_Start)
-      // .input('Time_Middle', mssql.NVarChar(255), originalRecord.Time_Middle)
+      .input('Time_Middle', mssql.NVarChar(255), originalRecord.Time_Middle)
       .input('Time_End', mssql.NVarChar(255), originalRecord.Time_End)
+      .input('Persent', mssql.NVarChar(50), originalRecord.Persent)
       .query(`
         INSERT INTO Test_MP (
           Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel, Artikul, Artikul_Syrya, 
           Nomenklatura, Nazvanie_Tovara, SHK, SHK_SPO, SHK_SPO_1, Kol_vo_Syrya, Itog_Zakaz, 
           Sht_v_MP, Itog_MP, SOH, Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, 
           Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht, Op_7_Pereschyot, 
-          Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_12_Markirovka_Pром, 
+          Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_12_Markirovka_Prom, 
           Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, 
           Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, 
-          Pallet_No, Time_Start, Time_End
+          Pallet_No, Time_Start, Time_Middle, Time_End
         ) VALUES (
           @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, 
           @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, 
           @Sht_v_MP, @Itog_MP, @SOH, @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, 
           @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht, @Op_7_Pereschyot, 
-          @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Pром, @Op_12_Markirovка_Pром, 
-          @Op_13_Markirovка_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, 
+          @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_12_Markirovka_Prom, 
+          @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, 
           @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Mesto, @Vlozhennost, 
-          @Pallet_No, @Time_Start, @Time_End
+          @Pallet_No, @Time_Start,@Time_Middle, @Time_End
         )
       `);
 
