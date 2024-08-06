@@ -111,7 +111,7 @@ const updateStatus = async (req, res) => {
 };
 
 const endStatus = async (req, res) => {
-  const { taskName, articul, status, endTime, ispolnitel } = req.body;
+  const { taskName, articul, status, endTime, ispolnitel, statusZadaniya } = req.body;
 
   if (!taskName || !articul || status === undefined|| !endTime || !ispolnitel) {
     return res.status(400).json({ success: false, value: 'Недостаточно данных для запроса', errorCode: 400 });
@@ -127,9 +127,10 @@ const endStatus = async (req, res) => {
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('Artikul', mssql.NVarChar(50), articul)
       .input('Status', mssql.Int, status)
+      .input('Status_Zadaniya', mssql.Int, statusZadaniya)
       .input('Time_End', mssql.NVarChar(255), endTime)
       .input('Ispolnitel', mssql.NVarChar(255), ispolnitel)
-      .query('UPDATE Test_MP SET Status = @Status, Time_End = @Time_End , Ispolnitel = @Ispolnitel WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
+      .query('UPDATE Test_MP SET Status = @Status, Time_End = @Time_End,Status_Zadaniya = @Status_Zadaniya , Ispolnitel = @Ispolnitel WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
 
     res.status(200).json({ success: true, value: 'Статус успешно обновлен', errorCode: 200 });
   } catch (error) {

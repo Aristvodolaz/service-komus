@@ -21,6 +21,7 @@ const updateData = async (req, res) => {
         Vlozhennost = ISNULL(@Vlozhennost, Vlozhennost),
         Pallet_No = ISNULL(@Pallet_No, Pallet_No),
         Status = 2,
+        Status_Zadaniya = 1,
         Time_End = ISNULL(@Time_End, Time_End)
       WHERE
         Nazvanie_Zadaniya = @Nazvanie_Zadaniya
