@@ -7,7 +7,7 @@ router.get('/findAllNamesWithStatusOne', async (req, res) => {
   try {
     const pool = await connectToDatabase();
     if (!pool) {
-      return res.status(500).json({ success: false, value: null, errorCode: 'DB_CONNECTION_ERROR' });
+      return res.status(500).json({ success: false, value: null, errorCode: 500 });
     }
 
     // Запрос для нахождения всех Nazvanie_Zadaniya, у которых все записи имеют Status_Zadaniya = 1
@@ -24,13 +24,13 @@ router.get('/findAllNamesWithStatusOne', async (req, res) => {
     `);
 
     if (result.recordset.length === 0) {
-      return res.status(404).json({ success: false, value: null, errorCode: 'NO_MATCHING_RECORDS' });
+      return res.status(500).json({ success: false, value: "Список выполенных заданий пуст!", errorCode: 500 });
     }
 
     res.status(200).json({ success: true, value: result.recordset.map(record => record.Nazvanie_Zadaniya), errorCode: null });
   } catch (error) {
     console.error('Ошибка при поиске записей с статусом 1:', error);
-    res.status(500).json({ success: false, value: null, errorCode: 'SEARCH_ERROR' });
+    res.status(500).json({ success: false, value: null, errorCode: 500});
   }
 });
 
