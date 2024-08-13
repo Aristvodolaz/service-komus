@@ -24,7 +24,7 @@ router.get('/findAllNamesWithStatusOne', async (req, res) => {
     `);
 
     if (result.recordset.length === 0) {
-      return res.status(500).json({ success: false, value: "Список выполенных заданий пуст!", errorCode: 500 });
+      return res.status(500).json({ success: false, value: "Список выполенных заданий пуст!", errorCode00 });
     }
 
     res.status(200).json({ success: true, value: result.recordset.map(record => record.Nazvanie_Zadaniya), errorCode: null });

@@ -321,6 +321,31 @@ const updateSHKByTaskAndArticul = async (req, res) => {
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+
+
+const updateStatusTaskAndArticul = async (req, res) => {
+  const { taskName, articul, status } = req.body;
+
+  try {
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ success: false, value: null, errorCode:500 });
+    }
+
+    // Обновление записи по названию задания и артиклу
+    await pool.request()
+      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
+      .input('Artikul', mssql.Int, articul)
+      .input('Status', mssql.Int, status)
+      .query('UPDATE Test_MP SET Status = @Status WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
+
+    res.json({ success: true, value: 'Статус успешно обновлен', errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при обновлении статуса:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
 module.exports = {
   getArticulsByTaskNumber,
   getUniqueTaskNames,
@@ -330,5 +355,6 @@ module.exports = {
   updateValues,
   updateSHKByTaskAndArticul,
   duplicateRecord,
-  endStatus
+  endStatus,
+  updateStatusTaskAndArticul
 };
