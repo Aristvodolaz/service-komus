@@ -11,5 +11,6 @@ router.post('/updateTasks', dataController.updateValues)
 router.post('/duplicate', dataController.duplicateRecord)
 router.post('/recordNewShk', dataController.updateSHKByTaskAndArticul)
 router.put('/endStatus', dataController.endStatus);
+router.post('/setStatus', dataController.updateStatusTaskAndArticul)
 
 module.exports = router;
