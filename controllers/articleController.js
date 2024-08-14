@@ -20,11 +20,13 @@ const searchBySHK = async (pool, shk) => {
     SELECT 
       ID, ARTICLE_MEASURE_ID, IS_ACTIVE, NAME, FIRST_NAME, 
       PIECE_GTIN, FPACK_GTIN, IS_VALID_PERIOD_WATCH, VALID_PERIOD_DAYS
-    FROM OPENQUERY(OW, 'SELECT 
-      ID, ARTICLE_MEASURE_ID, IS_ACTIVE, NAME, FIRST_NAME, 
-      PIECE_GTIN, FPACK_GTIN, IS_VALID_PERIOD_WATCH, VALID_PERIOD_DAYS  
-    FROM wms.article 
-    WHERE PIECE_GTIN = @shk')
+    FROM OPENQUERY(OW, 
+      'SELECT 
+        ID, ARTICLE_MEASURE_ID, IS_ACTIVE, NAME, FIRST_NAME, 
+        PIECE_GTIN, FPACK_GTIN, IS_VALID_PERIOD_WATCH, VALID_PERIOD_DAYS  
+      FROM wms.article 
+      WHERE PIECE_GTIN = @shk'
+    )
   `;
   const params = [{ name: 'shk', type: mssql.NVarChar, value: shk }];
   return await executeQuery(pool, query, params);
@@ -36,11 +38,13 @@ const searchByArticul = async (pool, articul) => {
     SELECT 
       ID, ARTICLE_MEASURE_ID, IS_ACTIVE, NAME, FIRST_NAME, 
       PIECE_GTIN, FPACK_GTIN, IS_VALID_PERIOD_WATCH, VALID_PERIOD_DAYS
-    FROM OPENQUERY(OW, 'SELECT 
-      ID, ARTICLE_MEASURE_ID, IS_ACTIVE, NAME, FIRST_NAME, 
-      PIECE_GTIN, FPACK_GTIN, IS_VALID_PERIOD_WATCH, VALID_PERIOD_DAYS  
-    FROM wms.article 
-    WHERE id = @articul')
+    FROM OPENQUERY(OW, 
+      'SELECT 
+        ID, ARTICLE_MEASURE_ID, IS_ACTIVE, NAME, FIRST_NAME, 
+        PIECE_GTIN, FPACK_GTIN, IS_VALID_PERIOD_WATCH, VALID_PERIOD_DAYS  
+      FROM wms.article 
+      WHERE ID = @articul'
+    )
   `;
   const params = [{ name: 'articul', type: mssql.NVarChar, value: articul }];
   return await executeQuery(pool, query, params);
