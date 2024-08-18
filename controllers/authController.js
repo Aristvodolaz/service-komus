@@ -2,11 +2,8 @@ const mssql = require('mssql');
 const { connectToDatabase } = require('../dbConfig');
 
 // Функция для выполнения SQL-запроса с обработкой ошибок
-const executeQuery = async (pool, query, params) => {
-  try {
-    const request = pool.request();
-    params.forEach(param => request.input(param.name, param.type, param.value));
-    const result = await request.query(query);
+const executeQuery = async (pool, query) => {  try {
+    const result = await pool.request().query(query);
     return result.recordset;
   } catch (error) {
     console.error('Ошибка выполнения запроса:', error);
@@ -18,10 +15,9 @@ const executeQuery = async (pool, query, params) => {
 const searchEmployeeById = async (pool, id) => {
   const query = `
     SELECT ID, FULL_NAME 
-    FROM OPENQUERY(OW, 'SELECT ID, FULL_NAME FROM staff.employee WHERE id = @id')
-  `;
-  const params = [{ name: 'id', type: mssql.NVarChar, value: id }];
-  return await executeQuery(pool, query, params);
+    FROM OPENQUERY(OW, 'SELECT ID, FULL_NAME FROM staff.employee WHERE id = ''${id}''')
+      `;
+      return await executeQuery(pool, query);
 };
 
 // Основная функция контроллера
