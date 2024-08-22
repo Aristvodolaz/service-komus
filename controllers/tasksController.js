@@ -163,6 +163,31 @@ const getRecordsByArticul = async (req, res) => {
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+
+const getRecordsByWPS = async (req, res) => {
+  const { shk } = req.query;
+
+  if (!shk) {
+    return res.status(400).json({ success: false, value: 'shk are required', errorCode: 400 });
+  }
+
+  try {
+    const pool = await connectToDatabase();
+    if (!pool) {
+      throw new Error('Ошибка подключения к базе данных');
+    }
+
+    const result = await pool.request()
+      .input('SHK_WPS', mssql.NVarChar(255), shk)
+      .query('SELECT * FROM Test_MP WHERE SHK_WPS = @SHK_WPS');
+
+    res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при получении записей по артикулу:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
 const getRecordsBySHKWPS = async (req, res) => {
   const { SHK_WPS } = req.query;
 
@@ -562,5 +587,6 @@ module.exports = {
   getRecordsBySHKWPS,
   updateRecordsBySHKWPS,
   updateSHKWPS,
-  updatePalletInfoBySHKWPS
+  updatePalletInfoBySHKWPS,
+  getRecordsByWPS
 };
