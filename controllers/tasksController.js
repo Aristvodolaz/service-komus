@@ -163,6 +163,91 @@ const getRecordsByArticul = async (req, res) => {
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+const getRecordsBySHKWPS = async (req, res) => {
+  const { SHK_WPS } = req.query;
+
+  if (!SHK_WPS) {
+    return res.status(400).json({ success: false, value: 'SHK_WPS is required', errorCode: 400 });
+  }
+
+  try {
+    const pool = await connectToDatabase();
+    if (!pool) {
+      throw new Error('Ошибка подключения к базе данных');
+    }
+
+    const result = await pool.request()
+      .input('SHK_WPS', mssql.NVarChar(255), SHK_WPS)
+      .query(`
+        SELECT 
+          Op_1_Bl_1_Sht,
+          Op_2_Bl_2_Sht,
+          Op_3_Bl_3_Sht,
+          Op_4_Bl_4_Sht,
+          Op_5_Bl_5_Sht,
+          Op_6_Blis_6_10_Sht,
+          Op_7_Pereschyot,
+          Op_9_Fasovka_Sborka,
+          Op_10_Markirovka_SHT,
+          Op_11_Markirovka_Prom,
+          Op_12_Markirovka_Prom,
+          Op_13_Markirovka_Fabr,
+          Op_14_TU_1_Sht,
+          Op_15_TU_2_Sht,
+          Op_16_TU_3_5,
+          Op_17_TU_6_8,
+          Op_468_Proverka_SHK,
+          Op_469_Spetsifikatsiya_TM,
+          Op_470_Dop_Upakovka
+        FROM Test_MP
+        WHERE SHK_WPS = @SHK_WPS
+      `);
+
+    res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при получении записей по SHK_WPS:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
+const updatePalletInfoBySHKWPS = async (req, res) => {
+  const { SHK_WPS, location, nesting, palletNumber } = req.body;
+
+  // Проверка на наличие необходимых параметров
+  if (!SHK_WPS || !location || !nesting || !palletNumber) {
+    return res.status(400).json({ success: false, value: 'SHK_WPS, location, nesting и palletNumber обязательны', errorCode: 400 });
+  }
+
+  try {
+    // Подключение к базе данных
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+
+    // Выполнение SQL-запроса для обновления данных о месте, вложенности и номере палета по SHK_WPS
+    await pool.request()
+      .input('SHK_WPS', mssql.NVarChar(255), SHK_WPS)
+      .input('Mesto', mssql.NVarChar(50), location)
+      .input('Vlozhennost', mssql.NVarChar(50), nesting)
+      .input('Pallet_No', mssql.NVarChar(50), palletNumber)
+      .query(`
+        UPDATE Test_MP
+        SET 
+          Mesto = @Mesto,
+          Vlozhennost = @Vlozhennost,
+          Pallet_No = @Pallet_No
+        WHERE SHK_WPS = @SHK_WPS
+      `);
+
+    // Успешный ответ
+    res.status(200).json({ success: true, value: 'Информация о палете успешно обновлена', errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при обновлении информации о палете:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
 
 const updateValues = async (req, res) => {
   const { Nazvanie_Zadaniya, SHK, columnsToUpdate } = req.body;
@@ -298,6 +383,36 @@ const duplicateRecord = async (req, res) => {
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+const updateSHKWPS= async (req, res) => {
+  const { taskName, articul, newSHK } = req.body;
+
+  // Проверка на наличие необходимых параметров
+  if (!taskName || !articul || !newSHK) {
+    return res.status(400).json({ success: false, value: 'taskName, articul и newSHK обязательны', errorCode: 400 });
+  }
+
+  try {
+    // Подключение к базе данных
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+
+    // Выполнение SQL-запроса для обновления SHK_WPS по taskName и articul
+    await pool.request()
+      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
+      .input('Artikul', mssql.Int, articul)
+      .input('NewSHK', mssql.NVarChar(255), newSHK)
+      .query('UPDATE Test_MP SET SHK_WPS = @NewSHK WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
+
+    // Успешный ответ
+    res.status(200).json({ success: true, value: 'ШК_WPS успешно обновлен', errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при обновлении ШК_WPS:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
 
 const updateSHKByTaskAndArticul = async (req, res) => {
   const { taskName, articul, newSHK } = req.body;
@@ -346,6 +461,93 @@ const updateStatusTaskAndArticul = async (req, res) => {
   }
 };
 
+const updateRecordsBySHKWPS = async (req, res) => {
+  const { SHK_WPS } = req.query;
+  const {
+    Op_1_Bl_1_Sht,
+    Op_2_Bl_2_Sht,
+    Op_3_Bl_3_Sht,
+    Op_4_Bl_4_Sht,
+    Op_5_Bl_5_Sht,
+    Op_6_Blis_6_10_Sht,
+    Op_7_Pereschyot,
+    Op_9_Fasovka_Sborka,
+    Op_10_Markirovka_SHT,
+    Op_11_Markirovka_Prom,
+    Op_12_Markirovka_Prom,
+    Op_13_Markirovka_Fabr,
+    Op_14_TU_1_Sht,
+    Op_15_TU_2_Sht,
+    Op_16_TU_3_5,
+    Op_17_TU_6_8,
+    Op_468_Proverka_SHK,
+    Op_469_Spetsifikatsiya_TM,
+    Op_470_Dop_Upakovka
+  } = req.body;
+
+  if (!SHK_WPS) {
+    return res.status(400).json({ success: false, value: 'SHK_WPS is required', errorCode: 400 });
+  }
+
+  try {
+    const pool = await connectToDatabase();
+    if (!pool) {
+      throw new Error('Ошибка подключения к базе данных');
+    }
+
+    await pool.request()
+      .input('SHK_WPS', mssql.NVarChar(255), SHK_WPS)
+      .input('Op_1_Bl_1_Sht', mssql.Int, Op_1_Bl_1_Sht)
+      .input('Op_2_Bl_2_Sht', mssql.Int, Op_2_Bl_2_Sht)
+      .input('Op_3_Bl_3_Sht', mssql.Int, Op_3_Bl_3_Sht)
+      .input('Op_4_Bl_4_Sht', mssql.Int, Op_4_Bl_4_Sht)
+      .input('Op_5_Bl_5_Sht', mssql.Int, Op_5_Bl_5_Sht)
+      .input('Op_6_Blis_6_10_Sht', mssql.Int, Op_6_Blis_6_10_Sht)
+      .input('Op_7_Pereschyot', mssql.Int, Op_7_Pereschyot)
+      .input('Op_9_Fasovka_Sborka', mssql.Int, Op_9_Fasovka_Sborka)
+      .input('Op_10_Markirovka_SHT', mssql.Int, Op_10_Markirovka_SHT)
+      .input('Op_11_Markirovka_Prom', mssql.Int, Op_11_Markirovka_Prom)
+      .input('Op_12_Markirovka_Prom', mssql.Int, Op_12_Markirovka_Prom)
+      .input('Op_13_Markirovka_Fabr', mssql.Int, Op_13_Markirovka_Fabr)
+      .input('Op_14_TU_1_Sht', mssql.Int, Op_14_TU_1_Sht)
+      .input('Op_15_TU_2_Sht', mssql.Int, Op_15_TU_2_Sht)
+      .input('Op_16_TU_3_5', mssql.Int, Op_16_TU_3_5)
+      .input('Op_17_TU_6_8', mssql.Int, Op_17_TU_6_8)
+      .input('Op_468_Proverka_SHK', mssql.Int, Op_468_Proverka_SHK)
+      .input('Op_469_Spetsifikatsiya_TM', mssql.Int, Op_469_Spetsifikatsiya_TM)
+      .input('Op_470_Dop_Upakovka', mssql.Int, Op_470_Dop_Upakovka)
+      .query(`
+        UPDATE Test_MP
+        SET 
+          Op_1_Bl_1_Sht = @Op_1_Bl_1_Sht,
+          Op_2_Bl_2_Sht = @Op_2_Bl_2_Sht,
+          Op_3_Bl_3_Sht = @Op_3_Bl_3_Sht,
+          Op_4_Bl_4_Sht = @Op_4_Bl_4_Sht,
+          Op_5_Bl_5_Sht = @Op_5_Bl_5_Sht,
+          Op_6_Blis_6_10_Sht = @Op_6_Blis_6_10_Sht,
+          Op_7_Pereschyot = @Op_7_Pereschyot,
+          Op_9_Fasovka_Sborka = @Op_9_Fasovka_Sborka,
+          Op_10_Markirovka_SHT = @Op_10_Markirovka_SHT,
+          Op_11_Markirovka_Prom = @Op_11_Markirovka_Prom,
+          Op_12_Markirovka_Prom = @Op_12_Markirovka_Prom,
+          Op_13_Markirovka_Fabr = @Op_13_Markirovka_Fabr,
+          Op_14_TU_1_Sht = @Op_14_TU_1_Sht,
+          Op_15_TU_2_Sht = @Op_15_TU_2_Sht,
+          Op_16_TU_3_5 = @Op_16_TU_3_5,
+          Op_17_TU_6_8 = @Op_17_TU_6_8,
+          Op_468_Proverka_SHK = @Op_468_Proverka_SHK,
+          Op_469_Spetsifikatsiya_TM = @Op_469_Spetsifikatsiya_TM,
+          Op_470_Dop_Upakovka = @Op_470_Dop_Upakovka
+        WHERE SHK_WPS = @SHK_WPS
+      `);
+
+    res.status(200).json({ success: true, value: 'Record updated successfully', errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при обновлении записей по SHK_WPS:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
 module.exports = {
   getArticulsByTaskNumber,
   getUniqueTaskNames,
@@ -356,5 +558,9 @@ module.exports = {
   updateSHKByTaskAndArticul,
   duplicateRecord,
   endStatus,
-  updateStatusTaskAndArticul
+  updateStatusTaskAndArticul,
+  getRecordsBySHKWPS,
+  updateRecordsBySHKWPS,
+  updateSHKWPS,
+  updatePalletInfoBySHKWPS
 };

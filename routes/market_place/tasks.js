@@ -12,5 +12,8 @@ router.post('/duplicate', dataController.duplicateRecord)
 router.post('/recordNewShk', dataController.updateSHKByTaskAndArticul)
 router.put('/endStatus', dataController.endStatus);
 router.post('/setStatus', dataController.updateStatusTaskAndArticul)
-
+router.get('/getInfoWPS', dataController.getRecordsBySHKWPS)
+router.put('/updateShkStat', dataController.updateRecordsBySHKWPS)
+router.post('/createShkWPS', dataController.updateSHKWPS)
+router.post('/sendInformation', dataController.updatePalletInfoBySHKWPS)
 module.exports = router;
