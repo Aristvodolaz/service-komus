@@ -24,7 +24,7 @@ const { updateSrokGodnosti } = require('./controllers/srokController');
 const logger = require('./utils/logger');
 
 const app = express();
-const port = 3006;
+const port = 3005;
 
 app.use(bodyParser.json());
 
