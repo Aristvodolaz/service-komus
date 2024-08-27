@@ -47,7 +47,7 @@ app.use('/send', updateRoutes);
 app.use('/article', articleRoutes);
 app.use('/auth', authRoutes);
 app.post('/srok', updateSrokGodnosti)
-app.post('/privyazka', zapisRouter)
+app.use('/privyazka', zapisRouter)
 
 
 app.listen(port, () => {
