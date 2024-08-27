@@ -3,7 +3,7 @@ const { connectToDatabase, sql } = require('../dbConfig');
 const { error } = require('winston');
 
 const addZapis = async (req, res) => {
-    const { name, artikul, kolvo, pallet, shk, srokGodnosti, persent } = req.body;  // You may need to capture additional fields required for insertion
+    const { name, artikul, kolvo, pallet, shk} = req.body;  // You may need to capture additional fields required for insertion
   
     try {
         const pool = await connectToDatabase();
@@ -17,7 +17,7 @@ const addZapis = async (req, res) => {
             .input('Artikul', mssql.Int, artikul)
             .input('Kolvo_Tovarov', mssql.Int, kolvo)
             .input('Pallet_No', mssql.Int, pallet)
-            .input('SHK_WPS', mssql.NVarChar(50), shk)
+            .input('SHK_WPS', mssql.NVarChar(255), shk)
             .query(`
                 INSERT INTO Test_MP_Privyazka (Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, Pallet_No, SHK_WPS)
                 VALUES (@Nazvanie_Zadaniya, @Artikul, @Kolvo_Tovarov, @Pallet_No, @SHK_WPS)
