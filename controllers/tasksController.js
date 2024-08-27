@@ -190,9 +190,9 @@ const getRecordsByWPS = async (req, res) => {
 
 
 const getLDUBySHK = async (req, res) => {
-  const { shk } = req.query;
+  const { name, artikul } = req.query;
 
-  if (!shk) {
+  if (!name, artikul) {
     return res.status(400).json({ success: false, value: 'Поле ШК пусто!', errorCode: 400 });
   }
 
@@ -203,7 +203,9 @@ const getLDUBySHK = async (req, res) => {
     }
 
     const result = await pool.request()
-      .input('SHK', mssql.NVarChar(255), shk)
+      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+      .input('Artikul', mssql.Int, artikul)
+
       .query(`
         SELECT 
           Op_1_Bl_1_Sht,
@@ -226,7 +228,7 @@ const getLDUBySHK = async (req, res) => {
           Op_469_Spetsifikatsiya_TM,
           Op_470_Dop_Upakovka
         FROM Test_MP
-        WHERE SHK = @SHK
+        WHERE Artikul = @Artikul and Nazvanie_Zadaniya = @Nazvanie_Zadaniya 
       `);
 
     res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
