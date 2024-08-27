@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 /*for gruzy*/
 const dataRouter = require('./routes/test');
 const reasonRouter = require('./routes/reason');
+const zapisRouter = require('./routes/privyazka')
 
 /* for market place*/
 const tasksController = require('./routes/market_place/tasks');
@@ -23,7 +24,7 @@ const { updateSrokGodnosti } = require('./controllers/srokController');
 const logger = require('./utils/logger');
 
 const app = express();
-const port = 3005;
+const port = 3006;
 
 app.use(bodyParser.json());
 
@@ -46,6 +47,7 @@ app.use('/send', updateRoutes);
 app.use('/article', articleRoutes);
 app.use('/auth', authRoutes);
 app.post('/srok', updateSrokGodnosti)
+app.post('/privyazka', zapisRouter)
 
 
 app.listen(port, () => {
