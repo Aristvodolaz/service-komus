@@ -188,6 +188,54 @@ const getRecordsByWPS = async (req, res) => {
   }
 };
 
+
+const getLDUBySHK = async (req, res) => {
+  const { shk } = req.query;
+
+  if (!shk) {
+    return res.status(400).json({ success: false, value: 'Поле ШК пусто!', errorCode: 400 });
+  }
+
+  try {
+    const pool = await connectToDatabase();
+    if (!pool) {
+      throw new Error('Ошибка подключения к базе данных');
+    }
+
+    const result = await pool.request()
+      .input('SHK', mssql.NVarChar(255), shk)
+      .query(`
+        SELECT 
+          Op_1_Bl_1_Sht,
+          Op_2_Bl_2_Sht,
+          Op_3_Bl_3_Sht,
+          Op_4_Bl_4_Sht,
+          Op_5_Bl_5_Sht,
+          Op_6_Blis_6_10_Sht,
+          Op_7_Pereschyot,
+          Op_9_Fasovka_Sborka,
+          Op_10_Markirovka_SHT,
+          Op_11_Markirovka_Prom,
+          Op_12_Markirovka_Prom,
+          Op_13_Markirovka_Fabr,
+          Op_14_TU_1_Sht,
+          Op_15_TU_2_Sht,
+          Op_16_TU_3_5,
+          Op_17_TU_6_8,
+          Op_468_Proverka_SHK,
+          Op_469_Spetsifikatsiya_TM,
+          Op_470_Dop_Upakovka
+        FROM Test_MP
+        WHERE SHK = @SHK
+      `);
+
+    res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при получении записей по SHK:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
 const getRecordsBySHKWPS = async (req, res) => {
   const { SHK_WPS } = req.query;
 
@@ -588,5 +636,6 @@ module.exports = {
   updateRecordsBySHKWPS,
   updateSHKWPS,
   updatePalletInfoBySHKWPS,
-  getRecordsByWPS
+  getRecordsByWPS,
+  getLDUBySHK
 };

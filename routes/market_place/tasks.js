@@ -17,4 +17,5 @@ router.put('/updateShkStat', dataController.updateRecordsBySHKWPS)
 router.post('/createShkWPS', dataController.updateSHKWPS)
 router.post('/sendInformation', dataController.updatePalletInfoBySHKWPS)
 router.get('/getInfoByWPS', dataController.getRecordsByWPS)
+router.get('/getLDU', dataController.getLDUBySHK)
 module.exports = router;
