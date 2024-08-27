@@ -325,10 +325,10 @@ const updatePalletInfoBySHKWPS = async (req, res) => {
 
 
 const updateValues = async (req, res) => {
-  const { Nazvanie_Zadaniya, SHK, columnsToUpdate } = req.body;
+  const { Nazvanie_Zadaniya, artikul, columnsToUpdate } = req.body;
 
-  if (!Nazvanie_Zadaniya || !SHK || !Array.isArray(columnsToUpdate) || columnsToUpdate.length === 0) {
-    return res.status(400).json({ success: false, value: 'Nazvanie_Zadaniya, SHK, and columnsToUpdate are required', errorCode: 400 });
+  if (!Nazvanie_Zadaniya || !artikul || !Array.isArray(columnsToUpdate) || columnsToUpdate.length === 0) {
+    return res.status(400).json({ success: false, value: 'Nazvanie_Zadaniya, artikul, and columnsToUpdate are required', errorCode: 400 });
   }
 
   try {
@@ -340,18 +340,18 @@ const updateValues = async (req, res) => {
       UPDATE Test_MP
       SET
         ${setClause}
-     WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK
+     WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
     `;
 
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), Nazvanie_Zadaniya)
-      .input('SHK', mssql.NVarChar(255), SHK)
+      .input('Artikul', mssql.Int, artikul)
       .query(query);
 
     if (result.rowsAffected[0] > 0) {
-      res.status(200).json({ success: true, value: `Значения успешно обновлены для документа ${Nazvanie_Zadaniya} с номером ШК ${SHK}`, errorCode: 200 });
+      res.status(200).json({ success: true, value: `Значения успешно обновлены для документа ${Nazvanie_Zadaniya} с артикулом ${artikul}`, errorCode: 200 });
     } else {
-      res.status(404).json({ success: false, value: `Запись не найдена для документа ${Nazvanie_Zadaniya} с номером ШК ${SHK}`, errorCode: 404 });
+      res.status(404).json({ success: false, value: `Запись не найдена для документа ${Nazvanie_Zadaniya} с артикулом ${artikul}`, errorCode: 404 });
     }
   } catch (error) {
     console.error('Ошибка при обновлении значений в базе данных:', error);
