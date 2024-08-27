@@ -192,8 +192,8 @@ const getRecordsByWPS = async (req, res) => {
 const getLDUBySHK = async (req, res) => {
   const { name, artikul } = req.query;
 
-  if (!name, artikul) {
-    return res.status(400).json({ success: false, value: 'Поле ШК пусто!', errorCode: 400 });
+  if (!name, !artikul) {
+    return res.status(400).json({ success: false, value: 'Поле пусто!', errorCode: 400 });
   }
 
   try {
