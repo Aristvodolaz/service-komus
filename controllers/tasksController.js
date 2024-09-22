@@ -29,7 +29,7 @@ const getArticulsByTaskNumber = async (req, res) => {
 const getTaskByStatus = async (req, res) => {
   const { taskNumber, status } = req.query;
 
-  if (!taskNumber, status) {
+  if (!taskNumber, !status) {
     return res.status(400).json({ success: false, value: 'taskNumber is required', errorCode: 400 });
   }
 
