@@ -26,6 +26,31 @@ const getArticulsByTaskNumber = async (req, res) => {
   }
 };
 
+const getTaskByStatus = async (req, res) => {
+  const { taskNumber, status } = req.query;
+
+  if (!taskNumber, status) {
+    return res.status(400).json({ success: false, value: 'taskNumber is required', errorCode: 400 });
+  }
+
+  try {
+    const pool = await connectToDatabase();
+    if (!pool) {
+      throw new Error('Ошибка подключения к базе данных');
+    }
+
+    const result = await pool.request()
+      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskNumber)
+      .input('Status', mssql.Int, status)
+      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya and Status = @Status');
+
+    res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при получении списка артикулов:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
 const getUniqueTaskNames = async (req, res) => {
   const { filter } = req.query;
 
@@ -639,5 +664,6 @@ module.exports = {
   updateSHKWPS,
   updatePalletInfoBySHKWPS,
   getRecordsByWPS,
-  getLDUBySHK
+  getLDUBySHK,
+  getTaskByStatus
 };
