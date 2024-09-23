@@ -94,7 +94,7 @@ const addSrokGodnosti = async (req, res) => {
 };
 
 const endZapis = async (req, res) => {
-    const { name, artikul } = req.body;
+    const { name, artikul } = req.query;
 
     try {
         const pool = await connectToDatabase();
