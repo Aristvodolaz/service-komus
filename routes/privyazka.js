@@ -8,5 +8,6 @@ router.post('/addSrokGodnosti', dataController.addSrokGodnosti)
 router.post('/endStatus', dataController.endZapis)
 router.get('/getData', dataController.getAllByNazvanieZadaniya)
 router.post('/updateInfo', dataController.updatePalletAndKolvo)
+router.get('/sklads', dataController.getSklads)
 
 module.exports = router;

@@ -129,6 +129,7 @@ const endZapis = async (req, res) => {
 const getAllByNazvanieZadaniya = async (req, res) => {
     const { name } = req.query;
 
+    console.log('Received name:', name); // Логируем параметр
     try {
         const pool = await connectToDatabase();
         if (!pool) {
@@ -186,11 +187,37 @@ const updatePalletAndKolvo = async (req, res) => {
     }
 };
 
+const getSklads = async (req, res) => {
+    try {
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка подключения к базе данных' });
+        }
+
+        // Выполнение запроса к базе данных для получения данных о складах
+        const result = await pool.request()
+            .query(`SELECT Pref, Name, City FROM Scklad_City_MP`);
+
+        // Проверяем, есть ли записи в результате запроса
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ success: false, value: [], errorCode: 404, message: 'Записи не найдены' });
+        }
+
+        // Успешный ответ с данными
+        res.json({ success: true, value: result.recordset, errorCode: 200 });
+    } catch (error) {
+        console.error('Ошибка при получении данных о складах:', error);
+        res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Внутренняя ошибка сервера' });
+    }
+};
+
+
 module.exports = {
     addZapis,
     addSrokGodnosti,
     getZapis,
     endZapis,
     getAllByNazvanieZadaniya,  // Экспорт метода для получения всех данных по названию задания
-    updatePalletAndKolvo       // Экспорт метода для обновления паллета и вложенности
+    updatePalletAndKolvo,       // Экспорт метода для обновления паллета и вложенности
+    getSklads
 };
