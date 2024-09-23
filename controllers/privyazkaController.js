@@ -167,7 +167,7 @@ const updatePalletAndKolvo = async (req, res) => {
 
         const result = await pool.request()
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
-            .input('Artikul', mssql.NVarChar(50), artikul)
+            .input('Artikul', mssql.Int, artikul)
             .input('Pallet_No', mssql.Int, pallet)
             .input('Kolvo_Tovarov', mssql.Int, kolvo)
             .input("SHK_WPS",  mssql.NVarChar(255), shk)
