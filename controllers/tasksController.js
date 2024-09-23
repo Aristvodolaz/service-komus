@@ -552,7 +552,7 @@ const updateSHKByTaskAndArticul = async (req, res) => {
   }
 };
 const addTaskStatus = async (req, res) => {
-  const { taskName, articul, comment } = req.query;
+  const { taskName, articul, comment, reason } = req.query;
 
   try {
     const pool = await connectToDatabase();
@@ -566,10 +566,12 @@ const addTaskStatus = async (req, res) => {
       .input('Artikul', mssql.Int, articul)
       .input('Status_Zadaniya', mssql.Int, 1) // Установка Status_Zadaniya в 1
       .input('Status', mssql.Int, 2) // Установка Status в 2
-      .input('Comment', mssql.NVarChar(mssql.MAX), comment) // Установка комментария
+      .input('comment', mssql.NVarChar(mssql.MAX), comment) // Установка комментария
+      .input('reason', mssql.NVarChar(mssql.MAX), reason) // Установка комментария
+
       .query(`
-        INSERT INTO Test_MP (Nazvanie_Zadaniya, Artikul, Status_Zadaniya, Status, comment)
-        VALUES (@Nazvanie_Zadaniya, @Artikul, @Status_Zadaniya, @Status, @Comment)
+        INSERT INTO Test_MP (Nazvanie_Zadaniya, Artikul, Status_Zadaniya, Status, comment, reason)
+        VALUES (@Nazvanie_Zadaniya, @Artikul, @Status_Zadaniya, @Status, @comment, @reason)
       `);
 
     res.json({ success: true, value: 'Запись успешно добавлена', errorCode: 200 });
