@@ -53,7 +53,7 @@ const getZapis = async (req, res) => {
         if (result.recordset.length > 0) {
             res.json({ success: true, value: result.recordset, errorCode: 200 });
         } else {
-            res.status(404).json({ success: false, value: null, errorCode: 200, message: 'Записи не найдены' });
+            res.status(200).json({ success: false, value: null, errorCode: 200, message: 'Записи не найдены' });
         }
     } catch (error) {
         console.error('Ошибка при получении записей:', error);
