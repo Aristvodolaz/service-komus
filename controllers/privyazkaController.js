@@ -32,7 +32,9 @@ const addZapis = async (req, res) => {
 
 
 const getZapis = async (req, res) => {
-    const { name, artikul } = req.body;  
+    const { name, artikul } = req.query;  
+
+    console.log('Полученные данные:', { name, artikul }); // Логируем входящие данные
 
     try {
         const pool = await connectToDatabase();
@@ -43,7 +45,7 @@ const getZapis = async (req, res) => {
         
         const result = await pool.request()
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
-            .input('Artikul', mssql.Int, artikul)
+            .input('Artikul', mssql.NVarChar(50), artikul) // Измените на NVarChar, если это строка
             .query(`
                 SELECT Nazvanie_Zadaniya, Artikul, Srok_Godnosti, SHK_WPS, Pallet_No, Kolvo_Tovarov
                 FROM Test_MP_Privyazka
@@ -54,13 +56,14 @@ const getZapis = async (req, res) => {
         if (result.recordset.length > 0) {
             return res.json({ success: true, value: result.recordset, errorCode: 200 });
         } else {
-            return res.status(200).json({ success: false, value: null, errorCode: 200});
+            return res.status(200).json({ success: false, value: null, errorCode: 200 });
         }
     } catch (error) {
         console.error('Ошибка при получении записей:', error);
         return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка сервера' });
     }
 };
+
 
 
 
