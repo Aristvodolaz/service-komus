@@ -36,8 +36,9 @@ const getZapis = async (req, res) => {
 
     try {
         const pool = await connectToDatabase();
+        
         if (!pool) {
-            throw new Error('Ошибка подключения к базе данных');
+            return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка подключения к базе данных' });
         }
         
         const result = await pool.request()
@@ -51,15 +52,16 @@ const getZapis = async (req, res) => {
 
         // Проверка результата
         if (result.recordset.length > 0) {
-            res.json({ success: true, value: result.recordset, errorCode: 200 });
+            return res.json({ success: true, value: result.recordset, errorCode: 200 });
         } else {
-            res.status(200).json({ success: false, value: null, errorCode: 200, message: 'Записи не найдены' });
+            return res.status(200).json({ success: false, value: null, errorCode: 200});
         }
     } catch (error) {
         console.error('Ошибка при получении записей:', error);
-        res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка сервера' });
+        return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка сервера' });
     }
 };
+
 
 
 const addSrokGodnosti = async (req, res) => {
