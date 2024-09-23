@@ -560,26 +560,37 @@ const addTaskStatus = async (req, res) => {
       return res.status(500).json({ success: false, value: null, errorCode: 500 });
     }
 
-    // Добавление новой записи с установленными значениями
-    await pool.request()
+    // Обновление существующей записи с установленными значениями
+    const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('Artikul', mssql.Int, articul)
       .input('Status_Zadaniya', mssql.Int, 1) // Установка Status_Zadaniya в 1
       .input('Status', mssql.Int, 2) // Установка Status в 2
       .input('comment', mssql.NVarChar(mssql.MAX), comment) // Установка комментария
-      .input('reason', mssql.NVarChar(mssql.MAX), reason) // Установка комментария
-
+      .input('reason', mssql.NVarChar(mssql.MAX), reason) // Установка причины
       .query(`
-        INSERT INTO Test_MP (Nazvanie_Zadaniya, Artikul, Status_Zadaniya, Status, comment, reason)
-        VALUES (@Nazvanie_Zadaniya, @Artikul, @Status_Zadaniya, @Status, @comment, @reason)
+        UPDATE Test_MP 
+        SET 
+          Status_Zadaniya = @Status_Zadaniya,
+          Status = @Status,
+          comment = @comment,
+          reason = @reason
+        WHERE 
+          Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND 
+          Artikul = @Artikul
       `);
 
-    res.json({ success: true, value: 'Запись успешно добавлена', errorCode: 200 });
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({ success: false, value: 'Запись не найдена', errorCode: 404 });
+    }
+
+    res.json({ success: true, value: 'Запись успешно обновлена', errorCode: 200 });
   } catch (error) {
-    console.error('Ошибка при добавлении записи:', error);
+    console.error('Ошибка при обновлении записи:', error);
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+
 
 
 const updateStatusTaskAndArticul = async (req, res) => {
