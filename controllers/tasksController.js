@@ -3,7 +3,7 @@ const { connectToDatabase, sql } = require('../dbConfig');
 const { error } = require('winston');
 
 const getArticulsByTaskNumber = async (req, res) => {
-  const { taskNumber } = req.query;
+  const { taskNumber, sk } = req.query;
 
   if (!taskNumber) {
     return res.status(400).json({ success: false, value: 'taskNumber is required', errorCode: 400 });
@@ -17,7 +17,8 @@ const getArticulsByTaskNumber = async (req, res) => {
 
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskNumber)
-      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
+      .input('Scklad_Pref',mssql.NVarChar(255) ,sk)
+      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya and Scklad_Pref = @Scklad_Pref ');
 
     res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
   } catch (error) {
