@@ -129,5 +129,6 @@ const endZapis = async (req, res) => {
 module.exports = {
     addZapis,
     addSrokGodnosti,
-    getZapis
+    getZapis,
+    endZapis
 };
