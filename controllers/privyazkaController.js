@@ -93,6 +93,39 @@ const addSrokGodnosti = async (req, res) => {
     }
 };
 
+const endZapis = async (req, res) => {
+    const { name, artikul } = req.body;
+
+    try {
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, value: null, errorCode: 500 });
+        }
+
+        // Обновление записи
+        const result = await pool.request()
+            .input('Nazvanie_Zadaniya', mssql.NVarChar, name)
+            .input('Artikul', mssql.NVarChar, artikul)
+            .input('Status', mssql.Int, 1)
+            .input('Status_Zadaniya', mssql.Int, 2)
+            .query(`
+                UPDATE Test_MP
+                SET Status = @Status, Status_Zadaniya = @Status_Zadaniya
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+            `);
+
+        if (result.rowsAffected[0] === 0) {
+            return res.status(404).json({ success: false, value: 'Запись не найдена', errorCode: 404 });
+        }
+
+        res.json({ success: true, value: 'Запись успешно обновлена', errorCode: 200 });
+    } catch (error) {
+        console.error('Ошибка при обновлении записи:', error);
+        res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+};
+
+
 module.exports = {
     addZapis,
     addSrokGodnosti,
