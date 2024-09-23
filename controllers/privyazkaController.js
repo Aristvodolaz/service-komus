@@ -32,27 +32,32 @@ const addZapis = async (req, res) => {
 
 
 const getZapis = async (req, res) => {
-    const { name, artikul} = req.body;  
+    const { name, artikul } = req.body;  
 
     try {
         const pool = await connectToDatabase();
         if (!pool) {
-            return res.status(500).json({ success: false, value: null, errorCode: 500 });
+            throw new Error('Ошибка подключения к базе данных');
         }
-
-        // Выполнение SELECT-запроса для получения всех записей с нужными полями
-        await pool.request()
+        
+        const result = await pool.request()
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
             .input('Artikul', mssql.Int, artikul)
             .query(`
                 SELECT Nazvanie_Zadaniya, Artikul, Srok_Godnosti, SHK_WPS, Pallet_No, Kolvo_Tovarov
                 FROM Test_MP_Privyazka
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
             `);
 
-        res.json({ success: true, value: result.recordset, errorCode: 200 });
+        // Проверка результата
+        if (result.recordset.length > 0) {
+            res.json({ success: true, value: result.recordset, errorCode: 200 });
+        } else {
+            res.status(404).json({ success: false, value: null, errorCode: 200, message: 'Записи не найдены' });
+        }
     } catch (error) {
         console.error('Ошибка при получении записей:', error);
-        res.status(500).json({ success: false, value: null, errorCode: 500 });
+        res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка сервера' });
     }
 };
 
