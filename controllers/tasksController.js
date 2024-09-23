@@ -3,7 +3,7 @@ const { connectToDatabase, sql } = require('../dbConfig');
 const { error } = require('winston');
 
 const getArticulsByTaskNumber = async (req, res) => {
-  const { taskNumber, sk } = req.query;
+  const { taskNumber } = req.query;
 
   if (!taskNumber) {
     return res.status(400).json({ success: false, value: 'taskNumber is required', errorCode: 400 });
@@ -17,8 +17,7 @@ const getArticulsByTaskNumber = async (req, res) => {
 
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskNumber)
-      .input('Scklad_Pref',mssql.NVarChar(255) ,sk)
-      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya and Scklad_Pref = @Scklad_Pref ');
+      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya');
 
     res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
   } catch (error) {
@@ -53,7 +52,7 @@ const getTaskByStatus = async (req, res) => {
 };
 
 const getUniqueTaskNames = async (req, res) => {
-  const { filter } = req.query;
+  const { filter, sk } = req.query;
 
   try {
     const pool = await connectToDatabase();
@@ -61,22 +60,37 @@ const getUniqueTaskNames = async (req, res) => {
       throw new Error('Ошибка подключения к базе данных');
     }
 
-    let query = 'SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP';
+    let query = 'SELECT DISTINCT Nazvanie_Zadaniya, Scklad_Pref FROM Test_MP WHERE 1=1';
     const request = pool.request();
 
+    // Добавляем фильтр по названию задания, если он есть
     if (filter) {
-      query += ' WHERE Nazvanie_Zadaniya LIKE @filter';
+      query += ' AND Nazvanie_Zadaniya LIKE @filter';
       request.input('filter', mssql.NVarChar(255), `%${filter}%`);
+    }
+
+    // Добавляем фильтр по складу, если он есть
+    if (sk) {
+      query += ' AND Scklad_Pref = @sk';
+      request.input('sk', mssql.NVarChar(255), sk);
     }
 
     const result = await request.query(query);
 
-    res.status(200).json({ success: true, value: result.recordset.map(row => row.Nazvanie_Zadaniya), errorCode: 200 });
+    res.status(200).json({
+      success: true,
+      value: result.recordset.map(row => ({
+        Nazvanie_Zadaniya: row.Nazvanie_Zadaniya,
+        Scklad_Pref: row.Scklad_Pref,
+      })),
+      errorCode: 200,
+    });
   } catch (error) {
     console.error('Ошибка при получении уникальных названий заданий:', error);
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+
 
 const getByShk = async (req, res) => {
   const { taskName, shk } = req.query;
