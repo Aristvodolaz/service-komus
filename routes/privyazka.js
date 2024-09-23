@@ -6,5 +6,7 @@ router.post('/add', dataController.addZapis);
 router.get('/getZapis', dataController.getZapis)
 router.post('/addSrokGodnosti', dataController.addSrokGodnosti)
 router.post('/endStatus', dataController.endZapis)
+router.get('/getData', dataController.getAllByNazvanieZadaniya)
+router.post('/updateInfo', dataController.updatePalletAndKolvo)
 
 module.exports = router;
