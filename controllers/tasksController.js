@@ -551,6 +551,33 @@ const updateSHKByTaskAndArticul = async (req, res) => {
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+const addTaskStatus = async (req, res) => {
+  const { taskName, articul, comment } = req.query;
+
+  try {
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+
+    // Добавление новой записи с установленными значениями
+    await pool.request()
+      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
+      .input('Artikul', mssql.Int, articul)
+      .input('Status_Zadaniya', mssql.Int, 1) // Установка Status_Zadaniya в 1
+      .input('Status', mssql.Int, 2) // Установка Status в 2
+      .input('Comment', mssql.NVarChar(mssql.MAX), comment) // Установка комментария
+      .query(`
+        INSERT INTO Test_MP (Nazvanie_Zadaniya, Artikul, Status_Zadaniya, Status, comment)
+        VALUES (@Nazvanie_Zadaniya, @Artikul, @Status_Zadaniya, @Status, @Comment)
+      `);
+
+    res.json({ success: true, value: 'Запись успешно добавлена', errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при добавлении записи:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
 
 
 const updateStatusTaskAndArticul = async (req, res) => {
@@ -680,5 +707,6 @@ module.exports = {
   updatePalletInfoBySHKWPS,
   getRecordsByWPS,
   getLDUBySHK,
-  getTaskByStatus
+  getTaskByStatus,
+  addTaskStatus
 };
