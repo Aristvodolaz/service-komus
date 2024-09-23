@@ -94,7 +94,7 @@ const addSrokGodnosti = async (req, res) => {
 };
 
 const endZapis = async (req, res) => {
-    const { name, artikul, shk } = req.query;
+    const { name, artikul } = req.query;
 
     try {
         const pool = await connectToDatabase();
@@ -107,12 +107,11 @@ const endZapis = async (req, res) => {
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
             .input('Artikul', mssql.Int, artikul)
             .input('Status', mssql.Int, 2)
-            .input("SHK_WPS",  mssql.NVarChar(255), shk)
             .input('Status_Zadaniya', mssql.Int, 1)
             .query(`
                 UPDATE Test_MP
                 SET Status = @Status, Status_Zadaniya = @Status_Zadaniya
-                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul and SHK_WPS = @SHK_WPS
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul 
             `);
 
         if (result.rowsAffected[0] === 0) {
@@ -158,7 +157,7 @@ const getAllByNazvanieZadaniya = async (req, res) => {
 
 // Метод для обновления паллета и вложенности
 const updatePalletAndKolvo = async (req, res) => {
-    const { name, artikul, pallet, kolvo } = req.query;
+    const { name, artikul, pallet, kolvo, shk } = req.query;
 
     try {
         const pool = await connectToDatabase();
@@ -171,10 +170,11 @@ const updatePalletAndKolvo = async (req, res) => {
             .input('Artikul', mssql.NVarChar(50), artikul)
             .input('Pallet_No', mssql.Int, pallet)
             .input('Kolvo_Tovarov', mssql.Int, kolvo)
+            .input("SHK_WPS",  mssql.NVarChar(255), shk)
             .query(`
                 UPDATE Test_MP_Privyazka
                 SET Pallet_No = @Pallet_No, Kolvo_Tovarov = @Kolvo_Tovarov
-                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul and SHK_WPS = @SHK_WPS
             `);
 
         if (result.rowsAffected[0] === 0) {
