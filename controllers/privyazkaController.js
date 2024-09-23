@@ -106,8 +106,8 @@ const endZapis = async (req, res) => {
         const result = await pool.request()
             .input('Nazvanie_Zadaniya', mssql.NVarChar, name)
             .input('Artikul', mssql.NVarChar, artikul)
-            .input('Status', mssql.Int, 1)
-            .input('Status_Zadaniya', mssql.Int, 2)
+            .input('Status', mssql.Int, 2)
+            .input('Status_Zadaniya', mssql.Int, 1)
             .query(`
                 UPDATE Test_MP
                 SET Status = @Status, Status_Zadaniya = @Status_Zadaniya
