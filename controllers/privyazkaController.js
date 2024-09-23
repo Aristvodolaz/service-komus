@@ -94,7 +94,7 @@ const addSrokGodnosti = async (req, res) => {
 };
 
 const endZapis = async (req, res) => {
-    const { name, artikul } = req.query;
+    const { name, artikul, shk } = req.query;
 
     try {
         const pool = await connectToDatabase();
@@ -104,14 +104,15 @@ const endZapis = async (req, res) => {
 
         // Обновление записи
         const result = await pool.request()
-            .input('Nazvanie_Zadaniya', mssql.NVarChar, name)
-            .input('Artikul', mssql.NVarChar, artikul)
+            .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+            .input('Artikul', mssql.Int, artikul)
             .input('Status', mssql.Int, 2)
+            .input("SHK_WPS",  mssql.NVarChar(255), shk)
             .input('Status_Zadaniya', mssql.Int, 1)
             .query(`
                 UPDATE Test_MP
                 SET Status = @Status, Status_Zadaniya = @Status_Zadaniya
-                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul and SHK_WPS = @SHK_WPS
             `);
 
         if (result.rowsAffected[0] === 0) {
