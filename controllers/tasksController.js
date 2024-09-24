@@ -564,8 +564,8 @@ const addTaskStatus = async (req, res) => {
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('Artikul', mssql.Int, articul)
-      .input('Status_Zadaniya', mssql.Int, 1) // Установка Status_Zadaniya в 1
-      .input('Status', mssql.Int, 2) // Установка Status в 2
+      .input('Status_Zadaniya', mssql.Int, 0) // Установка Status_Zadaniya в 1
+      .input('Status', mssql.Int, 1) // Установка Status в 2
       .input('comment', mssql.NVarChar(mssql.MAX), comment) // Установка комментария
       .input('reason', mssql.NVarChar(mssql.MAX), reason) // Установка причины
       .query(`
