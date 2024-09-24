@@ -279,9 +279,9 @@ const getLDUBySHK = async (req, res) => {
 };
 
 const getRecordsBySHKWPS = async (req, res) => {
-  const { SHK_WPS } = req.query;
+  const { SHK } = req.query;
 
-  if (!SHK_WPS) {
+  if (!SHK) {
     return res.status(400).json({ success: false, value: 'SHK_WPS is required', errorCode: 400 });
   }
 
@@ -292,7 +292,7 @@ const getRecordsBySHKWPS = async (req, res) => {
     }
 
     const result = await pool.request()
-      .input('SHK_WPS', mssql.NVarChar(255), SHK_WPS)
+      .input('SHK', mssql.NVarChar(255), SHK)
       .query(`
         SELECT 
           Op_1_Bl_1_Sht,
@@ -315,12 +315,12 @@ const getRecordsBySHKWPS = async (req, res) => {
           Op_469_Spetsifikatsiya_TM,
           Op_470_Dop_Upakovka
         FROM Test_MP
-        WHERE SHK_WPS = @SHK_WPS
+        WHERE SHK = @SHK
       `);
 
     res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
   } catch (error) {
-    console.error('Ошибка при получении записей по SHK_WPS:', error);
+    console.error('Ошибка при получении записей по SHK:', error);
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
