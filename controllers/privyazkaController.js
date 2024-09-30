@@ -3,26 +3,42 @@ const { connectToDatabase, sql } = require('../dbConfig');
 const { error } = require('winston');
 
 const addZapis = async (req, res) => {
-    const { name, artikul, kolvo, pallet, shk} = req.body;  
-  
+    const { name, artikul, kolvo, pallet, shk } = req.body;
+
     try {
         const pool = await connectToDatabase();
         if (!pool) {
             return res.status(500).json({ success: false, value: null, errorCode: 500 });
         }
-  
-        // Добавление новой записи
+
+        // Проверка на существование записи с таким же Названием задания и SHK_WPS
+        const checkResult = await pool.request()
+            .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+            .input('SHK_WPS', mssql.NVarChar(255), shk)
+            .query(`
+                SELECT COUNT(*) as count 
+                FROM Test_MP_Privyazka
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK_WPS = @SHK_WPS
+            `);
+
+        const { count } = checkResult.recordset[0];
+        
+        if (count > 0) {
+            return res.status(400).json({ success: false, value: 'Данный ШК уже был использован для этого задания', errorCode: 400 });
+        }
+
+        // Добавление новой записи, если проверка пройдена
         await pool.request()
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
             .input('Artikul', mssql.Int, artikul)
             .input('Kolvo_Tovarov', mssql.Int, kolvo)
-            .input('Pallet_No', mssql.Int, pallet)
+            .input('Pallet_No', mssql.NVarChar(255), pallet)
             .input('SHK_WPS', mssql.NVarChar(255), shk)
             .query(`
                 INSERT INTO Test_MP_Privyazka (Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, Pallet_No, SHK_WPS)
                 VALUES (@Nazvanie_Zadaniya, @Artikul, @Kolvo_Tovarov, @Pallet_No, @SHK_WPS)
             `);
-  
+
         res.json({ success: true, value: 'Запись успешно добавлена', errorCode: 200 });
     } catch (error) {
         console.error('Ошибка при добавлении записи:', error);
@@ -168,7 +184,7 @@ const updatePalletAndKolvo = async (req, res) => {
         const result = await pool.request()
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
             .input('Artikul', mssql.Int, artikul)
-            .input('Pallet_No', mssql.Int, pallet)
+            .input('Pallet_No', mssql.NVarChar(255), pallet)
             .input('Kolvo_Tovarov', mssql.Int, kolvo)
             .input("SHK_WPS",  mssql.NVarChar(255), shk)
             .query(`

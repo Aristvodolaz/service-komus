@@ -29,8 +29,13 @@ const getArticulsByTaskNumber = async (req, res) => {
 const getTaskByStatus = async (req, res) => {
   const { taskNumber, status } = req.query;
 
-  if (!taskNumber, !status) {
-    return res.status(400).json({ success: false, value: 'taskNumber is required', errorCode: 400 });
+  // Проверка наличия параметров taskNumber и status
+  if (!taskNumber || status === undefined) {
+    return res.status(400).json({
+      success: false,
+      value: 'taskNumber and status are required',
+      errorCode: 400
+    });
   }
 
   try {
@@ -39,15 +44,34 @@ const getTaskByStatus = async (req, res) => {
       throw new Error('Ошибка подключения к базе данных');
     }
 
+    // Если статус равен 0, выбираем записи, где Status 0 или 1
+    let query;
+    if (status == 0) {
+      query = 'SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya and Status IN (0, 1)';
+    } else {
+      query = 'SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya and Status = @Status';
+    }
+
+    // Выполняем запрос к базе данных
     const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskNumber)
       .input('Status', mssql.Int, status)
-      .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya and Status = @Status');
+      .query(query);
 
-    res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
+    // Возвращаем успешный результат
+    res.status(200).json({
+      success: true,
+      value: result.recordset,
+      errorCode: 200
+    });
   } catch (error) {
-    console.error('Ошибка при получении списка артикулов:', error);
-    res.status(500).json({ success: false, value: null, errorCode: 500 });
+    // Обработка ошибок
+    console.error('Ошибка при получении списка задач:', error);
+    res.status(500).json({
+      success: false,
+      value: null,
+      errorCode: 500
+    });
   }
 };
 
