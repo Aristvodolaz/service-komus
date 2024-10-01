@@ -641,7 +641,7 @@ const updateStatusTaskAndArticul = async (req, res) => {
 };
 
 const updateRecordsBySHKWPS = async (req, res) => {
-  const { SHK_WPS } = req.query;
+  const { taskName, articul } = req.query;
   const {
     Op_1_Bl_1_Sht,
     Op_2_Bl_2_Sht,
@@ -675,7 +675,8 @@ const updateRecordsBySHKWPS = async (req, res) => {
     }
 
     await pool.request()
-      .input('SHK_WPS', mssql.NVarChar(255), SHK_WPS)
+    .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
+    .input('Artikul', mssql.Int, articul)
       .input('Op_1_Bl_1_Sht', mssql.NVarChar(10), Op_1_Bl_1_Sht)
       .input('Op_2_Bl_2_Sht', mssql.NVarChar(10), Op_2_Bl_2_Sht)
       .input('Op_3_Bl_3_Sht', mssql.NVarChar(10), Op_3_Bl_3_Sht)
@@ -717,7 +718,7 @@ const updateRecordsBySHKWPS = async (req, res) => {
           Op_468_Proverka_SHK = @Op_468_Proverka_SHK,
           Op_469_Spetsifikatsiya_TM = @Op_469_Spetsifikatsiya_TM,
           Op_470_Dop_Upakovka = @Op_470_Dop_Upakovka
-        WHERE SHK_WPS = @SHK_WPS
+        WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul'
       `);
 
     res.status(200).json({ success: true, value: 'Record updated successfully', errorCode: 200 });
