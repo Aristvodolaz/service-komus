@@ -664,9 +664,6 @@ const updateRecordsBySHKWPS = async (req, res) => {
     Op_470_Dop_Upakovka
   } = req.body;
 
-  if (!SHK_WPS) {
-    return res.status(400).json({ success: false, value: 'SHK_WPS is required', errorCode: 400 });
-  }
 
   try {
     const pool = await connectToDatabase();
