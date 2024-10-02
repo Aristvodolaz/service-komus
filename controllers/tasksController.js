@@ -715,7 +715,7 @@ const updateRecordsBySHKWPS = async (req, res) => {
           Op_468_Proverka_SHK = @Op_468_Proverka_SHK,
           Op_469_Spetsifikatsiya_TM = @Op_469_Spetsifikatsiya_TM,
           Op_470_Dop_Upakovka = @Op_470_Dop_Upakovka
-        WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul'
+        WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
       `);
 
     res.status(200).json({ success: true, value: 'Record updated successfully', errorCode: 200 });
