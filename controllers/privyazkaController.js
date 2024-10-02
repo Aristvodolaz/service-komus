@@ -173,7 +173,8 @@ const getAllByNazvanieZadaniya = async (req, res) => {
 
 // Метод для обновления паллета и вложенности
 const updatePalletAndKolvo = async (req, res) => {
-    const { name, artikul, pallet, kolvo, shk } = req.query;
+    const { name, pallet, kolvo, shk } = req.query;
+    console.log("DDDDD", name + " "+ pallet + " " + kolvo + " " + shk)
 
     try {
         const pool = await connectToDatabase();
@@ -183,14 +184,13 @@ const updatePalletAndKolvo = async (req, res) => {
 
         const result = await pool.request()
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
-            .input('Artikul', mssql.Int, artikul)
             .input('Pallet_No', mssql.NVarChar(255), pallet)
             .input('Kolvo_Tovarov', mssql.Int, kolvo)
             .input("SHK_WPS",  mssql.NVarChar(255), shk)
             .query(`
                 UPDATE Test_MP_Privyazka
                 SET Pallet_No = @Pallet_No, Kolvo_Tovarov = @Kolvo_Tovarov
-                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul and SHK_WPS = @SHK_WPS
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya and SHK_WPS = @SHK_WPS
             `);
 
         if (result.rowsAffected[0] === 0) {
