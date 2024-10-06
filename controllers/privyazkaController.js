@@ -3,7 +3,7 @@ const { connectToDatabase, sql } = require('../dbConfig');
 const { error } = require('winston');
 
 const addZapis = async (req, res) => {
-    const { name, artikul, kolvo, pallet, shk } = req.body;
+    const { name, artikul, kolvo, pallet, shk } = req.body;  // Убрали srok_godnosti из body
 
     try {
         const pool = await connectToDatabase();
@@ -11,7 +11,7 @@ const addZapis = async (req, res) => {
             return res.status(500).json({ success: false, value: null, errorCode: 500 });
         }
 
-        // Проверка на существование записи с таким же Названием задания и SHK_WPS
+        // Проверка на существование записи с таким же названием задания и SHK_WPS
         const checkResult = await pool.request()
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
             .input('SHK_WPS', mssql.NVarChar(255), shk)
@@ -22,21 +22,59 @@ const addZapis = async (req, res) => {
             `);
 
         const { count } = checkResult.recordset[0];
-        
+
         if (count > 0) {
             return res.status(400).json({ success: false, value: 'Данный ШК уже был использован для этого задания', errorCode: 400 });
         }
 
-        // Добавление новой записи, если проверка пройдена
+        // Проверка на существование записи с таким же Названием задания и артикулом, у которой есть срок годности
+        const checkSrokGodnosti = await pool.request()
+            .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+            .input('Artikul', mssql.Int, artikul)
+            .query(`
+                SELECT Srok_Godnosti
+                FROM Test_MP_Privyazka
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul AND Srok_Godnosti IS NOT NULL
+            `);
+
+        let srok_godnosti = null;
+
+        if (checkSrokGodnosti.recordset.length > 0) {
+            // Если есть запись с сроком годности, берем этот срок годности
+            srok_godnosti = checkSrokGodnosti.recordset[0].Srok_Godnosti;
+
+            // Удаление записи с таким же Названием задания и артикулом, у которой есть срок годности
+            await pool.request()
+                .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+                .input('Artikul', mssql.Int, artikul)
+                .query(`
+                    DELETE FROM Test_MP_Privyazka
+                    WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul AND Srok_Godnosti IS NOT NULL
+                `);
+
+            // Обновление всех других записей с таким же Названием задания и артикулом, добавляем срок годности
+            await pool.request()
+                .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+                .input('Artikul', mssql.Int, artikul)
+                .input('Srok_Godnosti', mssql.NVarChar(255), srok_godnosti)
+                .query(`
+                    UPDATE Test_MP_Privyazka
+                    SET Srok_Godnosti = @Srok_Godnosti
+                    WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+                `);
+        }
+
+        // Добавление новой записи
         await pool.request()
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
             .input('Artikul', mssql.Int, artikul)
             .input('Kolvo_Tovarov', mssql.Int, kolvo)
-            .input('Pallet_No', mssql.NVarChar(255), pallet+"")
+            .input('Pallet_No', mssql.NVarChar(255), pallet + "")
             .input('SHK_WPS', mssql.NVarChar(255), shk)
+            .input('Srok_Godnosti', mssql.NVarChar(255), srok_godnosti)  // Добавляем срок годности к новой записи, если он существует
             .query(`
-                INSERT INTO Test_MP_Privyazka (Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, Pallet_No, SHK_WPS)
-                VALUES (@Nazvanie_Zadaniya, @Artikul, @Kolvo_Tovarov, @Pallet_No, @SHK_WPS)
+                INSERT INTO Test_MP_Privyazka (Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, Pallet_No, SHK_WPS, Srok_Godnosti)
+                VALUES (@Nazvanie_Zadaniya, @Artikul, @Kolvo_Tovarov, @Pallet_No, @SHK_WPS, @Srok_Godnosti)
             `);
 
         res.json({ success: true, value: 'Запись успешно добавлена', errorCode: 200 });
@@ -45,6 +83,7 @@ const addZapis = async (req, res) => {
         res.status(500).json({ success: false, value: null, errorCode: 500 });
     }
 };
+
 
 
 const getZapis = async (req, res) => {
