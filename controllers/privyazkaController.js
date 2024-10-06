@@ -32,7 +32,7 @@ const addZapis = async (req, res) => {
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
             .input('Artikul', mssql.Int, artikul)
             .input('Kolvo_Tovarov', mssql.Int, kolvo)
-            .input('Pallet_No', mssql.NVarChar(255), pallet)
+            .input('Pallet_No', mssql.NVarChar(255), pallet+"")
             .input('SHK_WPS', mssql.NVarChar(255), shk)
             .query(`
                 INSERT INTO Test_MP_Privyazka (Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, Pallet_No, SHK_WPS)
