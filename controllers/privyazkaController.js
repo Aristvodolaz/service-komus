@@ -3,7 +3,7 @@ const { connectToDatabase, sql } = require('../dbConfig');
 const { error } = require('winston');
 
 const addZapis = async (req, res) => {
-    const { name, artikul, kolvo, pallet, shk } = req.body;  // Убрали srok_godnosti из body
+    const { name, artikul, kolvo, pallet, shk } = req.body;
 
     try {
         const pool = await connectToDatabase();
@@ -42,26 +42,6 @@ const addZapis = async (req, res) => {
         if (checkSrokGodnosti.recordset.length > 0) {
             // Если есть запись с сроком годности, берем этот срок годности
             srok_godnosti = checkSrokGodnosti.recordset[0].Srok_Godnosti;
-
-            // Удаление записи с таким же Названием задания и артикулом, у которой есть срок годности
-            await pool.request()
-                .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
-                .input('Artikul', mssql.Int, artikul)
-                .query(`
-                    DELETE FROM Test_MP_Privyazka
-                    WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul AND Srok_Godnosti IS NOT NULL
-                `);
-
-            // Обновление всех других записей с таким же Названием задания и артикулом, добавляем срок годности
-            await pool.request()
-                .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
-                .input('Artikul', mssql.Int, artikul)
-                .input('Srok_Godnosti', mssql.NVarChar(255), srok_godnosti)
-                .query(`
-                    UPDATE Test_MP_Privyazka
-                    SET Srok_Godnosti = @Srok_Godnosti
-                    WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
-                `);
         }
 
         // Добавление новой записи
