@@ -47,22 +47,13 @@ const addZapis = async (req, res) => {
 
         // Удаление всех записей с SHK_WPS и Pallet_No равным NULL для данной задачи и артикула после первой валидной записи
         await pool.request()
-        .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
-        .input('Artikul', mssql.Int, artikul)
-        .query(`
-            DELETE FROM Test_MP_Privyazka
-            WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
-            AND ID > (
-                SELECT MIN(ID)
-                FROM Test_MP_Privyazka
-                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya 
-                AND Artikul = @Artikul 
-                AND SHK_WPS IS NOT NULL 
-                AND Pallet_No IS NOT NULL
-            )
-            AND (SHK_WPS IS NULL OR Pallet_No IS NULL)
-        `);
-
+            .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+            .input('Artikul', mssql.Int, artikul)
+            .query(`
+                DELETE FROM Test_MP_Privyazka
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+                AND (SHK_WPS IS NULL OR Pallet_No IS NULL)
+            `);
 
         // Добавление новой записи
         await pool.request()
