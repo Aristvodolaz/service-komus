@@ -75,6 +75,39 @@ const addZapis = async (req, res) => {
     }
 };
 
+// Метод для проверки наличия SHK_WPS в указанном задании
+const checkShkWpsExists = async (req, res) => {
+    const { name, shk } = req.query;
+
+    try {
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка подключения к базе данных' });
+        }
+
+        // Проверка на существование записи с таким же SHK_WPS в задании
+        const checkResult = await pool.request()
+            .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+            .input('SHK_WPS', mssql.NVarChar(255), shk)
+            .query(`
+                SELECT COUNT(*) as count 
+                FROM Test_MP_Privyazka
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK_WPS = @SHK_WPS
+            `);
+
+        const { count } = checkResult.recordset[0];
+
+        if (count > 0) {
+            return res.json({ success: false, message: 'ШК ВПС уже существует для данного задания', errorCode: 200 });
+        } else {
+            return res.json({ success: true, value: 'SHK_WPS не найден для данного задания', errorCode: 200 });
+        }
+    } catch (error) {
+        console.error('Ошибка при проверке SHK_WPS:', error);
+        return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка сервера' });
+    }
+};
+
 
 const getZapis = async (req, res) => {
     const { name, artikul } = req.query;  
@@ -265,5 +298,6 @@ module.exports = {
     endZapis,
     getAllByNazvanieZadaniya,  // Экспорт метода для получения всех данных по названию задания
     updatePalletAndKolvo,       // Экспорт метода для обновления паллета и вложенности
-    getSklads
+    getSklads,
+    checkShkWpsExists
 };
