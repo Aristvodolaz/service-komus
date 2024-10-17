@@ -52,7 +52,7 @@ const addZapis = async (req, res) => {
             .query(`
                 DELETE FROM Test_MP_Privyazka
                 WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
-                AND (SHK_WPS IS NULL OR Pallet_No IS NULL)
+                AND (SHK_WPS='0' OR Pallet_No = '0')
             `);
 
         // Добавление новой записи
@@ -159,6 +159,9 @@ const addSrokGodnosti = async (req, res) => {
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
             .input('Artikul', mssql.Int, artikul)
             .input('Srok_Godnosti', mssql.NVarChar(255), srok_godnosti)
+            .input("SHK_WPS", mssql.NVarChar(255), "0")
+            .input("Pallet_No", mssql.NVarChar(255), "0")
+
             .query(`
                 INSERT INTO Test_MP_Privyazka (Nazvanie_Zadaniya, Artikul, Srok_Godnosti)
                 VALUES (@Nazvanie_Zadaniya, @Artikul, @Srok_Godnosti)
