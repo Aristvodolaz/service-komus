@@ -14,6 +14,7 @@ const fileController = require('./routes/market_place/file');
 const filesRouter = require('./routes/market_place/file');
 const downloadController = require('./controllers/downloadController');
 const downloadExcelController = require('./controllers/downloadExcelController');
+const fileExcelController = require('./controllers/fileController');
 
 const exportRoutes = require('./routes/export');
 const updateRoutes = require('./routes/finish');
@@ -40,6 +41,7 @@ app.use('/download/excel', fileController);
 app.use('/list',downloadExcelController)
 app.use('/download/files', filesRouter);
 app.use('/download', downloadController);
+app.use('/',fileExcelController);
 
 app.use('/export', exportRoutes);
 app.use('/send', updateRoutes);
