@@ -1,151 +1,133 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const multer = require('multer');
-const { sql, connectToDatabase } = require('./db');
+const axios = require('axios');
+const fs = require('fs');
 const path = require('path');
-const xlsx = require('xlsx'); // Для работы с Excel
+const xlsx = require('xlsx');
+const logger = require('../utils/logger');
+const {connectToDatabase, sql } = require('../dbConfig')
 
-const app = express();
-const PORT = 3000;
+const filesListUrl = 'http://31.128.44.48/root/task_file/wait'; // замените на URL списка файлов
+const downloadDir = path.join(__dirname, '../downloads');
 
-// Настройка хранения файлов
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.originalname);
+// Создание директории для загрузки файлов, если она не существует
+if (!fs.existsSync(downloadDir)) {
+  fs.mkdirSync(downloadDir);
+}
+
+// Функция для скачивания файла
+const downloadFile = async (url, outputPath) => {
+  const writer = fs.createWriteStream(outputPath);
+
+  const response = await axios({
+    url,
+    method: 'GET',
+    responseType: 'stream',
+  });
+
+  response.data.pipe(writer);
+
+  return new Promise((resolve, reject) => {
+    writer.on('finish', resolve);
+    writer.on('error', reject);
+  });
+};
+
+// Функция для обработки и загрузки Excel файла в базу данных
+const processAndLoadFile = async (filePath) => {
+  const workbook = xlsx.readFile(filePath);
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+  let data = xlsx.utils.sheet_to_json(worksheet);
+
+  // Добавление двух новых колонок
+  data = data.map(row => ({
+    ...row,
+    newColumn1: 'значение1', // замените на реальное значение
+    newColumn2: 'значение2'  // замените на реальное значение
+  }));
+
+  await loadToDatabase(data);
+};
+
+// Функция для загрузки данных в базу данных
+const loadToDatabase = async (data) => {
+  let pool = await connectToDatabase();
+  const table = new sql.Table('tableName'); // замените на ваше название таблицы
+  table.create = false;
+
+  // Определите столбцы таблицы
+  table.columns.add('column1', sql.NVarChar(255), { nullable: true });
+  table.columns.add('column2', sql.NVarChar(255), { nullable: true });
+  table.columns.add('newColumn1', sql.NVarChar(255), { nullable: true });
+  table.columns.add('newColumn2', sql.NVarChar(255), { nullable: true });
+
+  // Добавление строк в таблицу
+  data.forEach(row => {
+    table.rows.add(row.column1, row.column2, row.newColumn1, row.newColumn2);
+  });
+
+  const request = new sql.Request(pool);
+  try {
+    await request.bulk(table);
+    logger.info('Data loaded to database successfully');
+  } catch (error) {
+    logger.error('Error loading data to database', { error });
+    throw error;
+  }
+};
+
+// Функция для проверки и загрузки новых файлов
+const checkAndLoadNewFiles = async (req, res) => {
+  try {
+    // Получение списка файлов
+    const response = await axios.get(filesListUrl);
+    const filesList = response.data; // Предполагается, что это массив объектов с полем 'url'
+
+    for (const file of filesList) {
+      const fileName = path.basename(file.url);
+      const outputFilePath = path.join(downloadDir, fileName);
+
+      // Проверка, если файл уже был обработан
+      if (fs.existsSync(outputFilePath)) {
+        logger.info(`File ${fileName} already exists, skipping.`);
+        continue;
+      }
+
+      // Скачивание и обработка нового файла
+      await downloadFile(file.url, outputFilePath);
+      logger.info(`File ${fileName} downloaded successfully`);
+
+      await processAndLoadFile(outputFilePath);
+      logger.info(`File ${fileName} processed and loaded successfully`);
     }
-});
 
-const upload = multer({ storage });
+    res.status(200).send('Files checked and updated successfully');
+  } catch (error) {
+    logger.error('Error checking and loading new files', { error });
+    res.status(500).json({
+      success: false,
+      message: "Ошибка работы сервера",
+      errorCode: 500
+    });
+  }
+};
 
-// Middleware для обработки JSON запросов
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Функция для получения списка всех загруженных файлов
+const getAllDownloadedFiles = (req, res) => {
+  try {
+    const files = fs.readdirSync(downloadDir);
+    res.status(200).json(files);
+  } catch (error) {
+    logger.error('Error retrieving downloaded files', { error });
+    res.status(500).json({
+      success: false,
+      message: "Ошибка работы сервера",
+      errorCode: 500
+    });
+  }
+};
 
-// Подключение к базе данных
-connectToDatabase();
-
-// 1. Метод для загрузки файла
-app.post('/upload', upload.single('file'), async (req, res) => {
-    try {
-        const filePath = req.file.path;
-        const fileName = req.file.filename;
-        const selectedSklad = req.body.sklad; // Склад, выбранный пользователем на клиенте
-
-        const pref = fileName.split(' ')[0]; // Извлечение pref из имени файла
-        const query = `
-            INSERT INTO Test_MP (
-                Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel, Artikul, Artikul_Syrya, Nomenklatura,
-                Nazvanie_Tovara, SHK, SHK_Syrya, SHK_SPO, SHK_SPO_1, Kol_vo_Syrya, Itog_Zakaz, Sht_v_MP, Itog_MP, SOH,
-                Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
-                Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
-                Op_12_Markirovka_Prom, Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8,
-                Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No,
-                Time_Start, Time_End, Persent, SHK_WPS, Scklad_Pref
-            )
-            VALUES (@pref, @fileName, @statusZadaniya, @status, @ispolnitel, @artikul, @artikulSyrya, @nomenklatura,
-                    @nazvanieTovara, @shk, @shkSyrya, @shkSpo, @shkSpo1, @kol_voSyrya, @itogZakaz, @sht_vMP, @itogMP,
-                    @soh, @tipPostavki, @srokGodnosti, @op1Bl1Sht, @op2Bl2Sht, @op3Bl3Sht, @op4Bl4Sht, @op5Bl5Sht,
-                    @op6Blis610Sht, @op7Pereschyot, @op9FasovkaSborka, @op10MarkirovkaSHT, @op11MarkirovkaProm,
-                    @op12MarkirovkaProm, @op13MarkirovkaFabr, @op14TU1Sht, @op15TU2Sht, @op16TU35, @op17TU68,
-                    @op468ProverkaSHK, @op469SpetsifikatsiyaTM, @op470DopUpakovka, @mesto, @vlozhennost, @palletNo,
-                    @timeStart, @timeEnd, @persent, @shkWps, @skladPref)`;
-
-        const request = new sql.Request();
-        request.input('pref', sql.NVarChar, pref);
-        request.input('fileName', sql.NVarChar, fileName);
-        // Пример ввода данных для остальных полей (заполните остальные параметры аналогично)
-        request.input('skladPref', sql.NVarChar, selectedSklad);
-
-        await request.query(query);
-        res.status(200).json({ message: "Файл успешно загружен и данные добавлены в базу данных." });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Ошибка при загрузке файла." });
-    }
-});
-
-// 2. Метод для получения списка складов
-app.get('/sklads', async (req, res) => {
-    try {
-        const query = "SELECT Pref, City FROM Scklad_City_MP";
-        const result = await sql.query(query);
-
-        const sklads = result.recordset.map(row => `${row.Pref} - ${row.City}`);
-        res.status(200).json({ sklads });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Ошибка при загрузке списка складов." });
-    }
-});
-
-// 3. Метод для получения списка выполненных файлов для выбранного склада
-app.get('/files', async (req, res) => {
-    try {
-        const skladPref = req.query.skladPref;
-        const query = "SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP WHERE Scklad_Pref = @skladPref";
-        
-        const request = new sql.Request();
-        request.input('skladPref', sql.NVarChar, skladPref);
-
-        const result = await request.query(query);
-        const files = result.recordset.map(row => row.Nazvanie_Zadaniya);
-
-        res.status(200).json({ files });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Ошибка при загрузке списка файлов." });
-    }
-});
-
-// 4. Метод для скачивания файла (создание и скачивание Excel файла)
-app.get('/download', async (req, res) => {
-    try {
-        const taskName = req.query.task;
-        const isWB = taskName.includes('WB');
-
-        let query;
-        if (isWB) {
-            // Если файл WB, выгружаем уникальные записи из таблицы Test_MP_Privyazka
-            query = `
-                SELECT Nazvanie_Zadaniya, Artikul, Barcode, Kolvo_Tovarov, SHK_Coroba, Srok_Godnosti, Pallet_No, SHK_WPS
-                FROM Test_MP_Privyazka WHERE Nazvanie_Zadaniya = @taskName`;
-        } else {
-            // Если файл не WB, выгружаем данные из основной таблицы Test_MP
-            query = `
-                SELECT Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
-                       Itog_MP, SOH, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
-                       Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
-                       Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
-                       Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS
-                FROM Test_MP WHERE Nazvanie_Zadaniya = @taskName`;
-        }
-
-        const request = new sql.Request();
-        request.input('taskName', sql.NVarChar, taskName);
-
-        const result = await request.query(query);
-
-        const data = result.recordset;
-
-        // Преобразование данных в Excel файл
-        const ws = xlsx.utils.json_to_sheet(data);
-        const wb = xlsx.utils.book_new();
-        xlsx.utils.book_append_sheet(wb, ws, 'Sheet1');
-
-        const filePath = path.join(__dirname, 'downloads', `${taskName}.xlsx`);
-        xlsx.writeFile(wb, filePath);
-
-        res.download(filePath);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Ошибка при скачивании файла." });
-    }
-});
-
-// Запуск сервера
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// Экспорт функций контроллера
+module.exports = {
+  checkAndLoadNewFiles,
+  getAllDownloadedFiles
+};
