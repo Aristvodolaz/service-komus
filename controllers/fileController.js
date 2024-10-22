@@ -173,7 +173,7 @@ router.get('/tasks-status-1', async (req, res) => {
   }
 });
 
-app.post('/upload-data', async (req, res) => {
+router.post('/upload-data', async (req, res) => {
     try {
       const data = req.body;  // Данные, отправленные с десктопа
   
