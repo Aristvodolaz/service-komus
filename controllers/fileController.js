@@ -28,7 +28,7 @@ router.get('/sklads', async (req, res) => {
       const result = await pool.request().query(query);  // Используем request() для выполнения запроса
 
       // Формируем список складов
-      const sklads = result.recordset.map(row => `${row.Pref} - ${row.City}`);
+      const sklads = result.recordset.map(row => `${row.Pref}`);
       
       // Отправляем ответ с данными
       res.status(200).json({ sklads });
