@@ -188,4 +188,45 @@ router.get('/download', async (req, res) => {
 });
 
 
+router.get('/completed-tasks', async (req, res) => {
+  try {
+    // Подключаемся к базе данных
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ message: "Ошибка подключения к базе данных." });
+    }
+
+    // Выполняем SQL-запрос для получения названий всех заданий, где Status_Zadaniya = 1
+    const query = "SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP WHERE Status_Zadaniya = 1";
+    const result = await pool.request().query(query);
+
+    // Формируем список названий заданий
+    const tasks = result.recordset.map(row => row.Nazvanie_Zadaniya);
+
+    // Отправляем ответ с полученными названиями заданий
+    res.status(200).json({ tasks });
+  } catch (err) {
+    console.error('Ошибка при выполнении запроса:', err);
+    res.status(500).json({ message: "Ошибка при загрузке списка заданий." });
+  }
+});
+
+router.get('/tasks-status-1', async (req, res) => {
+  try {
+      const pool = await connectToDatabase();
+      if (!pool) {
+          return res.status(500).json({ message: "Ошибка подключения к базе данных." });
+      }
+
+      const query = "SELECT Nazvanie_Zadaniya FROM Test_MP WHERE Status_Zadaniya = 1";
+      const result = await pool.request().query(query);
+
+      const tasks = result.recordset.map(row => row.Nazvanie_Zadaniya);
+
+      res.status(200).json({ tasks });
+  } catch (err) {
+      console.error('Ошибка при выполнении запроса:', err);
+      res.status(500).json({ message: "Ошибка при получении списка заданий." });
+  }
+});
 module.exports = router;
