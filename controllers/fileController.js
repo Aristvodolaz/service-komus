@@ -230,47 +230,58 @@ router.get('/tasks-status-1', async (req, res) => {
   }
 });
 
-router.post('/upload-row', async (req, res) => {
+router.post('/upload-rows', async (req, res) => {
     try {
-        const { sklad, ...rowData } = req.body; // Получаем склад и данные строки
+        const { rows } = req.body; // Получаем массив строк
+        if (!rows || rows.length === 0) {
+            return res.status(400).json({ message: 'Данные не переданы.' });
+        }
 
         const pool = await connectToDatabase();
         if (!pool) {
             return res.status(500).json({ success: false, message: 'Ошибка подключения к базе данных.' });
         }
 
-        const query = `
-          INSERT INTO Test_MP (
-              Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel, Artikul, Artikul_Syrya, Nomenklatura,
-              Nazvanie_Tovara, SHK, SHK_Syrya, SHK_SPO, Kol_vo_Syrya, Itog_Zakaz, Sht_v_MP, Itog_MP, SOH,
-              Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
-              Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
-              Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8,
-              Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No,
-              Time_Start, Time_End, Persent, SHK_WPS, Scklad_Pref
-          ) 
-          VALUES (@Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, @Nomenklatura,
-                  @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @Kol_vo_Syrya, @Itog_Zakaz, @Sht_v_MP, @Itog_MP, @SOH,
-                  @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht,
-                  @Op_6_Blis_6_10_Sht, @Op_7_Pereschyot, @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom,
-                  @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8,
-                  @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Mesto, @Vlozhennost, @Pallet_No,
-                  @Time_Start, @Time_End, @Persent, @SHK_WPS, @Scklad_Pref)`;
+        // Создаем транзакцию для массовой вставки
+        const transaction = new sql.Transaction(pool);
+        await transaction.begin();
+        const request = new sql.Request(transaction);
 
-        const request = pool.request();
-        // Заполнение значений для каждого столбца из rowData
-        for (let key in rowData) {
-            request.input(key, sql.NVarChar, rowData[key]);
+        // Формируем запрос для вставки каждой строки
+        for (let row of rows) {
+            const query = `
+              INSERT INTO Test_MP (
+                  Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel, Artikul, Artikul_Syrya, Nomenklatura,
+                  Nazvanie_Tovara, SHK, SHK_Syrya, SHK_SPO, Kol_vo_Syrya, Itog_Zakaz, Sht_v_MP, Itog_MP, SOH,
+                  Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
+                  Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
+                  Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8,
+                  Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No,
+                  Time_Start, Time_End, Persent, SHK_WPS, Scklad_Pref
+              ) 
+              VALUES (@Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, @Nomenklatura,
+                      @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @Kol_vo_Syrya, @Itog_Zakaz, @Sht_v_MP, @Itog_MP, @SOH,
+                      @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht,
+                      @Op_6_Blis_6_10_Sht, @Op_7_Pereschyot, @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom,
+                      @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8,
+                      @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Mesto, @Vlozhennost, @Pallet_No,
+                      @Time_Start, @Time_End, @Persent, @SHK_WPS, @Scklad_Pref)`;
+
+            for (let key in row) {
+                request.input(key, sql.NVarChar, row[key]);
+            }
+
+            await request.query(query);
         }
-        request.input('Scklad_Pref', sql.NVarChar, sklad);
 
-        await request.query(query);
-        res.status(200).json({ message: 'Строка загружена успешно' });
+        await transaction.commit(); // Подтверждаем транзакцию
+        res.status(200).json({ message: 'Данные успешно загружены.' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Ошибка при загрузке строки.' });
+        res.status(500).json({ message: 'Ошибка при загрузке данных.' });
     }
 });
+
 
 
 module.exports = router;
