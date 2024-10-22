@@ -201,15 +201,15 @@ router.post('/upload-data', async (req, res) => {
       
       const request = pool.request();
       request.input('Artikul', mssql.Int, data.Artikul);
-      request.input('Artikul_Syrya', mssql.NVarChar, data.Artikul_Syrya);
+      request.input('Artikul_Syrya', mssql.NVarChar, data.Artikul_Syrya ? data.Artikul_Syrya.toString() : null);
       request.input('Nomenklatura', mssql.BigInt, data.Nomenklatura);
       request.input('Nazvanie_Tovara', mssql.NVarChar, data.Nazvanie_Tovara);
-      request.input('SHK', mssql.NVarChar, data.SHK);
-      request.input('SHK_Syrya', mssql.NVarChar, data.SHK_Syrya);
-      request.input('SHK_SPO', mssql.NVarChar, data.SHK_SPO);
+      request.input('SHK', mssql.NVarChar, data.SHK ?  data.SHK.toString() : null);
+      request.input('SHK_Syrya', mssql.NVarChar, data.SHK_Syrya ? data.SHK_Syrya.toString() : null);
+      request.input('SHK_SPO', mssql.NVarChar, data.SHK_SPO ? data.SHK_SPO.toString() : null);
       request.input('Kol_vo_Syrya', mssql.Int, data.Kol_vo_Syrya);
       request.input('Itog_Zakaz', mssql.Int, data.Itog_Zakaz);
-      request.input('SOH', mssql.NVarChar, data.SOH);
+      request.input('SOH', mssql.NVarChar, data.SOH ? data.SOH.toString() : null);
       request.input('Tip_Postavki', mssql.NVarChar, data.Tip_Postavki);
       request.input('Srok_Godnosti', mssql.NVarChar, data.Srok_Godnosti);
       request.input('Op_1_Bl_1_Sht', mssql.NVarChar, data.Op_1_Bl_1_Sht);
