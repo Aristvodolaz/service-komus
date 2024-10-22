@@ -201,13 +201,13 @@ router.post('/upload-data', async (req, res) => {
       
       const request = pool.request();
       request.input('Artikul', mssql.Int, data.Artikul);
-      request.input('Artikul_Syrya', mssql.NVarChar, data.Artikul_Syrya);
+      request.input('Artikul_Syrya', mssql.Int, data.Artikul_Syrya);
       request.input('Nomenklatura', mssql.BigInt, data.Nomenklatura);
       request.input('Nazvanie_Tovara', mssql.NVarChar, data.Nazvanie_Tovara);
       request.input('SHK', mssql.NVarChar, data.SHK);
       request.input('SHK_Syrya', mssql.NVarChar, data.SHK_Syrya);
       request.input('SHK_SPO', mssql.NVarChar, data.SHK_SPO);
-      request.input('Kol_vo_Syrya', mssql.NVarChar, data.Kol_vo_Syrya);
+      request.input('Kol_vo_Syrya', mssql.Int, data.Kol_vo_Syrya);
       request.input('Itog_Zakaz', mssql.Int, data.Itog_Zakaz);
       request.input('SOH', mssql.NVarChar, data.SOH);
       request.input('Tip_Postavki', mssql.NVarChar, data.Tip_Postavki);
