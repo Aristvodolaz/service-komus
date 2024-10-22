@@ -190,13 +190,13 @@ router.post('/upload-data', async (req, res) => {
            Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht,
            Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, 
            Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, 
-           Mesto, Vlozhennost, Pallet_No)
+           Mesto, Vlozhennost, Pallet_No, Pref)
         VALUES 
           (@Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @Kol_vo_Syrya, @Itog_Zakaz, @SOH,
            @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht,
            @Op_7_Pereschyot, @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, 
            @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, 
-           @Mesto, @Vlozhennost, @Pallet_No)
+           @Mesto, @Vlozhennost, @Pallet_No, @Pref)
       `;
       
       const request = pool.request();
@@ -218,8 +218,8 @@ router.post('/upload-data', async (req, res) => {
       request.input('Op_4_Bl_4_Sht', mssql.NVarChar, data.Op_4_Bl_4_Sht);
       request.input('Op_5_Bl_5_Sht', mssql.NVarChar, data.Op_5_Bl_5_Sht);
       request.input('Op_6_Blis_6_10_Sht', mssql.NVarChar, data.Op_6_Blis_6_10_Sht);
-      request.input('Op_7_Pereschyot', mssql.NVarChar, data.Op_7_Pereschyot);
-      request.input('Op_9_Fasovka_Sborka', mssql.NVarChar, data.Op_9_Fasovka_Sborka);
+      request.input('Op_7_Pereschyot', mssql.NVarChar, data.Op_7_Pereschyот);
+      request.input('Op_9_Fasovka_Sborka', mssql.NVarChar, data.Op_9_Fasovка_Sborka);
       request.input('Op_10_Markirovka_SHT', mssql.NVarChar, data.Op_10_Markirovka_SHT);
       request.input('Op_11_Markirovka_Prom', mssql.NVarChar, data.Op_11_Markirovka_Prom);
       request.input('Op_13_Markirovka_Fabr', mssql.NVarChar, data.Op_13_Markirovka_Fabr);
@@ -233,6 +233,7 @@ router.post('/upload-data', async (req, res) => {
       request.input('Mesto', mssql.Int, data.Mesto);
       request.input('Vlozhennost', mssql.Int, data.Vlozhennost);
       request.input('Pallet_No', mssql.Int, data.Pallet_No);
+      request.input('Pref', mssql.NVarChar, data.pref);  // добавляем поле 'Pref'
   
       await request.query(query);
   
@@ -241,6 +242,6 @@ router.post('/upload-data', async (req, res) => {
       console.error('Ошибка при записи данных в базу:', err);
       res.status(500).json({ message: "Ошибка при записи данных в базу." });
     }
-  });
-  
+});
+
 module.exports = router;
