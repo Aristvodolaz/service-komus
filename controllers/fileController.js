@@ -143,10 +143,14 @@ router.get('/download', async (req, res) => {
               FROM Test_MP_Privyazka WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
 
           // Второй набор данных для WB (например, другая таблица или расширенные данные)
-          query2 = `
-              SELECT Nazvanie_Zadaniya, Artikul, SHK_Coroba, Mesto, Vlozhennost, Pallet_No, SHK_WPS, Status_Zadaniya
+          query1 = `
+              SELECT Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
+                     Itog_MP, SOH, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
+                     Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
+                     Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
+                     Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS
               FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
-      } else {
+     } else {
           // Если это не WB, оставляем как есть
           query1 = `
               SELECT Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
