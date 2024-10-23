@@ -92,14 +92,21 @@ router.get('/download', async (req, res) => {
           return res.status(500).json({ message: "Ошибка подключения к базе данных." });
       }
 
-      // Формируем SQL-запрос в зависимости от типа файла
-      let query;
+      // Формируем SQL-запросы в зависимости от типа файла
+      let query1, query2;
       if (isWB) {
-          query = `
+          // Первый набор данных для WB
+          query1 = `
               SELECT Nazvanie_Zadaniya, Artikul, Barcode, Kolvo_Tovarov, SHK_Coroba, Srok_Godnosti, Pallet_No, SHK_WPS
               FROM Test_MP_Privyazka WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
+
+          // Второй набор данных для WB (например, другая таблица или расширенные данные)
+          query2 = `
+              SELECT Nazvanie_Zadaniya, Artikul, SHK_Coroba, Mesto, Vlozhennost, Pallet_No, SHK_WPS, Status_Zadaniya
+              FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
       } else {
-          query = `
+          // Если это не WB, оставляем как есть
+          query1 = `
               SELECT Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
                      Itog_MP, SOH, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
                      Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
@@ -108,70 +115,36 @@ router.get('/download', async (req, res) => {
               FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
       }
 
+      // Выполняем первый запрос
       const request = pool.request();
       request.input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName);
+      const result1 = await request.query(query1);
 
-      const result = await request.query(query);
+      // Выполняем второй запрос (если это WB)
+      let result2 = null;
+      if (isWB) {
+          result2 = await request.query(query2);
+      }
 
-      if (result.recordset.length === 0) {
+      // Если данных нет в первом запросе
+      if (result1.recordset.length === 0) {
           return res.status(404).json({ message: "Данные для указанного задания не найдены." });
       }
 
-      // Отправляем данные построчно
-      res.setHeader('Content-Type', 'application/json');
-      for (let row of result.recordset) {
-          res.write(JSON.stringify(row) + '\n'); // Отправляем строку данных в формате JSON
-      }
+      // Объединяем данные из обоих наборов
+      const combinedData = {
+          dataSet1: result1.recordset,
+          dataSet2: result2 ? result2.recordset : [] // Если это WB, добавляем второй набор данных, иначе пустой массив
+      };
 
-      res.end(); // Заканчиваем поток
+      // Отправляем ответ в виде JSON
+      res.status(200).json(combinedData);
   } catch (err) {
       console.error('Ошибка при обработке запроса:', err);
       res.status(500).json({ message: "Ошибка при скачивании файла." });
   }
 });
 
-
-router.get('/completed-tasks', async (req, res) => {
-  try {
-    // Подключаемся к базе данных
-    const pool = await connectToDatabase();
-    if (!pool) {
-      return res.status(500).json({ message: "Ошибка подключения к базе данных." });
-    }
-
-    // Выполняем SQL-запрос для получения названий всех заданий, где Status_Zadaniya = 1
-    const query = "SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP WHERE Status_Zadaniya = 1";
-    const result = await pool.request().query(query);
-
-    // Формируем список названий заданий
-    const tasks = result.recordset.map(row => row.Nazvanie_Zadaniya);
-
-    // Отправляем ответ с полученными названиями заданий
-    res.status(200).json({ tasks });
-  } catch (err) {
-    console.error('Ошибка при выполнении запроса:', err);
-    res.status(500).json({ message: "Ошибка при загрузке списка заданий." });
-  }
-});
-
-router.get('/tasks-status-1', async (req, res) => {
-  try {
-      const pool = await connectToDatabase();
-      if (!pool) {
-          return res.status(500).json({ message: "Ошибка подключения к базе данных." });
-      }
-
-      const query = "SELECT Nazvanie_Zadaniya FROM Test_MP WHERE Status_Zadaniya = 1";
-      const result = await pool.request().query(query);
-
-      const tasks = result.recordset.map(row => row.Nazvanie_Zadaniya);
-
-      res.status(200).json({ tasks });
-  } catch (err) {
-      console.error('Ошибка при выполнении запроса:', err);
-      res.status(500).json({ message: "Ошибка при получении списка заданий." });
-  }
-});
 
 router.post('/upload-data', async (req, res) => {
     try {
