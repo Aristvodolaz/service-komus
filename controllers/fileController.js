@@ -191,6 +191,45 @@ router.get('/download', async (req, res) => {
   }
 });
 
+// 5. Метод для удаления ранее загруженных данных по pref и названию задания
+router.post('/delete-uploaded-data', async (req, res) => {
+  try {
+    const { pref, Nazvanie_Zadaniya } = req.body;  // Получаем pref и название задания из запроса
+
+    if (!pref || !Nazvanie_Zadaniya) {
+      return res.status(400).json({ message: "Параметры 'pref' и 'Nazvanie_Zadaniya' обязательны." });
+    }
+
+    // Подключаемся к базе данных
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ message: "Ошибка подключения к базе данных." });
+    }
+
+    // Формируем SQL-запрос на удаление данных с учетом pref и названия задания
+    const query = `
+      DELETE FROM Test_MP 
+      WHERE Pref = @Pref AND Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Status_Zadaniya = 0
+    `;
+
+    const request = pool.request();
+    request.input('Pref', mssql.NVarChar, pref);
+    request.input('Nazvanie_Zadaniya', mssql.NVarChar, Nazvanie_Zadaniya);
+
+    // Выполняем запрос на удаление
+    const result = await request.query(query);
+
+    if (result.rowsAffected[0] > 0) {
+      res.status(200).json({ message: "Данные успешно удалены." });
+    } else {
+      res.status(404).json({ message: "Данные для указанного pref и названия задания не найдены." });
+    }
+
+  } catch (err) {
+    console.error('Ошибка при удалении данных:', err);
+    res.status(500).json({ message: "Ошибка при удалении данных." });
+  }
+});
 
 router.post('/upload-data', async (req, res) => {
     try {
