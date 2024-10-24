@@ -87,25 +87,25 @@ const getUniqueTaskNames = async (req, res) => {
     let query = `
       SELECT Nazvanie_Zadaniya, Scklad_Pref 
       FROM Test_MP 
-      WHERE 1=1
+      WHERE Status_Zadaniya = 0
     `;
     const request = pool.request();
 
     // Добавляем фильтр по названию задания, если он есть
-    if (filter) {
+    if (filter && filter.trim() !== '') {
       query += ' AND Nazvanie_Zadaniya LIKE @filter';
       request.input('filter', mssql.NVarChar(255), `%${filter}%`);
     }
 
     // Добавляем фильтр по складу, если он есть
-    if (sk) {
+    if (sk && sk.trim() !== '') {
       query += ' AND Scklad_Pref = @sk';
       request.input('sk', mssql.NVarChar(255), sk);
     }
 
+    // Группируем результат по полям
     query += `
       GROUP BY Nazvanie_Zadaniya, Scklad_Pref
-      HAVING COUNT(CASE WHEN Status_Zadaniya = 1 THEN 1 END) = 0
     `;
 
     const result = await request.query(query);
@@ -123,6 +123,7 @@ const getUniqueTaskNames = async (req, res) => {
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+
 
 
 
