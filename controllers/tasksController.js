@@ -84,7 +84,11 @@ const getUniqueTaskNames = async (req, res) => {
       throw new Error('Ошибка подключения к базе данных');
     }
 
-    let query = 'SELECT DISTINCT Nazvanie_Zadaniya, Scklad_Pref FROM Test_MP WHERE 1=1';
+    let query = `
+      SELECT Nazvanie_Zadaniya, Scklad_Pref 
+      FROM Test_MP 
+      WHERE 1=1
+    `;
     const request = pool.request();
 
     // Добавляем фильтр по названию задания, если он есть
@@ -98,6 +102,11 @@ const getUniqueTaskNames = async (req, res) => {
       query += ' AND Scklad_Pref = @sk';
       request.input('sk', mssql.NVarChar(255), sk);
     }
+
+    query += `
+      GROUP BY Nazvanie_Zadaniya, Scklad_Pref
+      HAVING COUNT(CASE WHEN Status_Zadaniya = 1 THEN 1 END) = 0
+    `;
 
     const result = await request.query(query);
 
@@ -114,6 +123,8 @@ const getUniqueTaskNames = async (req, res) => {
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+
+
 
 
 const getByShk = async (req, res) => {
