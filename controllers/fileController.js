@@ -14,22 +14,31 @@ const router = express.Router();
 connectToDatabase();
 
 const getPieceGTINForArticulSyrya = async (pool, artikuls) => {
-  const pieceGTINs = [];
+  const gtinValues = [];
 
   for (let articul of artikuls) {
     const query = `
-      SELECT PIECE_GTIN 
-      FROM OPENQUERY(OW, 'SELECT PIECE_GTIN FROM wms.article WHERE ID = ''${articul.trim()}''')
+      SELECT PIECE_GTIN, FPACK_GTIN 
+      FROM OPENQUERY(OW, 'SELECT PIECE_GTIN, FPACK_GTIN FROM wms.article WHERE ID = ''${articul.trim()}''')
     `;
 
     const result = await pool.request().query(query);
-    if (result.recordset.length > 0 && result.recordset[0].PIECE_GTIN) {
-      pieceGTINs.push(result.recordset[0].PIECE_GTIN); // добавляем только если значение не пустое
+
+    if (result.recordset.length > 0) {
+      let { PIECE_GTIN, FPACK_GTIN } = result.recordset[0];
+
+      // Проверка условий: используем PIECE_GTIN, если он не null; иначе используем FPACK_GTIN (если FPACK_GTIN тоже не null)
+      if (PIECE_GTIN && PIECE_GTIN.toLowerCase() !== 'null') {
+        gtinValues.push(PIECE_GTIN);
+      } else if (FPACK_GTIN && FPACK_GTIN.toLowerCase() !== 'null') {
+        gtinValues.push(FPACK_GTIN);
+      }
     }
   }
 
-  return pieceGTINs.join(','); // Объединяем все найденные значения через запятую
+  return gtinValues.join(','); // Объединяем все найденные значения через запятую
 };
+
 
 
 // 2. Метод для получения списка складов
