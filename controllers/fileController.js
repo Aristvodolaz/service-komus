@@ -13,6 +13,24 @@ const router = express.Router();
 // Подключение к базе данных
 connectToDatabase();
 
+const getPieceGTINForArticulSyrya = async (pool, artikuls) => {
+  const pieceGTINs = [];
+
+  for (let articul of artikuls) {
+    const query = `
+      SELECT PIECE_GTIN 
+      FROM OPENQUERY(OW, 'SELECT PIECE_GTIN FROM wms.article WHERE ID = ''${articul.trim()}''')
+    `;
+
+    const result = await pool.request().query(query);
+    if (result.recordset.length > 0 && result.recordset[0].PIECE_GTIN) {
+      pieceGTINs.push(result.recordset[0].PIECE_GTIN); // добавляем только если значение не пустое
+    }
+  }
+
+  return pieceGTINs.join(','); // Объединяем все найденные значения через запятую
+};
+
 
 // 2. Метод для получения списка складов
 router.get('/sklads', async (req, res) => {
@@ -233,14 +251,25 @@ router.post('/delete-uploaded-data', async (req, res) => {
 
 router.post('/upload-data', async (req, res) => {
     try {
-      const data = req.body;  // Данные, отправленные с десктопа
-  
-      // Подключаемся к базе данных
+      const data = req.body;
+
       const pool = await connectToDatabase();
       if (!pool) {
         return res.status(500).json({ message: "Ошибка подключения к базе данных." });
       }
   
+      let shkSyrya = null;
+
+      // Проверка на пустое значение Artikul_Syrya
+      if (data.Artikul_Syrya && data.Artikul_Syrya.trim() !== '') {
+        if (data.Artikul_Syrya.includes(',')) {
+          const artikuls = data.Artikul_Syrya.split(',');
+          shkSyrya = await getPieceGTINForArticulSyrya(pool, artikuls); // Получаем GTIN для каждого артикула
+        } else {
+          // Если только один артикул, выполняем поиск напрямую
+          shkSyrya = await getPieceGTINForArticulSyrya(pool, [data.Artikul_Syrya]);
+        }
+      }
       // Пример запроса на вставку данных в таблицу Test_MP
       const query = `
         INSERT INTO Test_MP 
@@ -263,7 +292,7 @@ router.post('/upload-data', async (req, res) => {
       request.input('Nomenklatura', mssql.BigInt, data.Nomenklatura);
       request.input('Nazvanie_Tovara', mssql.NVarChar, data.Nazvanie_Tovara);
       request.input('SHK', mssql.NVarChar, data.SHK ?  data.SHK.toString() : null);
-      request.input('SHK_Syrya', mssql.NVarChar, data.SHK_Syrya ? data.SHK_Syrya.toString() : null);
+      request.input('SHK_Syrya', mssql.NVarChar, shkSyrya ? shkSyrya : data.SHK_Syrya);
       request.input('SHK_SPO', mssql.NVarChar, data.SHK_SPO ? data.SHK_SPO.toString() : null);
       request.input('Kol_vo_Syrya', mssql.Int, data.Kol_vo_Syrya);
       request.input('Itog_Zakaz', mssql.Int, data.Itog_Zakaz);
