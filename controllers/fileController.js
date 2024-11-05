@@ -154,6 +154,7 @@ router.get('/download', async (req, res) => {
       }
 
       const isWB = taskName.includes('WB');
+      console.log(`Загрузка данных для задания: ${taskName}, isWB: ${isWB}`);
 
       // Подключаемся к базе данных
       const pool = await connectToDatabase();
@@ -169,22 +170,22 @@ router.get('/download', async (req, res) => {
               SELECT Nazvanie_Zadaniya, Artikul, Barcode, Kolvo_Tovarov, SHK_Coroba, Srok_Godnosti, Pallet_No, SHK_WPS
               FROM Test_MP_Privyazka WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
 
-          // Второй набор данных для WB (например, другая таблица или расширенные данные)
+          // Второй набор данных для WB
           query2 = `
               SELECT Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
                      Itog_MP, SOH, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
                      Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
                      Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
-                     Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS
+                     Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upаковка, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS
               FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
      } else {
           // Если это не WB, оставляем как есть
           query1 = `
               SELECT Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
                      Itog_MP, SOH, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
-                     Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
-                     Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
-                     Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS
+                     Op_6_Blis_6_10_Sht, Op_7_Pereschyот, Op_9_Fasовka_Sborka, Op_10_Markirovка_SHT, Op_11_Markirovка_Prom,
+                     Op_13_Markiroвка_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
+                     Op_469_Spetsifikatsия_TM, Op_470_Dop_Upаковka, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS
               FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
       }
 
@@ -193,15 +194,17 @@ router.get('/download', async (req, res) => {
       request.input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName);
       const result1 = await request.query(query1);
 
+      // Проверка результата первого запроса
+      console.log(`Результат первого запроса (длина): ${result1.recordset.length}`);
+      if (result1.recordset.length === 0) {
+          return res.status(404).json({ message: "Данные для указанного задания не найдены." });
+      }
+
       // Выполняем второй запрос (если это WB)
       let result2 = null;
       if (isWB) {
           result2 = await request.query(query2);
-      }
-
-      // Если данных нет в первом запросе
-      if (result1.recordset.length === 0) {
-          return res.status(404).json({ message: "Данные для указанного задания не найдены." });
+          console.log(`Результат второго запроса (длина): ${result2.recordset.length}`);
       }
 
       // Объединяем данные из обоих наборов
@@ -217,6 +220,7 @@ router.get('/download', async (req, res) => {
       res.status(500).json({ message: "Ошибка при скачивании файла." });
   }
 });
+
 
 // 5. Метод для удаления ранее загруженных данных по pref и названию задания
 router.post('/delete-uploaded-data', async (req, res) => {
@@ -314,8 +318,8 @@ router.post('/upload-data', async (req, res) => {
       request.input('Op_4_Bl_4_Sht', mssql.NVarChar, data.Op_4_Bl_4_Sht);
       request.input('Op_5_Bl_5_Sht', mssql.NVarChar, data.Op_5_Bl_5_Sht);
       request.input('Op_6_Blis_6_10_Sht', mssql.NVarChar, data.Op_6_Blis_6_10_Sht);
-      request.input('Op_7_Pereschyot', mssql.NVarChar, data.Op_7_Pereschyот);
-      request.input('Op_9_Fasovka_Sborka', mssql.NVarChar, data.Op_9_Fasovка_Sborka);
+      request.input('Op_7_Pereschyot', mssql.NVarChar, data.Op_7_Pereschyot);
+      request.input('Op_9_Fasovka_Sborka', mssql.NVarChar, data.Op_9_Fasovka_Sborka);
       request.input('Op_10_Markirovka_SHT', mssql.NVarChar, data.Op_10_Markirovka_SHT);
       request.input('Op_11_Markirovka_Prom', mssql.NVarChar, data.Op_11_Markirovka_Prom);
       request.input('Op_13_Markirovka_Fabr', mssql.NVarChar, data.Op_13_Markirovka_Fabr);
