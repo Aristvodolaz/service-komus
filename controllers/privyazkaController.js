@@ -112,7 +112,7 @@ const checkShkWpsExists = async (req, res) => {
 const getZapis = async (req, res) => {
     const { name, artikul } = req.query;  
 
-    console.log('Полученные данные:', { name, artikul }); // Логируем входящие данные
+    console.log('Полученные данные:', { name, artikul }); // Log incoming data
 
     try {
         const pool = await connectToDatabase();
@@ -123,14 +123,17 @@ const getZapis = async (req, res) => {
         
         const result = await pool.request()
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
-            .input('Artikul', mssql.NVarChar(50), artikul) // Измените на NVarChar, если это строка
+            .input('Artikul', mssql.NVarChar(50), artikul)
             .query(`
                 SELECT Nazvanie_Zadaniya, Artikul, Srok_Godnosti, SHK_WPS, Pallet_No, Kolvo_Tovarov
                 FROM Test_MP_Privyazka
-                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya 
+                  AND Artikul = @Artikul
+                  AND Pallet_No IS NOT NULL
+                  AND SHK_WPS IS NOT NULL
             `);
 
-        // Проверка результата
+        // Check the result
         if (result.recordset.length > 0) {
             return res.json({ success: true, value: result.recordset, errorCode: 200 });
         } else {
@@ -141,8 +144,6 @@ const getZapis = async (req, res) => {
         return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка сервера' });
     }
 };
-
-
 
 
 const addSrokGodnosti = async (req, res) => {
