@@ -348,3 +348,111 @@ router.post('/upload-data', async (req, res) => {
 });
 
 module.exports = router;
+
+
+// 6. Новый маршрут для получения списка уникальных заданий в работе
+// 6. Новый маршрут для получения уникальных заданий с прогрессом
+router.get('/tasks-in-progress', async (req, res) => {
+  try {
+    // Подключаемся к базе данных
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ message: "Ошибка подключения к базе данных." });
+    }
+
+    // Запрос для получения уникальных заданий с прогрессом
+    const query = `
+      SELECT Nazvanie_Zadaniya, Time_Start,
+        COUNT(*) AS TotalTasks,
+        SUM(CASE WHEN Status_Zadaniya = 1 THEN 1 ELSE 0 END) AS CompletedTasks
+      FROM Test_MP
+      WHERE Nazvanie_Zadaniya IN (
+        SELECT Nazvanie_Zadaniya
+        FROM Test_MP
+        WHERE Status != 0
+        GROUP BY Nazvanie_Zadaniya
+        HAVING COUNT(CASE WHEN Status_Zadaniya != 1 THEN 1 END) = COUNT(*)
+      )
+      GROUP BY Nazvanie_Zadaniya, Time_Start
+    `;
+
+    const result = await pool.request().query(query);
+
+    // Проверяем, если задания есть
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Нет заданий в работе." });
+    }
+
+    // Группируем задания по имени и суммируем данные
+    const tasksMap = new Map();
+
+    result.recordset.forEach(row => {
+      if (!tasksMap.has(row.Nazvanie_Zadaniya)) {
+        tasksMap.set(row.Nazvanie_Zadaniya, {
+          Nazvanie_Zadaniya: row.Nazvanie_Zadaniya,
+          Time_Start: row.Time_Start,
+          TotalTasks: row.TotalTasks,
+          CompletedTasks: row.CompletedTasks,
+        });
+      } else {
+        let task = tasksMap.get(row.Nazvanie_Zadaniya);
+        task.TotalTasks += row.TotalTasks;
+        task.CompletedTasks += row.CompletedTasks;
+      }
+    });
+
+    // Вычисляем прогресс и добавляем его в каждый объект
+    const tasksInProgress = Array.from(tasksMap.values()).map(task => {
+      const progress = (task.CompletedTasks / task.TotalTasks) * 100;
+      return {
+        Nazvanie_Zadaniya: task.Nazvanie_Zadaniya,
+        Time_Start: task.Time_Start,
+        Progress: progress.toFixed(2),
+        TotalTasks: task.TotalTasks,
+        CompletedTasks: task.CompletedTasks,
+      };
+    });
+
+    // Отправляем ответ с данными
+    res.status(200).json({ tasksInProgress });
+  } catch (err) {
+    console.error('Ошибка при выполнении запроса:', err);
+    res.status(500).json({ message: "Ошибка при получении списка заданий в работе." });
+  }
+});
+
+module.exports = router;
+
+// Новый маршрут для получения уникальных загруженных файлов
+router.get('/uploaded-tasks', async (req, res) => {
+  try {
+    // Подключаемся к базе данных
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ message: "Ошибка подключения к базе данных." });
+    }
+
+    // Запрос для получения уникальных названий файлов (без повторений)
+    const query = `
+      SELECT DISTINCT Nazvanie_Zadaniya
+      FROM Test_MP
+      WHERE Nazvanie_Zadaniya IS NOT NULL AND Nazvanie_Zadaniya != ''
+    `;
+
+    const result = await pool.request().query(query);
+
+    // Проверяем, если задания есть
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Нет загруженных файлов." });
+    }
+
+    // Формируем список загруженных файлов
+    const uploadedFiles = result.recordset.map(row => row.Nazvanie_Zadaniya);
+
+    // Отправляем ответ с уникальными названиями файлов
+    res.status(200).json({ tasks: uploadedFiles });
+  } catch (err) {
+    console.error('Ошибка при выполнении запроса:', err);
+    res.status(500).json({ message: "Ошибка при получении списка загруженных файлов." });
+  }
+});
