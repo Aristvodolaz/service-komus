@@ -362,18 +362,20 @@ router.get('/tasks-in-progress', async (req, res) => {
 
     // Запрос для получения уникальных заданий с прогрессом
     const query = `
-      SELECT Nazvanie_Zadaniya, Time_Start,
-        COUNT(*) AS TotalTasks,
-        SUM(CASE WHEN Status_Zadaniya = 1 THEN 1 ELSE 0 END) AS CompletedTasks
-      FROM Test_MP
-      WHERE Nazvanie_Zadaniya IN (
-        SELECT Nazvanie_Zadaniya
-        FROM Test_MP
-        WHERE Status != 0
-        GROUP BY Nazvanie_Zadaniya
-        HAVING COUNT(CASE WHEN Status_Zadaniya != 1 THEN 1 END) = COUNT(*)
-      )
-      GROUP BY Nazvanie_Zadaniya, Time_Start
+      SELECT Nazvanie_Zadaniya,
+       COALESCE(MAX(Time_Start), '00:00:00') AS Time_Start,  
+       COUNT(*) AS TotalTasks,
+       SUM(CASE WHEN Status_Zadaniya = 1 THEN 1 ELSE 0 END) AS CompletedTasks
+FROM Test_MP
+WHERE Nazvanie_Zadaniya IN (
+    SELECT Nazvanie_Zadaniya
+    FROM Test_MP
+    WHERE Status != 0 AND Status_Zadaniya = 0
+    GROUP BY Nazvanie_Zadaniya
+    HAVING COUNT(CASE WHEN Status_Zadaniya = 0 THEN 1 END) = COUNT(*)
+)
+GROUP BY Nazvanie_Zadaniya;
+
     `;
 
     const result = await pool.request().query(query);
