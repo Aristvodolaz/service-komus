@@ -178,7 +178,9 @@ router.get('/download', async (req, res) => {
     p.SHK_WPS
 FROM Test_MP_Privyazka p
 LEFT JOIN Test_MP m
-ON p.Artikul = m.Artikul and p.Nazvanie_Zadaniya = m.Nazvanie_Zadaniya
+    ON p.Artikul = m.Artikul AND m.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+WHERE p.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+
 `;
 
           // Второй набор данных для WB
