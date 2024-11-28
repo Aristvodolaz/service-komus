@@ -167,8 +167,19 @@ router.get('/download', async (req, res) => {
       if (isWB) {
           // Первый набор данных для WB
           query1 = `
-              SELECT Nazvanie_Zadaniya, Artikul, Barcode, Kolvo_Tovarov, SHK_Coroba, Srok_Godnosti, Pallet_No, SHK_WPS
-              FROM Test_MP_Privyazka WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
+              SELECT 
+    p.Nazvanie_Zadaniya,
+    p.Artikul,
+    m.SHK,
+    p.Kolvo_Tovarov,
+    p.SHK_Coroba,
+    p.Srok_Godnosti,
+    p.Pallet_No,
+    p.SHK_WPS
+FROM Test_MP_Privyazka p
+LEFT JOIN Test_MP m
+ON p.Artikul = m.Artikul and p.Nazvanie_Zadaniya = m.Nazvanie_Zadaniya
+`;
 
           // Второй набор данных для WB
           query2 = `
