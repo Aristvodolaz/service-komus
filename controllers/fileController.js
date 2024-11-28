@@ -170,7 +170,7 @@ router.get('/download', async (req, res) => {
               SELECT 
     p.Nazvanie_Zadaniya,
     p.Artikul,
-    m.SHK,
+    m.SHK as Barcode,
     p.Kolvo_Tovarov,
     p.SHK_Coroba,
     p.Srok_Godnosti,
