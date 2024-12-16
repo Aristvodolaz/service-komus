@@ -113,7 +113,7 @@ const getPalletsByTaskName = async (req, res) => {
           .query(`
             SELECT 
               [Artikul],
-              [Mesto], [Vlozhennost]
+              [Mesto], [Vlozhennost], [Nazvanie_Tovara]
             FROM [SPOe_rc].[dbo].[${tableName}]
             WHERE CAST([Pallet_No] AS NVARCHAR(255)) = @palletNo AND [Nazvanie_Zadaniya] = @task
           `);
