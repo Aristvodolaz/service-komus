@@ -91,25 +91,40 @@ const getPalletsByTaskName = async (req, res) => {
         throw new Error('Ошибка подключения к базе данных');
       }
   
-      // Выбор таблицы
       const tableName = task.includes('WB') ? 'Test_MP_Privyazka' : 'Test_MP';
+      let result;
   
       // Запрос к базе данных
-      const result = await pool.request()
-        .input('palletNo', mssql.NVarChar(255), palletNo)
-        .input('task', mssql.NVarChar(255), task)
-        .query(`
-          SELECT 
-            [Artikul],
-            ISNULL([Kolvo_Tovarov], 0) AS [Kolvo_Tovarov]
-          FROM [SPOe_rc].[dbo].[${tableName}]
-          WHERE CAST([Pallet_No] AS NVARCHAR(255)) = @palletNo AND [Nazvanie_Zadaniya] = @task
-        `);
-  
+      if (tableName === 'Test_MP_Privyazka') {
+        result = await pool.request()
+          .input('palletNo', mssql.NVarChar(255), palletNo)
+          .input('task', mssql.NVarChar(255), task)
+          .query(`
+            SELECT 
+              [Artikul],
+              ISNULL([Kolvo_Tovarov], 0) AS [Kolvo_Tovarov]
+            FROM [SPOe_rc].[dbo].[${tableName}]
+            WHERE CAST([Pallet_No] AS NVARCHAR(255)) = @palletNo AND [Nazvanie_Zadaniya] = @task
+          `);
+      } else {
+        result = await pool.request()
+          .input('palletNo', mssql.NVarChar(255), palletNo)
+          .input('task', mssql.NVarChar(255), task)
+          .query(`
+            SELECT 
+              [Artikul],
+              [Mesto], [Vlozhennost]
+            FROM [SPOe_rc].[dbo].[${tableName}]
+            WHERE CAST([Pallet_No] AS NVARCHAR(255)) = @palletNo AND [Nazvanie_Zadaniya] = @task
+          `);
+      }
+
       // Подсчёт мест и товаров
       const totalPlaces = result.recordset.length; // Количество мест = количество строк
-      const totalItems = result.recordset.reduce((sum, record) => sum + (record.Kolvo_Tovarov || 0), 0);
-  
+      const totalItems = result.recordset.reduce(
+        (sum, record) => sum + (record.Kolvo_Tovarov || 0),
+        0
+      );
       // Успешный ответ
       res.status(200).json({
         success: true,
