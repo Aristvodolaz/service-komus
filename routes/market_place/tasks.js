@@ -20,4 +20,5 @@ router.get('/getInfoByWPS', dataController.getRecordsByWPS)
 router.get('/getLDU', dataController.getLDUBySHK)
 router.get('/getDataWithStatus', dataController.getTaskByStatus)
 router.post('/cancel', dataController.addTaskStatus)
+router.delete('/deleteRecord', dataController.deleteRecords)
 module.exports = router;
