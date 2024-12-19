@@ -800,25 +800,25 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
     await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('Artikul', mssql.Int, articul)
-      .input('Op_1_Bl_1_Sht', mssql.NVarChar(10), Op_1_Bl_1_Sht || 0) // Если значение не передано, установить 0
-      .input('Op_2_Bl_2_Sht', mssql.NVarChar(10), Op_2_Bl_2_Sht || 0)
-      .input('Op_3_Bl_3_Sht', mssql.NVarChar(10), Op_3_Bl_3_Sht || 0)
-      .input('Op_4_Bl_4_Sht', mssql.NVarChar(10), Op_4_Bl_4_Sht || 0)
-      .input('Op_5_Bl_5_Sht', mssql.NVarChar(10), Op_5_Bl_5_Sht || 0)
-      .input('Op_6_Blis_6_10_Sht', mssql.NVarChar(10), Op_6_Blis_6_10_Sht || 0)
-      .input('Op_7_Pereschyot', mssql.NVarChar(10), Op_7_Pereschyot || 0)
-      .input('Op_9_Fasovka_Sborka', mssql.NVarChar(10), Op_9_Fasovka_Sborka || 0)
-      .input('Op_10_Markirovka_SHT', mssql.NVarChar(10), Op_10_Markirovka_SHT || 0)
-      .input('Op_11_Markirovka_Prom', mssql.NVarChar(10), Op_11_Markirovka_Prom || 0)
-      .input('Op_12_Markirovka_Prom', mssql.NVarChar(10), Op_12_Markirovka_Prom || 0)
-      .input('Op_13_Markirovka_Fabr', mssql.NVarChar(10), Op_13_Markirovka_Fabr || 0)
-      .input('Op_14_TU_1_Sht', mssql.NVarChar(10), Op_14_TU_1_Sht || 0)
-      .input('Op_15_TU_2_Sht', mssql.NVarChar(10), Op_15_TU_2_Sht || 0)
-      .input('Op_16_TU_3_5', mssql.NVarChar(10), Op_16_TU_3_5 || 0)
-      .input('Op_17_TU_6_8', mssql.NVarChar(10), Op_17_TU_6_8 || 0)
-      .input('Op_468_Proverka_SHK', mssql.NVarChar(10), Op_468_Proverka_SHK || 0)
-      .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), Op_469_Spetsifikatsiya_TM || 0)
-      .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), Op_470_Dop_Upakovka || 0)
+      .input('Op_1_Bl_1_Sht', mssql.NVarChar(10), Op_1_Bl_1_Sht !== undefined ? String(Op_1_Bl_1_Sht) : '0')
+      .input('Op_2_Bl_2_Sht', mssql.NVarChar(10), String(Op_2_Bl_2_Sht || ''))
+  .input('Op_3_Bl_3_Sht', mssql.NVarChar(10), String(Op_3_Bl_3_Sht || ''))
+  .input('Op_4_Bl_4_Sht', mssql.NVarChar(10), String(Op_4_Bl_4_Sht || ''))
+  .input('Op_5_Bl_5_Sht', mssql.NVarChar(10), String(Op_5_Bl_5_Sht || ''))
+  .input('Op_6_Blis_6_10_Sht', mssql.NVarChar(10), String(Op_6_Blis_6_10_Sht || ''))
+  .input('Op_7_Pereschyot', mssql.NVarChar(10), String(Op_7_Pereschyot || ''))
+  .input('Op_9_Fasovka_Sborka', mssql.NVarChar(10), String(Op_9_Fasovka_Sborka || ''))
+  .input('Op_10_Markirovka_SHT', mssql.NVarChar(10), String(Op_10_Markirovka_SHT || ''))
+  .input('Op_11_Markirovka_Prom', mssql.NVarChar(10), String(Op_11_Markirovka_Prom || ''))
+  .input('Op_12_Markirovka_Prom', mssql.NVarChar(10), String(Op_12_Markirovka_Prom || ''))
+  .input('Op_13_Markirovka_Fabr', mssql.NVarChar(10), String(Op_13_Markirovka_Fabr || ''))
+  .input('Op_14_TU_1_Sht', mssql.NVarChar(10), String(Op_14_TU_1_Sht || ''))
+  .input('Op_15_TU_2_Sht', mssql.NVarChar(10), String(Op_15_TU_2_Sht || ''))
+  .input('Op_16_TU_3_5', mssql.NVarChar(10), String(Op_16_TU_3_5 || ''))
+  .input('Op_17_TU_6_8', mssql.NVarChar(10), String(Op_17_TU_6_8 || ''))
+  .input('Op_468_Proverka_SHK', mssql.NVarChar(10), String(Op_468_Proverka_SHK || ''))
+  .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), String(Op_469_Spetsifikatsiya_TM || ''))
+  .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), String(Op_470_Dop_Upakovka || ''))
       .query(`
         UPDATE Test_MP
         SET 
@@ -828,20 +828,20 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
           Op_4_Bl_4_Sht = @Op_4_Bl_4_Sht,
           Op_5_Bl_5_Sht = @Op_5_Bl_5_Sht,
           Op_6_Blis_6_10_Sht = @Op_6_Blis_6_10_Sht,
-          Op_7_Pereschyot = @Op_7_Pereschyот,
-          Op_9_Fasовка_Sborka = @Op_9_Fasовка_Sborka,
-          Op_10_Markirovка_SHT = @Op_10_Markiroвка_SHT,
-          Op_11_Markировka_Prom = @Op_11_Mаркировка_Pром,
-          Op_12_Markировka_Pром = @Op_12_Markировka_Pром,
-          Op_13_Markировка_Fabr = @Op_13_Mаркировка_Fабр,
+          Op_7_Pereschyot = @Op_7_Pereschyot,
+          Op_9_Fasovka_Sborka = @Op_9_Fasovka_Sborka,
+          Op_10_Markirovka_SHT = @Op_10_Markirovka_SHT,
+          Op_11_Markirovka_Prom = @Op_11_Markirovka_Prom,
+          Op_12_Markirovka_Prom = @Op_12_Markirovka_Prom,
+          Op_13_Markirovka_Fabr = @Op_13_Markirovka_Fabr,
           Op_14_TU_1_Sht = @Op_14_TU_1_Sht,
           Op_15_TU_2_Sht = @Op_15_TU_2_Sht,
           Op_16_TU_3_5 = @Op_16_TU_3_5,
           Op_17_TU_6_8 = @Op_17_TU_6_8,
-          Op_468_Proverka_SHK = @Op_468_Proverка_SHК,
-          Op_469_Spetsifikatsiya_TM = @Op_469_Sпецификатсия_TM,
-          Op_470_Dop_Upаковка = @Op_470_Dop_Upаковка
-        WHERE Nazvanie_Zadания = @Nazvanie_Zадания AND Artikul = @Artikul
+          Op_468_Proverka_SHK = @Op_468_Proverka_SHK,
+          Op_469_Spetsifikatsiya_TM = @Op_469_Spetsifikatsiya_TM,
+          Op_470_Dop_Upakovka = @Op_470_Dop_Upakovka
+        WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
       `);
 
     res.status(200).json({ success: true, value: 'Данные успешно обновлены', errorCode: 200 });
