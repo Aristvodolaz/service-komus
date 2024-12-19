@@ -820,6 +820,7 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
       .input('Op_468_Proverka_SHK', mssql.NVarChar(10), Op_468_Proverka_SHK ?? '0')
       .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), Op_469_Spetsifikatsiya_TM ?? '0')
       .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), Op_470_Dop_Upakovka ?? '0')
+      .input('Status', mssql.Int, 3)
       .query(`
         UPDATE Test_MP
         SET 
@@ -841,7 +842,8 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
           Op_17_TU_6_8 = @Op_17_TU_6_8,
           Op_468_Proverka_SHK = @Op_468_Proverka_SHK,
           Op_469_Spetsifikatsiya_TM = @Op_469_Spetsifikatsiya_TM,
-          Op_470_Dop_Upakovka = @Op_470_Dop_Upakovka
+          Op_470_Dop_Upakovka = @Op_470_Dop_Upakovka,
+          Status = @Status
         WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
       `);
 
