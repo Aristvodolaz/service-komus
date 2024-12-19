@@ -766,7 +766,6 @@ const updateRecordsBySHKWPS = async (req, res) => {
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
-
 const updateRecordsBySHKWPSNEW = async (req, res) => {
   const { taskName, articul } = req.query; // Получаем параметры запроса
   const {
@@ -797,28 +796,29 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
       throw new Error('Ошибка подключения к базе данных');
     }
 
+    // Запрос к базе данных
     await pool.request()
-      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
-      .input('Artikul', mssql.Int, articul)
-      .input('Op_1_Bl_1_Sht', mssql.NVarChar(10), Op_1_Bl_1_Sht !== undefined ? String(Op_1_Bl_1_Sht) : '0')
-      .input('Op_2_Bl_2_Sht', mssql.NVarChar(10), String(Op_2_Bl_2_Sht || ''))
-  .input('Op_3_Bl_3_Sht', mssql.NVarChar(10), String(Op_3_Bl_3_Sht || ''))
-  .input('Op_4_Bl_4_Sht', mssql.NVarChar(10), String(Op_4_Bl_4_Sht || ''))
-  .input('Op_5_Bl_5_Sht', mssql.NVarChar(10), String(Op_5_Bl_5_Sht || ''))
-  .input('Op_6_Blis_6_10_Sht', mssql.NVarChar(10), String(Op_6_Blis_6_10_Sht || ''))
-  .input('Op_7_Pereschyot', mssql.NVarChar(10), String(Op_7_Pereschyot || ''))
-  .input('Op_9_Fasovka_Sborka', mssql.NVarChar(10), String(Op_9_Fasovka_Sborka || ''))
-  .input('Op_10_Markirovka_SHT', mssql.NVarChar(10), String(Op_10_Markirovka_SHT || ''))
-  .input('Op_11_Markirovka_Prom', mssql.NVarChar(10), String(Op_11_Markirovka_Prom || ''))
-  .input('Op_12_Markirovka_Prom', mssql.NVarChar(10), String(Op_12_Markirovka_Prom || ''))
-  .input('Op_13_Markirovka_Fabr', mssql.NVarChar(10), String(Op_13_Markirovka_Fabr || ''))
-  .input('Op_14_TU_1_Sht', mssql.NVarChar(10), String(Op_14_TU_1_Sht || ''))
-  .input('Op_15_TU_2_Sht', mssql.NVarChar(10), String(Op_15_TU_2_Sht || ''))
-  .input('Op_16_TU_3_5', mssql.NVarChar(10), String(Op_16_TU_3_5 || ''))
-  .input('Op_17_TU_6_8', mssql.NVarChar(10), String(Op_17_TU_6_8 || ''))
-  .input('Op_468_Proverka_SHK', mssql.NVarChar(10), String(Op_468_Proverka_SHK || ''))
-  .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), String(Op_469_Spetsifikatsiya_TM || ''))
-  .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), String(Op_470_Dop_Upakovka || ''))
+      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName || '')
+      .input('Artikul', mssql.Int, articul || 0)
+      .input('Op_1_Bl_1_Sht', mssql.NVarChar(10), Op_1_Bl_1_Sht ?? '0')
+      .input('Op_2_Bl_2_Sht', mssql.NVarChar(10), Op_2_Bl_2_Sht ?? '0')
+      .input('Op_3_Bl_3_Sht', mssql.NVarChar(10), Op_3_Bl_3_Sht ?? '0')
+      .input('Op_4_Bl_4_Sht', mssql.NVarChar(10), Op_4_Bl_4_Sht ?? '0')
+      .input('Op_5_Bl_5_Sht', mssql.NVarChar(10), Op_5_Bl_5_Sht ?? '0')
+      .input('Op_6_Blis_6_10_Sht', mssql.NVarChar(10), Op_6_Blis_6_10_Sht ?? '0')
+      .input('Op_7_Pereschyot', mssql.NVarChar(10), Op_7_Pereschyot ?? '0')
+      .input('Op_9_Fasovka_Sborka', mssql.NVarChar(10), Op_9_Fasovka_Sborka ?? '0')
+      .input('Op_10_Markirovka_SHT', mssql.NVarChar(10), Op_10_Markirovka_SHT ?? '0')
+      .input('Op_11_Markirovka_Prom', mssql.NVarChar(10), Op_11_Markirovka_Prom ?? '0')
+      .input('Op_12_Markirovka_Prom', mssql.NVarChar(10), Op_12_Markirovka_Prom ?? '0')
+      .input('Op_13_Markirovka_Fabr', mssql.NVarChar(10), Op_13_Markirovka_Fabr ?? '0')
+      .input('Op_14_TU_1_Sht', mssql.NVarChar(10), Op_14_TU_1_Sht ?? '0')
+      .input('Op_15_TU_2_Sht', mssql.NVarChar(10), Op_15_TU_2_Sht ?? '0')
+      .input('Op_16_TU_3_5', mssql.NVarChar(10), Op_16_TU_3_5 ?? '0')
+      .input('Op_17_TU_6_8', mssql.NVarChar(10), Op_17_TU_6_8 ?? '0')
+      .input('Op_468_Proverka_SHK', mssql.NVarChar(10), Op_468_Proverka_SHK ?? '0')
+      .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), Op_469_Spetsifikatsiya_TM ?? '0')
+      .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), Op_470_Dop_Upakovka ?? '0')
       .query(`
         UPDATE Test_MP
         SET 
@@ -850,6 +850,7 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+
 
 module.exports = {
   getArticulsByTaskNumber,
