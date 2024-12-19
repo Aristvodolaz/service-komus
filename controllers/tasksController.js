@@ -790,6 +790,7 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
     Op_470_Dop_Upakovka
   } = req.body; // Получаем данные из тела запроса
 
+  console.log(Op_1_Bl_1_Sht)
   try {
     const pool = await connectToDatabase();
     if (!pool) {
