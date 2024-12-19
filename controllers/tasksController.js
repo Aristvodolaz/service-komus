@@ -735,6 +735,7 @@ const updateRecordsBySHKWPS = async (req, res) => {
       .input('Op_468_Proverka_SHK', mssql.NVarChar(10), Op_468_Proverka_SHK)
       .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), Op_469_Spetsifikatsiya_TM)
       .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), Op_470_Dop_Upakovka)
+      .input('Status', mssql, 3)
       .query(`
         UPDATE Test_MP
         SET 
