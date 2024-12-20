@@ -221,7 +221,7 @@ const getAllByNazvanieZadaniya = async (req, res) => {
         const result = await pool.request()
             .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
             .query(`
-                SELECT Nazvanie_Zadaniya, Artikul, Srok_Godnosti, SHK_WPS, Pallet_No, Kolvo_Tovarov
+                SELECT ID, Nazvanie_Zadaniya, Artikul, Srok_Godnosti, SHK_WPS, Pallet_No, Kolvo_Tovarov
                 FROM Test_MP_Privyazka
                 WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
             `);
