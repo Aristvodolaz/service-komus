@@ -270,6 +270,37 @@ const updatePalletAndKolvo = async (req, res) => {
     }
 };
 
+const updatePalletAndKolvoNew = async (req, res) => {
+    const { id, pallet, kolvo } = req.query;
+
+    try {
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, value: null, errorCode: 500 });
+        }
+
+        const result = await pool.request()
+            .input('ID', mssql.NVarChar(255), id)
+            .input('Pallet_No', mssql.NVarChar(255), pallet)
+            .input('Kolvo_Tovarov', mssql.Int, kolvo)
+            .query(`
+                UPDATE Test_MP_Privyazka
+                SET Pallet_No = @Pallet_No, Kolvo_Tovarov = @Kolvo_Tovarov
+                WHERE ID = @ID 
+            `);
+
+        if (result.rowsAffected[0] === 0) {
+            return res.status(404).json({ success: false, value: 'Запись не найдена для обновления', errorCode: 404 });
+        }
+
+        res.json({ success: true, value: 'Паллет и вложенность успешно обновлены', errorCode: 200 });
+    } catch (error) {
+        console.error('Ошибка при обновлении паллета и вложенности:', error);
+        res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+};
+
+
 const getSklads = async (req, res) => {
     try {
         const pool = await connectToDatabase();
@@ -303,5 +334,6 @@ module.exports = {
     getAllByNazvanieZadaniya,  // Экспорт метода для получения всех данных по названию задания
     updatePalletAndKolvo,       // Экспорт метода для обновления паллета и вложенности
     getSklads,
+    updatePalletAndKolvoNew,
     checkShkWpsExists
 };

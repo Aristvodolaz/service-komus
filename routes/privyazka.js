@@ -10,5 +10,6 @@ router.get('/getData', dataController.getAllByNazvanieZadaniya)
 router.put('/updateInfo', dataController.updatePalletAndKolvo)
 router.get('/sklads', dataController.getSklads)
 router.get('/checkSHKWps', dataController.checkShkWpsExists)
+router.post('/udpateWBNew', dataController.updatePalletAndKolvoNew)
 
 module.exports = router;
