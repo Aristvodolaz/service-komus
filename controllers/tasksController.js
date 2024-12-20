@@ -157,26 +157,6 @@ const getByShk = async (req, res) => {
   }
 };
 
-const setStatusNew = async(req, res) =>{
-  const { id, status} = req.query;
-  try {
-    const pool = await connectToDatabase();
-    if (!pool) {
-      throw new Error('Ошибка подключения к базе данных');
-    }
-
-    await pool.request()
-      .input('Status', mssql.Int, status)
-      .input('ID', mssql.BigInt, id)
-      .input('Ispolnitel', mssql.NVarChar(255), ispolnitel)
-      .query('UPDATE Test_MP SET Status = @Status WHERE ID = @ID');
-
-    res.status(200).json({ success: true, value: 'Статус успешно обновлен', errorCode: 200 });
-  } catch (error) {
-    console.error('Ошибка при обновлении статуса:', error);
-    res.status(500).json({ success: false, value: null, errorCode: 500 });
-  }
-};
 
 const updateStatus = async (req, res) => {
   const { taskName, articul, status, startTime, ispolnitel } = req.body;
@@ -783,6 +763,26 @@ const updateRecordsBySHKWPS = async (req, res) => {
     res.status(200).json({ success: true, value: 'Record updated successfully', errorCode: 200 });
   } catch (error) {
     console.error('Ошибка при обновлении записей по SHK_WPS:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
+const setStatusNew = async(req, res) =>{
+  const { id, status} = req.query;
+  try {
+    const pool = await connectToDatabase();
+    if (!pool) {
+      throw new Error('Ошибка подключения к базе данных');
+    }
+
+    await pool.request()
+      .input('Status', mssql.Int, status)
+      .input('ID', mssql.BigInt, id)
+      .query('UPDATE Test_MP SET Status = @Status WHERE ID = @ID');
+
+    res.status(200).json({ success: true, value: 'Статус успешно обновлен', errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при обновлении статуса:', error);
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
