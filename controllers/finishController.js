@@ -51,6 +51,52 @@ const updateData = async (req, res) => {
   }
 };
 
+const updateDataNew = async (req, res) => {
+  const { id, mesto, vlozhennost, palletNo } = req.query;
+
+  try {
+    // Подключение к базе данных
+    const pool = await connectToDatabase();
+    if (!pool) {
+      throw new Error('Ошибка подключения к базе данных');
+    }
+
+    // Формирование запроса на обновление данных
+    const query = `
+      UPDATE TOP (1) Test_MP
+      SET
+        Mesto = ISNULL(@Mesto, Mesto),
+        Vlozhennost = ISNULL(@Vlozhennost, Vlozhennost),
+        Pallet_No = ISNULL(@Pallet_No, Pallet_No),
+        Status = 2,
+        Status_Zadaniya = 1,
+        SHK_WPS = 0,
+        Time_End = ISNULL(@Time_End, Time_End)
+      WHERE
+        ID = @id
+    `;
+
+    // Выполнение запроса с параметрами
+    const result = await pool.request()
+      .input('Mesto', mssql.NVarChar(50), mesto)
+      .input('Vlozhennost', mssql.NVarChar(50), vlozhennost)
+      .input('Pallet_No', mssql.NVarChar(50), palletNo)
+      .input('ID', mssql.BigInt, id)
+      .query(query);
+
+    // Проверка результатов выполнения запроса
+    if (result.rowsAffected[0] > 0) {
+      res.json({ success: true, message: 'Данные успешно обновлены.' });
+    } else {
+      res.status(404).json({ success: false, message: 'Запись не найдена.' });
+    }
+  } catch (error) {
+    console.error('Ошибка при обновлении данных:', error);
+    res.status(500).json({ success: false, message: 'Ошибка при обновлении данных', error: error.message });
+  }
+};
+
 module.exports = {
   updateData,
+  updateDataNew
 };

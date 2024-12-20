@@ -735,7 +735,6 @@ const updateRecordsBySHKWPS = async (req, res) => {
       .input('Op_468_Proverka_SHK', mssql.NVarChar(10), Op_468_Proverka_SHK)
       .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), Op_469_Spetsifikatsiya_TM)
       .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), Op_470_Dop_Upakovka)
-      .input('Status', mssql, 3)
       .query(`
         UPDATE Test_MP
         SET 
@@ -767,6 +766,7 @@ const updateRecordsBySHKWPS = async (req, res) => {
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
+
 const updateRecordsBySHKWPSNEW = async (req, res) => {
   const { taskName, articul } = req.query; // Получаем параметры запроса
   const {
@@ -821,7 +821,7 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
       .input('Op_468_Proverka_SHK', mssql.NVarChar(10), Op_468_Proverka_SHK ?? '0')
       .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), Op_469_Spetsifikatsiya_TM ?? '0')
       .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), Op_470_Dop_Upakovka ?? '0')
-      .input('Status', mssql.Int, 3)
+      .input('Status', mssql.Int, 3) // Установка Status в 2
       .query(`
         UPDATE Test_MP
         SET 
@@ -844,7 +844,7 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
           Op_468_Proverka_SHK = @Op_468_Proverka_SHK,
           Op_469_Spetsifikatsiya_TM = @Op_469_Spetsifikatsiya_TM,
           Op_470_Dop_Upakovka = @Op_470_Dop_Upakovka,
-          Status = @Status
+          Status = 3
         WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
       `);
 
