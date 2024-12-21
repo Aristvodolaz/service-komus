@@ -4,11 +4,7 @@ const { error } = require('winston');
 
 
 const updateStatusNew = async (req, res) => {
-    const { id, status, startTime, ispolnitel } = req.body;
-  
-    if ( status === undefined|| !startTime || !ispolnitel) {
-      return res.status(400).json({ success: false, value: 'Недостаточно данных для запроса', errorCode: 400 });
-    }
+    const { id, status, startTime, ispolnitel } = req.query;
   
     try {
       const pool = await connectToDatabase();
@@ -90,7 +86,7 @@ const updateStatusNew = async (req, res) => {
 
 
   const duplicateRecordNew = async (req, res) => {
-    const { id, mesto, vlozhennost, palletNo } = req.body;
+    const { id, mesto, vlozhennost, palletNo } = req.query;
   
     try {
       const pool = await connectToDatabase();
