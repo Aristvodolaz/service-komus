@@ -8,7 +8,10 @@ const zapisRouter = require('./routes/privyazka')
 
 /* for market place*/
 const tasksController = require('./routes/market_place/tasks');
+const otkazController = require('./routes/market_place/otkaz');
 const tasksNewController = require('./routes/market_place/newTasks');
+const srokNewController = require('./routes/srok');
+
 /* for excel*/
 const fileController = require('./routes/market_place/file');
 const filesRouter = require('./routes/market_place/file');
@@ -37,7 +40,8 @@ app.use('/reason', reasonRouter);
 /* for market place*/
 app.use('/market/tasks', tasksController);
 app.use('/market/new', tasksNewController);
-
+app.use('/market/otkaz', otkazController);
+app.use('/srok/updateNew', srokNewController);
 /* for excel download*/
 app.use('/download/excel', fileController);
 app.use('/list',downloadExcelController)

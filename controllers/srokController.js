@@ -26,6 +26,31 @@ const updateSrokGodnosti = async (req, res) => {
     }
 };
 
+
+const updateSrokGodnostiNew = async (req, res) => {
+  const { srokGodnosti, persent, id } = req.query;
+
+  try {
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+
+    // Обновление записи по названию задания и артиклу
+    await pool.request()
+      .input('ID', mssql.BigInt, id)
+      .input('Srok_Godnosti', mssql.NVarChar(50), srokGodnosti)
+      .input('Persent', mssql.NVarChar(50), persent)
+      .query('UPDATE Test_MP SET Srok_Godnosti = @Srok_Godnosti, Persent = @Persent WHERE ID = @ID');
+
+    res.json({ success: true, value: 'ШК успешно обновлен', errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка при обновлении ШК:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
 module.exports = {
-    updateSrokGodnosti
+    updateSrokGodnosti,
+    updateSrokGodnostiNew
 };

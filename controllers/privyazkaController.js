@@ -208,6 +208,38 @@ const endZapis = async (req, res) => {
 };
 
 
+const endZapisNew = async (req, res) => {
+    const { id } = req.query;
+
+    try {
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, value: null, errorCode: 500 });
+        }
+
+        // Обновление записи
+        const result = await pool.request()
+            .input('ID', mssql.BigInt, id)
+            .input('Status', mssql.Int, 2)
+            .input('Status_Zadaniya', mssql.Int, 1)
+            .query(`
+                UPDATE Test_MP
+                SET Status = @Status, Status_Zadaniya = @Status_Zadaniya
+                WHERE ID = @ID 
+            `);
+
+        if (result.rowsAffected[0] === 0) {
+            return res.status(404).json({ success: false, value: 'Запись не найдена', errorCode: 404 });
+        }
+
+        res.json({ success: true, value: 'Запись успешно обновлена', errorCode: 200 });
+    } catch (error) {
+        console.error('Ошибка при обновлении записи:', error);
+        res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+};
+
+
 const getAllByNazvanieZadaniya = async (req, res) => {
     const { name } = req.query;
 
@@ -335,5 +367,6 @@ module.exports = {
     updatePalletAndKolvo,       // Экспорт метода для обновления паллета и вложенности
     getSklads,
     updatePalletAndKolvoNew,
-    checkShkWpsExists
+    checkShkWpsExists,
+    endZapisNew
 };
