@@ -63,7 +63,7 @@ const updateStatusNew = async (req, res) => {
             Op_17_TU_6_8,
             Op_468_Proverka_SHK,
             Op_469_Spetsifikatsiya_TM,
-            Op_470_Dop_Upakovка,
+            Op_470_Dop_Upakovka,
             Sortiruemyi_Tovar,
             Ne_Sortiruemyi_Tovar,
             Produkty,
