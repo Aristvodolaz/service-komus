@@ -6,7 +6,7 @@ const { error } = require('winston');
 const updateStatusNew = async (req, res) => {
     const { id, status, startTime, ispolnitel } = req.body;
   
-    if (!taskName || status === undefined|| !startTime || !ispolnitel) {
+    if ( status === undefined|| !startTime || !ispolnitel) {
       return res.status(400).json({ success: false, value: 'Недостаточно данных для запроса', errorCode: 400 });
     }
   
