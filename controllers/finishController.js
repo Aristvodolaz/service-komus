@@ -52,7 +52,7 @@ const updateData = async (req, res) => {
 };
 
 const updateDataNew = async (req, res) => {
-  const { id, mesto, vlozhennost, palletNo } = req.query;
+  const { id, mesto, vlozhennost, palletNo, time } = req.query;
 
   try {
     // Подключение к базе данных
@@ -63,7 +63,7 @@ const updateDataNew = async (req, res) => {
 
     // Формирование запроса на обновление данных
     const query = `
-      UPDATE TOP (1) Test_MP
+      UPDATE Test_MP
       SET
         Mesto = ISNULL(@Mesto, Mesto),
         Vlozhennost = ISNULL(@Vlozhennost, Vlozhennost),
@@ -71,7 +71,7 @@ const updateDataNew = async (req, res) => {
         Status = 2,
         Status_Zadaniya = 1,
         SHK_WPS = 0,
-        Time_End = ISNULL(@Time_End, Time_End)
+        Time_End = @Time_End,
       WHERE
         ID = @id
     `;
@@ -82,6 +82,7 @@ const updateDataNew = async (req, res) => {
       .input('Vlozhennost', mssql.NVarChar(50), vlozhennost)
       .input('Pallet_No', mssql.NVarChar(50), palletNo)
       .input('ID', mssql.BigInt, id)
+      .input('Time_End', mssql.NVarChar(255), time)
       .query(query);
 
     // Проверка результатов выполнения запроса

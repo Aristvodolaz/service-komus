@@ -86,7 +86,7 @@ const updateStatusNew = async (req, res) => {
 
 
   const duplicateRecordNew = async (req, res) => {
-    const { id, mesto, vlozhennost, palletNo } = req.query;
+    const { id, mesto, vlozhennost, palletNo, time } = req.query;
   
     try {
       const pool = await connectToDatabase();
@@ -162,7 +162,7 @@ const updateStatusNew = async (req, res) => {
         .input('Pallet_No', mssql.NVarChar(50), palletNo)
         .input('Time_Start', mssql.NVarChar(255), originalRecord.Time_Start)
         .input('Time_Middle', mssql.NVarChar(255), originalRecord.Time_Middle)
-        .input('Time_End', mssql.NVarChar(255), originalRecord.Time_End)
+        .input('Time_End', mssql.NVarChar(255), time)
         .input('Persent', mssql.NVarChar(50), originalRecord.Persent)
         .query(`
           INSERT INTO Test_MP (
