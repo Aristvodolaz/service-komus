@@ -41,7 +41,7 @@ app.use('/reason', reasonRouter);
 app.use('/market/tasks', tasksController);
 app.use('/market/new', tasksNewController);
 app.use('/market/otkaz', otkazController);
-app.use('/srok/updateNew', srokNewController);
+app.use('/srok', srokNewController);
 /* for excel download*/
 app.use('/download/excel', fileController);
 app.use('/list',downloadExcelController)

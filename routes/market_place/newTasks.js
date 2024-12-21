@@ -10,3 +10,4 @@ router.put('/updateShkWps', dataController.updateSHKWPSNew);
 router.put('/updateShk', dataController.updateSHKNew);
 router.post('/updateLdu', dataController.updateLduNEW)
 router.post('/closeTask', dataController.addTaskStatusExitNew);
+module.exports = router;

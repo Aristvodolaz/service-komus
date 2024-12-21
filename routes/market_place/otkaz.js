@@ -3,3 +3,4 @@ const router = express.Router();
 const dataController = require('../../controllers/otkazController');
 
 router.post('/', dataController.setFactSize);
+module.exports = router;
