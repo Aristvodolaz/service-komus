@@ -73,7 +73,7 @@ const updateDataNew = async (req, res) => {
         SHK_WPS = 0,
         Time_End = @Time_End,
       WHERE
-        ID = @id
+        ID = @ID
     `;
 
     // Выполнение запроса с параметрами
