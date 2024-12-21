@@ -320,7 +320,6 @@ const updateStatusNew = async (req, res) => {
       Yuvelirnye_Izdelia,
       Pechat_Etiketki_s_SHK,
       Pechat_Etiketki_s_Opisaniem,
-      Fakticheskoe_Kol_vo
     } = req.body; // Получаем данные из тела запроса
   
     console.log(Op_1_Bl_1_Sht);
