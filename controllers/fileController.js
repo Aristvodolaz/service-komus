@@ -363,6 +363,106 @@ router.post('/upload-data', async (req, res) => {
 module.exports = router;
 
 
+router.post('/upload-data-new', async (req, res) => {
+  try {
+      const data = req.body;
+
+      const pool = await connectToDatabase();
+      if (!pool) {
+          return res.status(500).json({ message: "Ошибка подключения к базе данных." });
+      }
+
+      let shkSyrya = null;
+
+      if (data.Artikul_Syrya && data.Artikul_Syrya.trim() !== '') {
+          if (data.Artikul_Syrya.includes(',')) {
+              const artikuls = data.Artikul_Syrya.split(',');
+              shkSyrya = await getPieceGTINForArticulSyrya(pool, artikuls);
+          } else {
+              shkSyrya = await getPieceGTINForArticulSyrya(pool, [data.Artikul_Syrya]);
+          }
+      }
+
+      const query = `
+          INSERT INTO Test_MP 
+          (Artikul, Artikul_Syrya, Nomenklatura, Nazvanie_Tovara, SHK, SHK_Syrya, SHK_SPO, Kol_vo_Syrya, Itog_Zakaz, SOH, 
+          Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht,
+          Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, 
+          Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upаковка, 
+          Mesto, Vlozhennost, Pallet_No, Pref, Nazvanie_Zadaniya, Status, Status_Zadaniya, Scklad_Pref, 
+          Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
+          Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, Fakticheskoe_Kol_vo)
+          VALUES 
+          (@Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @Kol_vo_Syrya, @Itog_Zakaz, @SOH,
+          @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht,
+          @Op_7_Pereschyot, @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, 
+          @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upаковка, 
+          @Mesto, @Vlozhennost, @Pallet_No, @Pref, @Nazvanie_Zadaniya, @Status, @Status_Zadaniya, @Scklad_Pref,
+          @Sortiruemyi_Tovar, @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
+          @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @Fakticheskoe_Kol_vo)
+      `;
+
+      const request = pool.request();
+      request.input('Artikul', mssql.Int, data.Artikul);
+      request.input('Artikul_Syrya', mssql.NVarChar, data.Artikul_Syrya ? data.Artikul_Syrya.toString() : null);
+      request.input('Nomenklatura', mssql.BigInt, data.Nomenklatura);
+      request.input('Nazvanie_Tovara', mssql.NVarChar, data.Nazvanie_Tovara);
+      request.input('SHK', mssql.NVarChar, data.SHK ? data.SHK.toString() : null);
+      request.input('SHK_Syrya', mssql.NVarChar, shkSyrya ? shkSyrya : data.SHK_Syrya);
+      request.input('SHK_SPO', mssql.NVarChar, data.SHK_SPO ? data.SHK_SPO.toString() : null);
+      request.input('Kol_vo_Syrya', mssql.Int, data.Kol_vo_Syrya);
+      request.input('Itog_Zakaz', mssql.Int, data.Itog_Zakaz);
+      request.input('SOH', mssql.NVarChar, data.SOH ? data.SOH.toString() : null);
+      request.input('Tip_Postavki', mssql.NVarChar, data.Tip_Postavki);
+      request.input('Srok_Godnosti', mssql.NVarChar, data.Srok_Godnosti);
+      request.input('Op_1_Bl_1_Sht', mssql.NVarChar, data.Op_1_Bl_1_Sht);
+      request.input('Op_2_Bl_2_Sht', mssql.NVarChar, data.Op_2_Bl_2_Sht);
+      request.input('Op_3_Bl_3_Sht', mssql.NVarChar, data.Op_3_Bl_3_Sht);
+      request.input('Op_4_Bl_4_Sht', mssql.NVarChar, data.Op_4_Bl_4_Sht);
+      request.input('Op_5_Bl_5_Sht', mssql.NVarChar, data.Op_5_Bl_5_Sht);
+      request.input('Op_6_Blis_6_10_Sht', mssql.NVarChar, data.Op_6_Blis_6_10_Sht);
+      request.input('Op_7_Pereschyot', mssql.NVarChar, data.Op_7_Pereschyot);
+      request.input('Op_9_Fasovka_Sborka', mssql.NVarChar, data.Op_9_Fasovka_Sborka);
+      request.input('Op_10_Markirovka_SHT', mssql.NVarChar, data.Op_10_Markirovka_SHT);
+      request.input('Op_11_Markirovka_Prom', mssql.NVarChar, data.Op_11_Markirovka_Prom);
+      request.input('Op_13_Markirovka_Fabr', mssql.NVarChar, data.Op_13_Markirovka_Fabr);
+      request.input('Op_14_TU_1_Sht', mssql.NVarChar, data.Op_14_TU_1_Sht);
+      request.input('Op_15_TU_2_Sht', mssql.NVarChar, data.Op_15_TU_2_Sht);
+      request.input('Op_16_TU_3_5', mssql.NVarChar, data.Op_16_TU_3_5);
+      request.input('Op_17_TU_6_8', mssql.NVarChar, data.Op_17_TU_6_8);
+      request.input('Op_468_Proverka_SHK', mssql.NVarChar, data.Op_468_Proverka_SHK);
+      request.input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar, data.Op_469_Spetsifikatsiya_TM);
+      request.input('Op_470_Dop_Upakovka', mssql.NVarChar, data.Op_470_Dop_Upаковка);
+      request.input('Mesto', mssql.Int, data.Mesto);
+      request.input('Vlozhennost', mssql.Int, data.Vlozhennost);
+      request.input('Pallet_No', mssql.Int, data.Pallet_No);
+      request.input('Pref', mssql.NVarChar, data.pref);
+      request.input('Nazvanie_Zadaniya', mssql.NVarChar, data.Nazvanie_Zadaniya);
+      request.input('Status', mssql.Int, data.Status);
+      request.input('Status_Zadaniya', mssql.Int, data.Status_Zadaniya);
+      request.input('Scklad_Pref', mssql.NVarChar, data.Scklad_Pref);
+      request.input('Sortiruemyi_Tovar', mssql.NVarChar, data.Sortiruemyi_Tovar);
+      request.input('Ne_Sortiruemyi_Tovar', mssql.NVarChar, data.Ne_Sortiruemyi_Tovar);
+      request.input('Produkty', mssql.NVarChar, data.Produkty);
+      request.input('Opasnyi_Tovar', mssql.NVarChar, data.Opasnyi_Tovar);
+      request.input('Zakrytaya_Zona', mssql.NVarChar, data.Zakrytaya_Zona);
+      request.input('Krupnogabaritnyi_Tovar', mssql.NVarChar, data.Krupnogabaritnyi_Tovar);
+      request.input('Yuvelirnye_Izdelia', mssql.NVarChar, data.Yuvelirnye_Izdelia);
+      request.input('Pechat_Etiketki_s_SHK', mssql.NVarChar, data.Pechat_Etiketki_s_SHK);
+      request.input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar, data.Pechat_Etiketki_s_Opisaniem);
+
+      await request.query(query);
+
+      res.status(200).json({ message: "Данные успешно записаны в базу." });
+  } catch (err) {
+      console.error('Ошибка при записи данных в базу:', err);
+      res.status(500).json({ message: "Ошибка при записи данных в базу." });
+  }
+});
+
+module.exports = router;
+
+
 // 6. Новый маршрут для получения списка уникальных заданий в работе
 // 6. Новый маршрут для получения уникальных заданий с прогрессом
 router.get('/tasks-in-progress', async (req, res) => {
