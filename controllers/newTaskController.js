@@ -126,7 +126,7 @@ const updateStatusNew = async (req, res) => {
         .input('Sht_v_MP', mssql.Int, originalRecord.Sht_v_MP)
         .input('Itog_MP', mssql.Int, originalRecord.Itog_MP)
         .input('SOH', mssql.NVarChar(10), originalRecord.SOH)
-        .input('Scklad_Pref', mssql.mssql.NVarChar(50), originalRecord.Scklad_Pref)
+        .input('Scklad_Pref', mssql.NVarChar(50), originalRecord.Scklad_Pref)
         .input('Tip_Postavki', mssql.NVarChar(50), originalRecord.Tip_Postavki)
         .input('Srok_Godnosti', mssql.NVarChar(50), originalRecord.Srok_Godnosti)
         .input('Op_1_Bl_1_Sht', mssql.NVarChar(10), originalRecord.Op_1_Bl_1_Sht)
