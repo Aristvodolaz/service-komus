@@ -388,18 +388,18 @@ router.post('/upload-data-new', async (req, res) => {
           (Artikul, Artikul_Syrya, Nomenklatura, Nazvanie_Tovara, SHK, SHK_Syrya, SHK_SPO, Kol_vo_Syrya, Itog_Zakaz, SOH, 
           Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht,
           Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, 
-          Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upаковка, 
+          Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, 
           Mesto, Vlozhennost, Pallet_No, Pref, Nazvanie_Zadaniya, Status, Status_Zadaniya, Scklad_Pref, 
           Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
-          Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, Fakticheskoe_Kol_vo)
+          Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem)
           VALUES 
           (@Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @Kol_vo_Syrya, @Itog_Zakaz, @SOH,
           @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht,
           @Op_7_Pereschyot, @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, 
-          @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upаковка, 
+          @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, 
           @Mesto, @Vlozhennost, @Pallet_No, @Pref, @Nazvanie_Zadaniya, @Status, @Status_Zadaniya, @Scklad_Pref,
           @Sortiruemyi_Tovar, @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
-          @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @Fakticheskoe_Kol_vo)
+          @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem)
       `;
 
       const request = pool.request();
@@ -432,7 +432,7 @@ router.post('/upload-data-new', async (req, res) => {
       request.input('Op_17_TU_6_8', mssql.NVarChar, data.Op_17_TU_6_8);
       request.input('Op_468_Proverka_SHK', mssql.NVarChar, data.Op_468_Proverka_SHK);
       request.input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar, data.Op_469_Spetsifikatsiya_TM);
-      request.input('Op_470_Dop_Upakovka', mssql.NVarChar, data.Op_470_Dop_Upаковка);
+      request.input('Op_470_Dop_Upakovka', mssql.NVarChar, data.Op_470_Dop_Upakovka);
       request.input('Mesto', mssql.Int, data.Mesto);
       request.input('Vlozhennost', mssql.Int, data.Vlozhennost);
       request.input('Pallet_No', mssql.Int, data.Pallet_No);
