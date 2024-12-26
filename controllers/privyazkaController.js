@@ -256,6 +256,8 @@ const getAllByNazvanieZadaniya = async (req, res) => {
                 SELECT ID, Nazvanie_Zadaniya, Artikul, Srok_Godnosti, SHK_WPS, Pallet_No, Kolvo_Tovarov
                 FROM Test_MP_Privyazka
                 WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+                  AND Pallet_No IS NOT NULL
+                  AND SHK_WPS IS NOT NULL
             `);
 
         if (result.recordset.length > 0) {

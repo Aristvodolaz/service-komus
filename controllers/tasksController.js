@@ -48,7 +48,9 @@ const getTaskByStatus = async (req, res) => {
     let query;
     if (status == 0) {
       query = 'SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya and Status IN (0, 1)';
-    } else {
+    } else if(status ==3){
+      query = 'SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya and Status IN (3, 4)';
+    }else {
       query = 'SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya and Status = @Status';
     }
 

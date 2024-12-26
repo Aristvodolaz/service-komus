@@ -22,7 +22,8 @@ const { error } = require('winston');
       await pool.request()
         .input('ID', mssql.BigInt, id)
         .input('Fakticheskoe_Kol_vo', mssql.Int, count)
-        .query('UPDATE Test_MP SET Fakticheskoe_Kol_vo = @Fakticheskoe_Kol_vo WHERE ID = @ID');
+        .input("Status", mssql.Int, 3)
+        .query('UPDATE Test_MP SET Fakticheskoe_Kol_vo = @Fakticheskoe_Kol_vo, Status = @Status  WHERE ID = @ID');
   
       // Успешный ответ
       res.status(200).json({ success: true, value: 'Количество успешно добавлено', errorCode: 200 });
