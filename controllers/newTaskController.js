@@ -504,9 +504,12 @@ const checkOrderCompletionOzon = async (req, res) => {
 
     // Проверка на совпадение итоговых значений
     let allOrdersMatch = true;
+    let full, have;
     for (const row of result.recordset) {
       const total = row.mesto_vlozhennost_sum + row.ubriano_iz_zakaza; // Сумма Mesto * Vlozhennost + Ubrano_iz_Zakaza
       if (total !== row.Itog_Zakaz) {
+        full = Itog_Zakaz;
+        have = total;
         allOrdersMatch = false;
         break; // Если хотя бы один заказ не совпадает, прекращаем проверку
       }
@@ -522,7 +525,7 @@ const checkOrderCompletionOzon = async (req, res) => {
     } else {
       return res.status(400).json({
         success: false,
-        value: 'Не все заказы совпадают с итогами.',
+        value: 'Не все заказы совпадают с итогами ' + have + 'из' + full,
         errorCode: 200,
       });
     }
