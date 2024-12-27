@@ -204,8 +204,8 @@ const endStatus = async (req, res) => {
     await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('Artikul', mssql.NVarChar(50), articul)
-      .input('Status', mssql.Int, status)
-      .input('Status_Zadaniya', mssql.Int, statusZadaniya)
+      .input('Status', mssql.Int, 2)
+      .input('Status_Zadaniya', mssql.Int, 1)
       .input('Time_End', mssql.NVarChar(255), endTime)
       .input('Ispolnitel', mssql.NVarChar(255), ispolnitel)
       .query('UPDATE Test_MP SET Status = @Status, Time_End = @Time_End,Status_Zadaniya = @Status_Zadaniya , Ispolnitel = @Ispolnitel WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');

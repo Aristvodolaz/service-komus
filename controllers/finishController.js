@@ -14,19 +14,18 @@ const updateData = async (req, res) => {
 
     // Формирование запроса на обновление данных
     const query = `
-      UPDATE TOP (1) Test_MP
-      SET
-        Mesto = ISNULL(@Mesto, Mesto),
-        Vlozhennost = ISNULL(@Vlozhennost, Vlozhennost),
-        Pallet_No = ISNULL(@Pallet_No, Pallet_No),
-        Status = 2,
-        Status_Zadaniya = 1,
-        SHK_WPS = 0,
-        Time_End = ISNULL(@Time_End, Time_End)
-      WHERE
-        Nazvanie_Zadaniya = @Nazvanie_Zadaniya
-        AND SHK LIKE @SHK 
-    `;
+  UPDATE Test_MP
+  SET
+    Mesto = ISNULL(@Mesto, Mesto),
+    Vlozhennost = ISNULL(@Vlozhennost, Vlozhennost),
+    Pallet_No = ISNULL(@Pallet_No, Pallet_No),
+    Status = 2,
+    Status_Zadaniya = 1,
+    Time_End = ISNULL(@Time_End, Time_End)
+  WHERE
+    Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+    AND SHK LIKE @SHK 
+`;
 
     // Выполнение запроса с параметрами
     const result = await pool.request()
