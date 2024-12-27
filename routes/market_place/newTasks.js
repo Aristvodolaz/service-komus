@@ -9,5 +9,7 @@ router.get('/getLdu', dataController.getLDUNew);
 router.put('/updateShkWps', dataController.updateSHKWPSNew);
 router.put('/updateShk', dataController.updateSHKNew);
 router.post('/updateLdu', dataController.updateLduNEW)
+router.get('/checkOrderCompletionWB', dataController.checkOrderCompletion)
+router.get('/checkOrderCompletionOzon', dataController.checkOrderCompletionOzon)
 router.post('/closeTask', dataController.addTaskStatusExitNew);
 module.exports = router;
