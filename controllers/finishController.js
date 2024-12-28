@@ -14,7 +14,7 @@ const updateData = async (req, res) => {
 
     // Формирование запроса на обновление данных
     const query = `
-  UPDATE Test_MP
+  UPDATE  TOP(1) Test_MP
   SET
     Mesto = ISNULL(@Mesto, Mesto),
     Vlozhennost = ISNULL(@Vlozhennost, Vlozhennost),
