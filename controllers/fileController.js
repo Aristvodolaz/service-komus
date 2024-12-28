@@ -228,8 +228,8 @@ WHERE p.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
                      Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
                      Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
                      Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka,           Pechat_Etiketki_s_SHK, 
-           Pechat_Etiketki_s_Opisaniem,  Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
-                     Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, 
+           Pechat_Etiketki_s_Opisaniem, 
+                     Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty,  Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
        vp, fact_vp, Plan_Otkaz
               FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
       }
