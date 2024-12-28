@@ -25,6 +25,7 @@ const updateData = async (req, res) => {
   WHERE
     Nazvanie_Zadaniya = @Nazvanie_Zadaniya
     AND SHK LIKE @SHK 
+    order By ID
 `;
 
     // Выполнение запроса с параметрами
