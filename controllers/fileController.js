@@ -143,7 +143,31 @@ router.get('/files', async (req, res) => {
   }
 });
 
+function processData(rows) {
+  // Столбцы, для которых необходимо заменить 0 или "0" на пустую строку
+  const columnsToCheck = [
+    'Srok_Godnosti', 'Opasnyi_Tovar', 'Zakrytaya_Zona', 
+    'Krupnogabaritnyi_Tovar', 'Yuvelirnye_Izdelia', 'Fakticheskoe_Kol_vo',
+    'Ubrano_iz_Zakaza', 'Op_1_Bl_1_Sht', 'Op_2_Bl_2_Sht', 'Op_3_Bl_3_Sht',
+    'Op_4_Bl_4_Sht', 'Op_5_Bl_5_Sht', 'Op_6_Blis_6_10_Sht', 'Op_7_Pereschyot',
+    'Op_9_Fasovka_Sborka', 'Op_10_Markirovka_SHT', 'Op_11_Markirovka_Prom',
+    'Op_13_Markirovka_Fabr', 'Op_14_TU_1_Sht', 'Op_15_TU_2_Sht', 'Op_16_TU_3_5',
+    'Op_17_TU_6_8', 'Op_468_Proverka_SHK', 'Op_469_Spetsifikatsiya_TM',
+    'Op_470_Dop_Upakovka', 'Pechat_Etiketki_s_SHK', 'Pechat_Etiketki_s_Opisaniem',
+    'Sortiruemyi_Tovar', 'Ne_Sortiruemyi_Tovar', 'Produkty'
+  ];
 
+  // Проходим по каждой строке данных и проверяем соответствующие столбцы
+  rows.forEach(row => {
+    columnsToCheck.forEach(column => {
+      if (row[column] === 0 || row[column] === "0") {
+        row[column] = ''; // Заменяем на пустую строку
+      }
+    });
+  });
+
+  return rows;
+}
 // 4. Метод для скачивания файла (создание и скачивание Excel файла)
 router.get('/download', async (req, res) => {
   try {
@@ -195,19 +219,18 @@ WHERE p.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
           // Если это не WB, оставляем как есть
           query1 = `
               SELECT Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
-                     Itog_MP, SOH, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
-                     Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
-                     Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
-                     Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
-                     Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, 
-           Opasnyi_Tovar, 
+                     Itog_MP, SOH, Srok_Godnosti,     Opasnyi_Tovar, 
            Zakrytaya_Zona, 
            Krupnogabaritnyi_Tovar, 
            Yuvelirnye_Izdelia, 
-           Pechat_Etiketki_s_SHK, 
-           Pechat_Etiketki_s_Opisaniem, 
            Fakticheskoe_Kol_vo, 
-           Ubrano_iz_Zakaza, vp, fact_vp, Plan_Otkaz
+           Ubrano_iz_Zakaza, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
+                     Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
+                     Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
+                     Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka,           Pechat_Etiketki_s_SHK, 
+           Pechat_Etiketki_s_Opisaniem,  Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
+                     Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, 
+       vp, fact_vp, Plan_Otkaz
               FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
       }
 
@@ -229,10 +252,12 @@ WHERE p.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
           console.log(`Результат второго запроса (длина): ${result2.recordset.length}`);
       }
 
+      const processedData1 = processData(result1.recordset);
+      const processedData2 = result2 ? processData(result2.recordset) : [];
       // Объединяем данные из обоих наборов
       const combinedData = {
-          dataSet1: result1.recordset,
-          dataSet2: result2 ? result2.recordset : [] // Если это WB, добавляем второй набор данных, иначе пустой массив
+        dataSet1: processedData1,
+        dataSet2: processedData2
       };
 
       // Отправляем ответ в виде JSON
