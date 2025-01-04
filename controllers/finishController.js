@@ -14,7 +14,7 @@ const updateData = async (req, res) => {
 
     // Формирование запроса на обновление данных
     const query = `
-  UPDATE  TOP(1) Test_MP
+  UPDATE Test_MP
   SET
     Mesto = ISNULL(@Mesto, Mesto),
     Vlozhennost = ISNULL(@Vlozhennost, Vlozhennost),
@@ -22,11 +22,17 @@ const updateData = async (req, res) => {
     Status = 2,
     Status_Zadaniya = 1,
     Time_End = ISNULL(@Time_End, Time_End)
-  WHERE
-    Nazvanie_Zadaniya = @Nazvanie_Zadaniya
-    AND SHK LIKE @SHK 
-    order By ID
+  WHERE ID = (
+    SELECT TOP(1) ID
+    FROM Test_MP
+    WHERE
+      Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+      AND SHK LIKE @SHK
+    ORDER BY ID
+  );
 `;
+
+
 
     // Выполнение запроса с параметрами
     const result = await pool.request()
