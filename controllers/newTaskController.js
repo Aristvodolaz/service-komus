@@ -362,7 +362,6 @@ const updateStatusNew = async (req, res) => {
         .input('Yuvelirnye_Izdelia', mssql.NVarChar(10), Yuvelirnye_Izdelia ?? '0')
         .input('Pechat_Etiketki_s_SHK', mssql.NVarChar(10), Pechat_Etiketki_s_SHK ?? '0')
         .input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar(10), Pechat_Etiketki_s_Opisaniem ?? '0')
-        .input('Status', mssql.Int, 3) // Установка Status в 2
         .query(`
           UPDATE Test_MP
           SET 
@@ -394,7 +393,6 @@ const updateStatusNew = async (req, res) => {
             Yuvelirnye_Izdelia = @Yuvelirnye_Izdelia,
             Pechat_Etiketki_s_SHK = @Pechat_Etiketki_s_SHK,
             Pechat_Etiketki_s_Opisaniem = @Pechat_Etiketki_s_Opisaniem,
-            Status = 3
           WHERE ID = @ID
         `);
         
