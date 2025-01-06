@@ -484,8 +484,8 @@ router.post('/upload-data-new', async (req, res) => {
       request.input('Yuvelirnye_Izdelia', mssql.NVarChar, data.Yuvelirnye_Izdelia);
       request.input('Pechat_Etiketki_s_SHK', mssql.NVarChar, data.Pechat_Etiketki_s_SHK);
       request.input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar, data.Pechat_Etiketki_s_Opisaniem);
-      request.input('vp', mssql.NVarChar, data.vp.toString());
-      request.input('Plan_Otkaz', mssql.NVarChar, data.Plan_Otkaz.toString());
+      request.input('vp', mssql.NVarChar, data.vp ? data.vp.toString() :null);
+      request.input('Plan_Otkaz', mssql.NVarChar, data.Plan_Otkaz ? data.Plan_Otkaz.toString(): null);
 
       await request.query(query);
 
