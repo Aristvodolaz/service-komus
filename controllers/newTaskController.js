@@ -392,7 +392,7 @@ const updateStatusNew = async (req, res) => {
             Krupnogabaritnyi_Tovar = @Krupnogabaritnyi_Tovar,
             Yuvelirnye_Izdelia = @Yuvelirnye_Izdelia,
             Pechat_Etiketki_s_SHK = @Pechat_Etiketki_s_SHK,
-            Pechat_Etiketki_s_Opisaniem = @Pechat_Etiketki_s_Opisaniem,
+            Pechat_Etiketki_s_Opisaniem = @Pechat_Etiketki_s_Opisaniem
           WHERE ID = @ID
         `);
         
