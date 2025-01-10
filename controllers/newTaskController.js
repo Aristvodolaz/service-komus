@@ -478,7 +478,6 @@ const updateStatusNew = async (req, res) => {
     }
   };  
   
-  
   const checkOrderCompletionOzon = async (req, res) => {
     const { nazvanie_zadaniya, articul } = req.query;
   
@@ -514,31 +513,33 @@ const updateStatusNew = async (req, res) => {
         return res.status(404).json({ success: false, value: 'Данные не найдены', errorCode: 404 });
       }
   
-      let allOrdersMatch = true;
-      let full = 0;
-      let have = 0;
+      // Итоговый заказ берём из первой записи
+      const firstRecord = result.recordset[0];
+      const itogZakaz = firstRecord.Itog_Zakaz;
   
-      for (const row of result.recordset) {
-        const total = row.mesto_vlozhennost_sum + row.ubrano_iz_zakaza; // Сумма Mesto * Vlozhennost + Ubrano_iz_Zakaza
-        if (total !== row.Itog_Zakaz) {
-          full = row.Itog_Zakaz;  // Исправлено: берём значение из `row`
-          have = total;
-          allOrdersMatch = false;
-          break; // Если хотя бы один заказ не совпадает, выходим из цикла
-        }
-      }
+      let totalSum = 0;
   
-      // Возвращаем результат проверки
-      if (allOrdersMatch) {
+      // Суммируем все `Mesto * Vlozhennost` для вычитания из `Itog_Zakaz`
+      result.recordset.forEach(row => {
+        const mestoVlozhennost = row.mesto_vlozhennost_sum ?? 0;
+        const ubranoIzZakaza = row.ubrano_iz_zakaza ?? 0;
+        totalSum += mestoVlozhennost + ubranoIzZakaza;
+      });
+  
+      // Сколько осталось добавить
+      const remaining = itogZakaz - totalSum;
+  
+      if (remaining > 0) {
         return res.status(200).json({
           success: true,
-          value: 'Все заказы заполнены корректно.',
+          value: `Можно добавить: ${remaining}`,
+          remaining,
           errorCode: 200,
         });
       } else {
         return res.status(200).json({
           success: false,
-          value: `Не все заказы совпадают с итогами: ${have} из ${full}`,
+          value: `Нельзя добавить больше. Осталось: ${remaining}`,
           errorCode: 200,
         });
       }
