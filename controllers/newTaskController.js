@@ -465,7 +465,7 @@ const updateStatusNew = async (req, res) => {
           errorCode: 200,
         });
       } else {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
           value: `Не все заказы совпадают с итогами: ${have} из ${full}`,
           errorCode: 200,
@@ -536,7 +536,7 @@ const updateStatusNew = async (req, res) => {
           errorCode: 200,
         });
       } else {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
           value: `Не все заказы совпадают с итогами: ${have} из ${full}`,
           errorCode: 200,
