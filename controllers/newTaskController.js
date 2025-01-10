@@ -468,7 +468,7 @@ const updateStatusNew = async (req, res) => {
         return res.status(400).json({
           success: false,
           value: `Не все заказы совпадают с итогами: ${have} из ${full}`,
-          errorCode: 400,
+          errorCode: 200,
         });
       }
   
@@ -539,7 +539,7 @@ const updateStatusNew = async (req, res) => {
         return res.status(400).json({
           success: false,
           value: `Не все заказы совпадают с итогами: ${have} из ${full}`,
-          errorCode: 400,
+          errorCode: 200,
         });
       }
   
