@@ -494,13 +494,13 @@ const updateStatusNew = async (req, res) => {
   
       // Формируем запрос
       const query = `
-        SELECT Artikul, Nazvanie_Zadaniya, 
-               SUM(ISNULL(Mesto, 0) * ISNULL(Vlozhennost, 0)) AS mesto_vlozhennost_sum, 
-               ISNULL(Ubrano_iz_Zakaza, 0) AS ubrano_iz_zakaza, 
-               Itog_Zakaz
-        FROM Test_MP
-        WHERE Nazvanie_Zadaniya = @nazvanie_zadaniya AND Artikul = @articul
-        GROUP BY Artikul, Nazvanie_Zadaniya, Ubrano_iz_Zakaza, Itog_Zakaz
+      SELECT Artikul, Nazvanie_Zadaniya, 
+       SUM(Mesto * Vlozhennost) AS mesto_vlozhennost_sum, 
+       MAX(Itog_Zakaz) AS Itog_Zakaz 
+FROM Test_MP
+WHERE Nazvanie_Zadaniya = @nazvanie_zadaniya AND Artikul = @articul
+GROUP BY Artikul, Nazvanie_Zadaniya
+
       `;
   
       // Выполнение запроса
