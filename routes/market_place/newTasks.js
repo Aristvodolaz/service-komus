@@ -12,4 +12,5 @@ router.post('/updateLdu', dataController.updateLduNEW)
 router.get('/checkOrderCompletionWB', dataController.checkOrderCompletion)
 router.get('/checkOrderCompletionOzon', dataController.checkOrderCompletionOzon)
 router.post('/closeTask', dataController.addTaskStatusExitNew);
+router.post('/sendEndData', dataController.endStatusNew)
 module.exports = router;

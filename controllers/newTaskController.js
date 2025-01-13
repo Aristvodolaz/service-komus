@@ -494,37 +494,32 @@ const updateStatusNew = async (req, res) => {
   
       // Формируем запрос
       const query = `
-      SELECT Artikul, Nazvanie_Zadaniya, 
-       SUM(Mesto * Vlozhennost) AS mesto_vlozhennost_sum, 
-       MAX(Itog_Zakaz) AS Itog_Zakaz 
-FROM Test_MP
-WHERE Nazvanie_Zadaniya = @nazvanie_zadaniya AND Artikul = @articul
-GROUP BY Artikul, Nazvanie_Zadaniya
-
+        SELECT Artikul, Nazvanie_Zadaniya, 
+               SUM(ISNULL(Mesto, 0) * ISNULL(Vlozhennost, 0)) AS mesto_vlozhennost_sum, 
+               ISNULL(SUM(Ubrano_iz_Zakaza), 0) AS ubrano_iz_zakaza, 
+               MAX(Itog_Zakaz) AS Itog_Zakaz
+        FROM Test_MP
+        WHERE Nazvanie_Zadaniya = @nazvanie_zadaniya AND Artikul = @articul
+        GROUP BY Artikul, Nazvanie_Zadaniya
       `;
   
       // Выполнение запроса
       const result = await pool.request()
         .input('nazvanie_zadaniya', mssql.NVarChar, nazvanie_zadaniya)
-        .input('articul', mssql.Int, articul) // Если артикул — строка, используем NVarChar
+        .input('articul', mssql.Int, articul) // Если артикул строковый, можно использовать NVarChar
         .query(query);
   
       if (result.recordset.length === 0) {
         return res.status(404).json({ success: false, value: 'Данные не найдены', errorCode: 404 });
       }
   
-      // Итоговый заказ берём из первой записи
       const firstRecord = result.recordset[0];
-      const itogZakaz = firstRecord.Itog_Zakaz;
+      const itogZakaz = firstRecord.Itog_Zakaz ?? 0;
+      const mestoVlozhennostSum = firstRecord.mesto_vlozhennost_sum ?? 0;
+      const ubranoIzZakazaSum = firstRecord.ubrano_iz_zakaza ?? 0;
   
-      let totalSum = 0;
-  
-      // Суммируем все `Mesto * Vlozhennost` для вычитания из `Itog_Zakaz`
-      result.recordset.forEach(row => {
-        const mestoVlozhennost = row.mesto_vlozhennost_sum ?? 0;
-        const ubranoIzZakaza = row.ubrano_iz_zakaza ?? 0;
-        totalSum += mestoVlozhennost + ubranoIzZakaza;
-      });
+      // Общий результат с учетом `Ubrano_iz_Zakaza`
+      const totalSum = mestoVlozhennostSum + ubranoIzZakazaSum;
   
       // Сколько осталось добавить
       const remaining = itogZakaz - totalSum;
@@ -551,6 +546,48 @@ GROUP BY Artikul, Nazvanie_Zadaniya
   };
   
 
+
+  const endStatusNew = async (req, res) => {
+    const { id, endTime, ispolnitel } = req.body;  // Получаем данные из тела запроса (req.body)
+  
+    // Проверка на наличие обязательных параметров
+    if (!id || !endTime || !ispolnitel) {
+      return res.status(400).json({ success: false, value: 'Недостаточно данных для запроса', errorCode: 400 });
+    }
+  
+    const STATUS_COMPLETED = 2; // Статус завершения
+    const STATUS_TASK_UPDATED = 1; // Статус обновления задачи
+  
+    try {
+      const pool = await connectToDatabase();
+      if (!pool) {
+        throw new Error('Ошибка подключения к базе данных');
+      }
+  
+      // Выполнение запроса к базе данных
+      await pool.request()
+        .input('ID', mssql.BigInt, id)
+        .input('Status', mssql.Int, STATUS_COMPLETED)
+        .input('Status_Zadaniya', mssql.Int, STATUS_TASK_UPDATED)
+        .input('Time_End', mssql.NVarChar(255), endTime)
+        .input('Ispolnitel', mssql.NVarChar(255), ispolnitel)
+        .query(`
+          UPDATE Test_MP 
+          SET Status = @Status, 
+              Time_End = @Time_End, 
+              Status_Zadaniya = @Status_Zadaniya, 
+              Ispolnitel = @Ispolnitel
+          WHERE ID = @ID
+        `);
+  
+      return res.status(200).json({ success: true, value: 'Статус успешно обновлен', errorCode: 200 });
+    } catch (error) {
+      console.error('Ошибка при обновлении статуса:', error.message);
+      res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+  };
+  
+  
 module.exports = {
   checkOrderCompletionOzon,
   checkOrderCompletion,
@@ -560,5 +597,6 @@ module.exports = {
     updateSHKNew,
     updateSHKWPSNew, 
     duplicateRecordNew,
-    getLDUNew
+    getLDUNew,
+    endStatusNew
 }
