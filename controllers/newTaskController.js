@@ -536,13 +536,7 @@ const updateStatusNew = async (req, res) => {
       }
   
       // Возвращаем результат проверки
-      if (allOrdersMatch) {
-        return res.status(200).json({
-          success: true,
-          value: 'Все заказы заполнены корректно.',
-          errorCode: 200,
-        });
-      } else {
+      if (!allOrdersMatch) {
         return res.status(200).json({
           success: false,
           value: `Не все заказы совпадают с итогами: ${have} из ${full}`,
