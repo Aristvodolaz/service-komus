@@ -11,6 +11,7 @@ router.put('/updateShk', dataController.updateSHKNew);
 router.post('/updateLdu', dataController.updateLduNEW)
 router.get('/checkOrderCompletionWB', dataController.checkOrderCompletion)
 router.get('/checkOrderCompletionOzon', dataController.checkOrderCompletionOzon)
+router.get('/checkOrderCompletionWBBox', dataController.checkOrderCompletionForBox)
 router.post('/closeTask', dataController.addTaskStatusExitNew);
 router.post('/sendEndData', dataController.endStatusNew)
 module.exports = router;

@@ -473,6 +473,89 @@ const updateStatusNew = async (req, res) => {
       res.status(500).json({ success: false, value: `Ошибка сервера: ${error.message}`, errorCode: 500 });
     }
   };  
+
+  const checkOrderCompletionForBox = async (req, res) => {
+    const { nazvanie_zadaniya, articul } = req.query; // получаем параметры запроса
+  
+    if (!nazvanie_zadaniya || !articul) {
+      return res.status(400).json({ success: false, value: 'Nazvanie_Zadaniya и Artikul обязательны', errorCode: 400 });
+    }
+  
+    try {
+      // Подключение к базе данных
+      const pool = await connectToDatabase();
+      if (!pool) {
+        return res.status(500).json({ success: false, value: 'Ошибка подключения к базе данных', errorCode: 500 });
+      }
+  
+      // Формируем строку запроса
+      const query = `
+        SELECT t.Artikul, t.Nazvanie_Zadaniya, 
+               SUM(p.Kolvo_Tovarov) AS total_colvo, 
+               ISNULL(t.Ubrano_iz_Zakaza, 0) AS ubrano_iz_zakaza, 
+               t.Itog_Zakaz
+        FROM Test_MP_privyazka p
+        JOIN Test_MP t ON p.Artikul = t.Artikul AND p.Nazvanie_Zadaniya = t.Nazvanie_Zadaniya
+        WHERE t.Nazvanie_Zadaniya = @nazvanie_zadaniya AND t.Artikul = @articul
+        GROUP BY t.Artikul, t.Nazvanie_Zadaniya, t.Ubrano_iz_Zakaza, t.Itog_Zakaz
+      `;
+  
+      // Выполнение запроса
+      const result = await pool.request()
+        .input('nazvanie_zadaniya', mssql.NVarChar, nazvanie_zadaniya)
+        .input('articul', mssql.NVarChar, articul) // Если артикул строковый, используем NVarChar
+        .query(query);
+  
+      // Проверка на пустой результат
+      if (result.recordset.length === 0) {
+        return res.status(404).json({ success: false, value: 'Данные по запросу не найдены', errorCode: 404 });
+      }
+  
+      // Проверка всех записей
+      let allOrdersMatch = true;
+      let have = 0;
+      let full = 0;
+  
+      for (const row of result.recordset) {
+        const total = row.total_colvo + row.ubrano_iz_zakaza; // Сумма количества товаров и убранного из заказа
+        have = total;
+        full = row.Itog_Zakaz;
+  
+        if (total < row.Itog_Zakaz) {
+          const remaining = row.Itog_Zakaz - total; // Сколько еще можно добавить
+          return res.status(200).json({
+            success: true,
+            value: `Можно добавить еще ${remaining} единиц(ы)`,
+            remainingToAdd: remaining,
+            errorCode: 200,
+          });
+        } else if (total > row.Itog_Zakaz) {
+          allOrdersMatch = false;
+          break; // Если хотя бы один заказ превышает итог, выходим из цикла
+        }
+      }
+  
+      // Возвращаем результат проверки
+      if (allOrdersMatch) {
+        return res.status(200).json({
+          success: true,
+          value: 'Все заказы заполнены корректно.',
+          errorCode: 200,
+        });
+      } else {
+        return res.status(200).json({
+          success: false,
+          value: `Не все заказы совпадают с итогами: ${have} из ${full}`,
+          errorCode: 200,
+        });
+      }
+  
+    } catch (error) {
+      console.error('Ошибка:', error);
+      res.status(500).json({ success: false, value: `Ошибка сервера: ${error.message}`, errorCode: 500 });
+    }
+};
+
   
   const checkOrderCompletionOzon = async (req, res) => {
     const { nazvanie_zadaniya, articul } = req.query;
@@ -594,5 +677,6 @@ module.exports = {
     updateSHKWPSNew, 
     duplicateRecordNew,
     getLDUNew,
-    endStatusNew
+    endStatusNew,
+    checkOrderCompletionForBox
 }

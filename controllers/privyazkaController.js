@@ -209,7 +209,7 @@ const endZapis = async (req, res) => {
 
 
 const endZapisNew = async (req, res) => {
-    const { id } = req.query;
+    const { id, time } = req.query;
 
     try {
         const pool = await connectToDatabase();
@@ -222,9 +222,10 @@ const endZapisNew = async (req, res) => {
             .input('ID', mssql.BigInt, id)
             .input('Status', mssql.Int, 2)
             .input('Status_Zadaniya', mssql.Int, 1)
+            .input('Time_End', mssql.NVarChar(255), time)
             .query(`
                 UPDATE Test_MP
-                SET Status = @Status, Status_Zadaniya = @Status_Zadaniya
+                SET Status = @Status, Status_Zadaniya = @Status_Zadaniya, Time_End =@Time_End
                 WHERE ID = @ID 
             `);
 
