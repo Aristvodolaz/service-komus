@@ -262,8 +262,6 @@ const updateStatusNew = async (req, res) => {
       // Обновление существующей записи с установленными значениями
       const result = await pool.request()
       .input('ID', mssql.BigInt, id)
-        .input('Status_Zadaniya', mssql.Int, 0) 
-        .input('Status', mssql.Int, 1) 
         .input('comment', mssql.NVarChar(mssql.MAX), comment) // Установка комментария
         .input('reason', mssql.NVarChar(mssql.MAX), reason) // Установка причины
         .input('Ubrano_iz_Zakaza', mssql.Int, count)

@@ -78,7 +78,94 @@ const { error } = require('winston');
     }
   };
   
+
+const addTaskData = async (req, res) => {
+  const { Nazvanie_Zadaniya, VP, Artikul, Plans, Fact } = req.body;
+
+  // Проверка на наличие необходимых параметров
+  if (!Nazvanie_Zadaniya || !VP || !Artikul || !Plans || !Fact) {
+    return res.status(400).json({
+      success: false,
+      value: 'Nazvanie_Zadaniya, VP, Artikul, Plans, Fact обязательны',
+      errorCode: 400
+    });
+  }
+
+  try {
+    // Подключение к базе данных
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+
+    // Выполнение SQL-запроса для добавления данных
+    await pool.request()
+      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), Nazvanie_Zadaniya)
+      .input('VP', mssql.NVarChar(255), VP)
+      .input('Artikul', mssql.NVarChar(255), Artikul)
+      .input('Plans', mssql.Int, Plans)
+      .input('Fact', mssql.Int, Fact)
+      .query(`
+        INSERT INTO [SPOe_rc].[dbo].[Test_MP_VP] (Nazvanie_Zadaniya, VP, Artikul, Plans, Fact)
+        VALUES (@Nazvanie_Zadaniya, @VP, @Artikul, @Plans, @Fact)
+      `);
+
+    // Успешный ответ
+    res.status(200).json({ success: true, value: 'Данные успешно добавлены', errorCode: 200 });
+  } catch (error) {
+    console.error('Ошибка:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+const getTransferNumsData = async (req, res) => {
+  try {
+    // Получаем значения параметров из запроса (например: ?transfer_nums=17569142,17569143)
+    const transferNums = req.query.transfer_nums;
+    const artikul = req.query.artikul;
+
+
+    if (!transferNums) {
+      return res.status(400).json({ success: false, value: 'Parameter "transfer_nums" is required', errorCode: 400 });
+    }
+
+    // Преобразуем строку значений в массив
+    const transferNumsList = transferNums.split(',').map((num) => num.trim());
+
+    // Формируем строку для SQL-запроса (например: '17569142, 17569143')
+    const transferNumsInClause = transferNumsList.join(',');  // Не ставим кавычки вокруг значений
+
+    // Подключаемся к базе данных
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+
+    // Выполняем SQL-запрос через OPENQUERY
+    const query = `
+      SELECT * 
+      FROM OPENQUERY(OW, '
+        SELECT  TRANSFER_NUM, ITEM_NUM, QTY_SHIPPED
+        FROM elite.whse_t_l$ 
+        WHERE TRANSFER_NUM IN (${transferNumsInClause}) and ITEM_NUM =''${artikul}''
+      ');
+    `;
+
+    // Выполняем запрос и получаем результат
+    const result = await pool.request().query(query);
+    const sum = result.recordset.reduce((total, record) => total + record.QTY_SHIPPED, 0);
+
+    // Отправляем результат клиенту
+    res.status(200).json({ success: true, value: result.recordset, sum: sum, errorCode: 200 });
+  } catch (err) {
+    console.error('Error executing query:', err);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
+
   module.exports = {
     setFactSize,
-    getQtyOrderedSum
+    getQtyOrderedSum,
+    addTaskData,
+    getTransferNumsData
   };
