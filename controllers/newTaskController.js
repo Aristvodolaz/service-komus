@@ -268,8 +268,6 @@ const updateStatusNew = async (req, res) => {
         .query(`
           UPDATE Test_MP 
           SET 
-            Status_Zadaniya = @Status_Zadaniya,
-            Status = @Status,
             comment = @comment,
             reason = @reason,
             Ubrano_iz_Zakaza = @Ubrano_iz_Zakaza
