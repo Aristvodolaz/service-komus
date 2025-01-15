@@ -24,7 +24,7 @@ const searchEmployeeById = async (pool, id) => {
 const searchBySHKForAuth = async (req, res) => {
   const { id } = req.query;
 
-  console.log(id+"")
+  console.log("Попытка авторизовать ШК: "+id+"")
 
   if (!id) {
     return res.status(400).json({ success: false, msg: 'Необходимо указать ID сотрудника', errorCode: 400 });
