@@ -218,7 +218,7 @@ WHERE p.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
      } else {
           // Если это не WB, оставляем как есть
           query1 = `
-              SELECT Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
+              SELECT vp, Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
                      Itog_MP, SOH, Srok_Godnosti,     Opasnyi_Tovar, 
            Zakrytaya_Zona, 
            Krupnogabaritnyi_Tovar, 
@@ -230,7 +230,10 @@ WHERE p.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
                      Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka,           Pechat_Etiketki_s_SHK, 
            Pechat_Etiketki_s_Opisaniem, 
                      Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty,  Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
-       vp, fact_vp, Plan_Otkaz
+        Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty,
+       Opasnyi_Tovar,Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
+       Yuvelirnye_Izdelia,Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, 
+       Fakticheskoe_Kol_vo,Ubrano_iz_Zakaza, Time_Start, Time_End
               FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
       }
 
