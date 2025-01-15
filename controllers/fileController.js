@@ -168,110 +168,123 @@ function processData(rows) {
 
   return rows;
 }
-// 4. Метод для скачивания файла (создание и скачивание Excel файла)
+
+function processData(rows) {
+  // Столбцы, для которых необходимо заменить "0", null или массивы с "null" на пустую строку
+  const columnsToCheck = [
+    'Srok_Godnosti', 'Opasnyi_Tovar', 'Zakrytaya_Zona', 
+    'Krupnogabaritnyi_Tovar', 'Yuvelirnye_Izdelia', 'Fakticheskoe_Kol_vo',
+    'Ubrano_iz_Zakaza', 'Op_1_Bl_1_Sht', 'Op_2_Bl_2_Sht', 'Op_3_Bl_3_Sht',
+    'Op_4_Bl_4_Sht', 'Op_5_Bl_5_Sht', 'Op_6_Blis_6_10_Sht', 'Op_7_Pereschyot',
+    'Op_9_Fasovka_Sborka', 'Op_10_Markirovka_SHT', 'Op_11_Markirovka_Prom',
+    'Op_13_Markirovka_Fabr', 'Op_14_TU_1_Sht', 'Op_15_TU_2_Sht', 'Op_16_TU_3_5',
+    'Op_17_TU_6_8', 'Op_468_Proverka_SHK', 'Op_469_Spetsifikatsiya_TM',
+    'Op_470_Dop_Upakovka', 'Pechat_Etiketki_s_SHK', 'Pechat_Etiketki_s_Opisaniem',
+    'Sortiruemyi_Tovar', 'Ne_Sortiruemyi_Tovar', 'Produkty'
+  ];
+
+  // Проходим по каждой строке данных и очищаем данные
+  rows.forEach(row => {
+    columnsToCheck.forEach(column => {
+      if (Array.isArray(row[column])) {
+        // Если значение — массив и все элементы равны `null`, заменяем на пустую строку
+        const uniqueValues = [...new Set(row[column])];
+        if (uniqueValues.length === 1 && uniqueValues[0] === null) {
+          row[column] = ''; // Заменяем массив с null на пустую строку
+        }
+      } else if (row[column] === 0 || row[column] === '0' || row[column] === null) {
+        row[column] = ''; // Заменяем на пустую строку
+      }
+    });
+  });
+
+  return rows;
+}
+
 router.get('/download', async (req, res) => {
   try {
-      const taskName = req.query.task;
+    const taskName = req.query.task;
 
-      if (!taskName) {
-          return res.status(400).json({ message: "Параметр 'task' обязателен." });
-      }
+    if (!taskName) {
+      return res.status(400).json({ message: "Параметр 'task' обязателен." });
+    }
 
-      const isWB = taskName.includes('WB');
-      console.log(`Загрузка данных для задания: ${taskName}, isWB: ${isWB}`);
+    const isWB = taskName.includes('WB');
+    console.log(`Загрузка данных для задания: ${taskName}, isWB: ${isWB}`);
 
-      // Подключаемся к базе данных
-      const pool = await connectToDatabase();
-      if (!pool) {
-          return res.status(500).json({ message: "Ошибка подключения к базе данных." });
-      }
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ message: "Ошибка подключения к базе данных." });
+    }
 
-      // Формируем SQL-запросы в зависимости от типа файла
-      let query1, query2;
-      if (isWB) {
-          // Первый набор данных для WB
-          query1 = `
-              SELECT 
-    p.Nazvanie_Zadaniya,
-    p.Artikul,
-    m.SHK as Barcode,
-    p.Kolvo_Tovarov,
-    p.SHK_Coroba,
-    p.Srok_Godnosti,
-    p.Pallet_No,
-    p.SHK_WPS
-FROM Test_MP_Privyazka p
-LEFT JOIN Test_MP m
-    ON p.Artikul = m.Artikul AND m.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
-WHERE p.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+    let query1, query2;
+    if (isWB) {
+      query1 = `
+        SELECT 
+          p.Nazvanie_Zadaniya,
+          p.Artikul,
+          m.SHK as Barcode,
+          p.Kolvo_Tovarov,
+          p.SHK_Coroba,
+          p.Srok_Godnosti,
+          p.Pallet_No,
+          p.SHK_WPS
+        FROM Test_MP_Privyazka p
+        LEFT JOIN Test_MP m
+          ON p.Artikul = m.Artikul AND m.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+        WHERE p.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+      `;
 
-`;
+      query2 = `
+        SELECT vp, Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
+               Itog_MP, SOH, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
+               Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
+               Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
+               Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
+               Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty,
+               Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem,
+               Fakticheskoe_Kol_vo, Ubrano_iz_Zakaza, Time_Start, Time_End
+        FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+      `;
+    } else {
+      query1 = `
+        SELECT vp, Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
+               Itog_MP, SOH, Srok_Godnosti, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, Yuvelirnye_Izdelia,
+               Fakticheskoe_Kol_vo, Ubrano_iz_Zakaza, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
+               Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
+               Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
+               Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, 
+               Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
+               Time_Start, Time_End
+        FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+      `;
+    }
 
-          // Второй набор данных для WB
-          query2 = `
-              SELECT vp,Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
-                     Itog_MP, SOH, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
-                     Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
-                     Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
-                     Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
-                      Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty,
-       Opasnyi_Tovar,Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
-       Yuvelirnye_Izdelia,Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, 
-       Fakticheskoe_Kol_vo,Ubrano_iz_Zakaza, Time_Start, Time_End
-              FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
-     } else {
-          // Если это не WB, оставляем как есть
-          query1 = `
-              SELECT vp, Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
-                     Itog_MP, SOH, Srok_Godnosti,     Opasnyi_Tovar, 
-           Zakrytaya_Zona, 
-           Krupnogabaritnyi_Tovar, 
-           Yuvelirnye_Izdelia, 
-           Fakticheskoe_Kol_vo, 
-           Ubrano_iz_Zakaza, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
-                     Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
-                     Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
-                     Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka,           Pechat_Etiketki_s_SHK, 
-           Pechat_Etiketki_s_Opisaniem, 
-                     Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty,  Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
-        Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty,
-       Opasnyi_Tovar,Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
-       Yuvelirnye_Izdelia,Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, 
-       Fakticheskoe_Kol_vo,Ubrano_iz_Zakaza, Time_Start, Time_End
-              FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya`;
-      }
+    const request = pool.request();
+    request.input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName);
+    const result1 = await request.query(query1);
 
-      // Выполняем первый запрос
-      const request = pool.request();
-      request.input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName);
-      const result1 = await request.query(query1);
+    if (result1.recordset.length === 0) {
+      return res.status(404).json({ message: "Данные для указанного задания не найдены." });
+    }
 
-      // Проверка результата первого запроса
-      console.log(`Результат первого запроса (длина): ${result1.recordset.length}`);
-      if (result1.recordset.length === 0) {
-          return res.status(404).json({ message: "Данные для указанного задания не найдены." });
-      }
+    let result2 = null;
+    if (isWB) {
+      result2 = await request.query(query2);
+    }
 
-      // Выполняем второй запрос (если это WB)
-      let result2 = null;
-      if (isWB) {
-          result2 = await request.query(query2);
-          console.log(`Результат второго запроса (длина): ${result2.recordset.length}`);
-      }
+    const processedData1 = processData(result1.recordset);
+    const processedData2 = result2 ? processData(result2.recordset) : [];
 
-      const processedData1 = processData(result1.recordset);
-      const processedData2 = result2 ? processData(result2.recordset) : [];
-      // Объединяем данные из обоих наборов
-      const combinedData = {
-        dataSet1: processedData1,
-        dataSet2: processedData2
-      };
+    const combinedData = {
+      dataSet1: processedData1,
+      dataSet2: processedData2
+    };
 
-      // Отправляем ответ в виде JSON
-      res.status(200).json(combinedData);
+    res.status(200).json(combinedData);
   } catch (err) {
-      console.error('Ошибка при обработке запроса:', err);
-      res.status(500).json({ message: "Ошибка при скачивании файла." });
+    console.error('Ошибка при обработке запроса:', err);
+    res.status(500).json({ message: "Ошибка при скачивании файла." });
   }
 });
 
