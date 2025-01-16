@@ -530,7 +530,7 @@ const updateStatusNew = async (req, res) => {
           const remaining = row.Itog_Zakaz - total; // Сколько еще можно добавить
           return res.status(200).json({
             success: true,
-            value: `Можно добавить еще ${remaining} единиц(ы)`,
+            value: `Можно добавить еще ${remaining} единиц(ы).`,
             remainingToAdd: remaining,
             errorCode: 200,
           });
@@ -540,20 +540,19 @@ const updateStatusNew = async (req, res) => {
         }
       }
   
-      // Возвращаем результат проверки
-      if (!allOrdersMatch) {
-        return res.status(200).json({
-          success: false,
-          value: `Не все заказы совпадают с итогами: ${have} из ${full}`,
-          errorCode: 200,
-        });
-      }
+      // Если все совпадает
+      return res.status(200).json({
+        success: true,
+        value: 'Все заказы полностью соответствуют итогам.',
+        errorCode: 200,
+      });
   
     } catch (error) {
       console.error('Ошибка:', error);
       res.status(500).json({ success: false, value: `Ошибка сервера: ${error.message}`, errorCode: 500 });
     }
-};
+  };
+  
 
   
   const checkOrderCompletionOzon = async (req, res) => {
