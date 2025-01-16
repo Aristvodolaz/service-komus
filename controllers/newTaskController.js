@@ -491,11 +491,11 @@ const updateStatusNew = async (req, res) => {
       // Формируем строку запроса
       const query = `
         SELECT t.Artikul, t.Nazvanie_Zadaniya, 
-               SUM(p.Kolvo_Tovarov) AS total_colvo, 
+               ISNULL(SUM(p.Kolvo_Tovarov), 0) AS total_colvo, 
                ISNULL(t.Ubrano_iz_Zakaza, 0) AS ubrano_iz_zakaza, 
                t.Itog_Zakaz
-        FROM Test_MP_privyazka p
-        JOIN Test_MP t ON p.Artikul = t.Artikul AND p.Nazvanie_Zadaniya = t.Nazvanie_Zadaniya
+        FROM Test_MP t
+        LEFT JOIN Test_MP_privyazka p ON p.Artikul = t.Artikul AND p.Nazvanie_Zadaniya = t.Nazvanie_Zadaniya
         WHERE t.Nazvanie_Zadaniya = @nazvanie_zadaniya AND t.Artikul = @articul
         GROUP BY t.Artikul, t.Nazvanie_Zadaniya, t.Ubrano_iz_Zakaza, t.Itog_Zakaz
       `;
@@ -506,9 +506,14 @@ const updateStatusNew = async (req, res) => {
         .input('articul', mssql.NVarChar, articul) // Если артикул строковый, используем NVarChar
         .query(query);
   
-      // Проверка на пустой результат
+      // Если результат пуст, возвращаем значение по умолчанию
       if (result.recordset.length === 0) {
-        return res.status(404).json({ success: false, value: 'Данные по запросу не найдены', errorCode: 404 });
+        return res.status(200).json({
+          success: true,
+          value: 'Нет данных в Test_MP_privyazka. Можно добавить все единицы.',
+          remainingToAdd: 0,
+          errorCode: 200,
+        });
       }
   
       // Проверка всех записей
