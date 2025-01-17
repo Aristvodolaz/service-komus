@@ -39,7 +39,7 @@ const getPalletsByTaskName = async (req, res) => {
           .query(`
             SELECT 
               CAST(Pallet_No AS NVARCHAR(255)) AS Pallet_No, 
-              COUNT(*) AS Total_Kolvo
+              Sum(Mesto) AS Total_Kolvo
             FROM Test_MP
             WHERE Nazvanie_Zadaniya = @taskName AND Pallet_No IS NOT NULL
             GROUP BY Pallet_No
