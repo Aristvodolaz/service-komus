@@ -120,11 +120,25 @@ const getPalletsByTaskName = async (req, res) => {
       }
 
       // Подсчёт мест и товаров
-      const totalPlaces = result.recordset.length; // Количество мест = количество строк
-      const totalItems = result.recordset.reduce(
+      let totalPlaces;
+      let totalItems;
+      if (tableName === 'Test_MP_Privyazka') {
+       totalPlaces = result.recordset.length; // Количество мест = количество строк
+       totalItems = result.recordset.reduce(
         (sum, record) => sum + (record.Kolvo_Tovarov || 0),
         0
       );
+      } else{
+         totalPlaces = result.recordset.reduce(
+          (sum, record) => sum + (record.Mesto || 0), // Суммируем поле Mesto
+          0
+        );
+        totalItems = result.recordset.reduce(
+          (sum, record) => sum + (record.Kolvo_Tovarov || record.Vlozhennost || 0), // Суммируем количество товаров
+          0
+        );
+      }
+     
       // Успешный ответ
       res.status(200).json({
         success: true,
