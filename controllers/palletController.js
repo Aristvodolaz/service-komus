@@ -170,7 +170,7 @@ const getPalletsByTaskName = async (req, res) => {
         .input('TaskName', mssql.NVarChar, taskName)
         .query(`
           DELETE FROM Test_MP_Privyazka
-          WHERE Artikul = @Articul AND NazvanieZadaniya = @TaskName
+          WHERE Artikul = @Articul AND Nazvanie_Zadaniya = @TaskName
         `);
   
       // Обнуляем запись в `Test_MP` по `ID`
