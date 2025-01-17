@@ -151,6 +151,110 @@ const getPalletsByTaskName = async (req, res) => {
     }
   };
   
+  const resetWB = async (req, res) => {
+    const { articul, taskName, id } = req.query;
   
+    if (!articul || !taskName || !id) {
+      return res.status(400).json({ success: false, value: 'articul, taskName, and id are required', errorCode: 400 });
+    }
+  
+    try {
+      const pool = await connectToDatabase();
+      if (!pool) {
+        throw new Error('Ошибка подключения к базе данных');
+      }
+  
+      // Удаляем записи из `Test_MP_Privyazka` по `articul` и `taskName`
+      await pool.request()
+        .input('Articul', mssql.NVarChar, articul)
+        .input('TaskName', mssql.NVarChar, taskName)
+        .query(`
+          DELETE FROM Test_MP_Privyazka
+          WHERE Artikul = @Articul AND NazvanieZadaniya = @TaskName
+        `);
+  
+      // Обнуляем запись в `Test_MP` по `ID`
+      await pool.request()
+        .input('ID', mssql.BigInt, BigInt(id))
+        .query(`
+          UPDATE Test_MP
+          SET Status = 0,
+              Status_Zadaniya = 0,
+              Mesto = 0,
+              Vlozhennost = 0,
+              Pallet = 0
+          WHERE ID = @ID
+        `);
+  
+      res.status(200).json({ success: true, value: 'WB reset completed', errorCode: 200 });
+  
+    } catch (error) {
+      console.error('Ошибка при обнулении WB:', error);
+      res.status(500).json({ success: false, value: error.message, errorCode: 500 });
+    }
+  };
+  
+  const resetOzon = async (req, res) => {
+    const { taskName, articul } = req.query;
+  
+    if (!taskName || !articul) {
+      return res.status(400).json({ success: false, value: 'taskName and articul are required', errorCode: 400 });
+    }
+  
+    try {
+      const pool = await connectToDatabase();
+      if (!pool) {
+        throw new Error('Ошибка подключения к базе данных');
+      }
+  
+      // Получаем записи по `taskName` и `articul`, сортируем по `ID`
+      const result = await pool.request()
+        .input('TaskName', mssql.NVarChar, taskName)
+        .input('Articul', mssql.NVarChar, articul)
+        .query(`
+          SELECT * FROM Test_MP
+          WHERE Nazvanie_Zadaniya = @TaskName AND Artikul = @Articul
+          ORDER BY ID ASC
+        `);
+  
+      const records = result.recordset;
+  
+      if (records.length === 0) {
+        return res.status(404).json({ success: false, value: 'No records found', errorCode: 404 });
+      }
+  
+      const earliestRecord = records[0]; // Самая ранняя запись по ID
+      const earliestId = earliestRecord.ID;
+  
+      // Удаляем все записи, кроме самой ранней
+      await pool.request()
+        .input('TaskName', mssql.NVarChar, taskName)
+        .input('Articul', mssql.NVarChar, articul)
+        .input('ID', mssql.BigInt, earliestId)
+        .query(`
+          DELETE FROM Test_MP
+          WHERE Nazvanie_Zadaniya = @TaskName AND Artikul = @Articul AND ID <> @ID
+        `);
+  
+      // Обнуляем поля в самой ранней записи
+      await pool.request()
+        .input('ID', mssql.BigInt, earliestId)
+        .query(`
+          UPDATE Test_MP
+          SET Status = 0,
+              Status_Zadaniya = 0,
+              Mesto = 0,
+              Vlozhennost = 0,
+              Pallet_No = 0
+          WHERE ID = @ID
+        `);
+  
+      res.status(200).json({ success: true, value: 'Ozon reset completed', errorCode: 200 });
+  
+    } catch (error) {
+      console.error('Ошибка при обнулении Ozon:', error);
+      res.status(500).json({ success: false, value: error.message, errorCode: 500 });
+    }
+  };
 
-module.exports = { getPalletsByTaskName, getArticlesByPalletNumber };
+module.exports = { getPalletsByTaskName, getArticlesByPalletNumber , resetOzon, resetWB};
