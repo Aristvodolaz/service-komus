@@ -182,7 +182,7 @@ const getPalletsByTaskName = async (req, res) => {
               Status_Zadaniya = 0,
               Mesto = 0,
               Vlozhennost = 0,
-              Pallet = 0
+              Pallet_No = 0
           WHERE ID = @ID
         `);
   
