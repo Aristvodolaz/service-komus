@@ -129,7 +129,6 @@ const getUniqueTaskNames = async (req, res) => {
 
 
 
-
 const getByShk = async (req, res) => {
   const { taskName, shk } = req.query;
 
@@ -143,18 +142,29 @@ const getByShk = async (req, res) => {
       return res.status(500).json({ success: false, value: null, errorCode: 500 });
     }
 
-    const result = await pool.request()
+    // Получение записи
+    const selectResult = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('SHK', mssql.NVarChar(50), `%${shk}%`)
       .query('SELECT * FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
 
-    if (result.recordset.length === 0) {
+    if (selectResult.recordset.length === 0) {
       return res.status(200).json({ success: false, value: null, errorCode: 200 });
     }
 
-    res.status(200).json({ success: true, value: result.recordset, errorCode: 200 });
+    // Обновление найденных записей
+    await pool.request()
+      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
+      .input('SHK', mssql.NVarChar(50), `%${shk}%`)
+      .query('UPDATE Test_MP SET SHK = @SHK WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
+
+    res.status(200).json({
+      success: true,
+      value: selectResult.recordset,
+      errorCode: 200,
+    });
   } catch (error) {
-    console.error('Ошибка при получении данных по SHK:', error);
+    console.error('Ошибка при обработке запроса:', error);
     res.status(500).json({ success: false, value: null, errorCode: 500 });
   }
 };
