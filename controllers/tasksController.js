@@ -153,10 +153,10 @@ const getByShk = async (req, res) => {
     }
 
     // Обновление найденных записей
-    await pool.request()
-      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
-      .input('SHK', mssql.NVarChar(50), `%${shk}%`)
-      .query('UPDATE Test_MP SET SHK = shk WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
+    aw  .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
+    .input('Old_SHK', mssql.NVarChar(50), `%${shk}%`)
+    .input('New_SHK', mssql.NVarChar(50), shk)
+    .query('UPDATE Test_MP SET SHK = @New_SHK WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @Old_SHK');
 
     res.status(200).json({
       success: true,
