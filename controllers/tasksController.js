@@ -156,7 +156,7 @@ const getByShk = async (req, res) => {
     await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('SHK', mssql.NVarChar(50), `%${shk}%`)
-      .query('UPDATE Test_MP SET SHK = @SHK WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
+      .query('UPDATE Test_MP SET SHK = shk WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @SHK');
 
     res.status(200).json({
       success: true,
