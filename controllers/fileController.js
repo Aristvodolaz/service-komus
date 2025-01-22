@@ -201,6 +201,32 @@ function processData(rows) {
   return rows;
 }
 
+router.get('/all-records', async (req, res) => {
+  try {
+    // Подключаемся к базе данных
+    const pool = await connectToDatabase();
+    if (!pool) {
+      return res.status(500).json({ message: "Ошибка подключения к базе данных." });
+    }
+
+    // Выполняем запрос для получения всех записей
+    const query = "SELECT * FROM Test_MP";
+    const result = await pool.request().query(query);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Нет записей в таблице Test_MP." });
+    }
+
+    // Возвращаем записи
+    res.status(200).json(result.recordset);
+  } catch (err) {
+    console.error('Ошибка при выполнении запроса:', err);
+    res.status(500).json({ message: "Ошибка при получении записей из таблицы Test_MP." });
+  }
+});
+
+module.exports = router;
+
 router.get('/download', async (req, res) => {
   try {
     const taskName = req.query.task;
