@@ -5,5 +5,6 @@ const updateController = require('../controllers/finishController');
 // Роут для обновления данных в указанных колонках
 router.post('/update', updateController.updateData);
 router.post('/updateNew', updateController.updateDataNew);
+router.post('/updateOrAdd', updateController.updateOrAddRecord);
 
 module.exports = router;
