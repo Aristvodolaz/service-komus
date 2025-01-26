@@ -146,8 +146,8 @@ const updateOrAddRecord = async (req, res) => {
     } else {
       // Если совпадений нет, создаем новую запись
       const insertQuery = `
-        INSERT INTO Test_MP (ID, Mesto, Vlozhennost, Pallet_No, Status, Status_Zadaniya, SHK_WPS, Time_End)
-        VALUES (@ID, @Mesto, @Vlozhennost, @Pallet_No, 2, 1, 0, @Time_End)
+        INSERT INTO Test_MP (ID, Mesto, Vlozhennost, Pallet_No, Time_End)
+        VALUES (@ID, @Mesto, @Vlozhennost, @Pallet_No, @Time_End)
       `;
       await pool.request()
         .input('ID', mssql.BigInt, id)
