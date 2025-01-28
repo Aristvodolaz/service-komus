@@ -161,50 +161,84 @@ const { error } = require('winston');
     }
   };
   
-const getTransferNumsData = async (req, res) => {
-  try {
-    // Получаем значения параметров из запроса (например: ?transfer_nums=17569142,17569143)
-    const transferNums = req.query.transfer_nums;
-    const artikul = req.query.artikul;
-
-
-    if (!transferNums) {
-      return res.status(400).json({ success: false, value: 'Parameter "transfer_nums" is required', errorCode: 400 });
+  const getTransferNumsData = async (req, res) => {
+    try {
+      // Получаем значения параметров из запроса
+      const transferNums = req.query.transfer_nums;
+      const artikul = req.query.artikul;
+  
+      if (!transferNums || !artikul) {
+        return res.status(400).json({ 
+          success: false, 
+          value: 'Parameters "transfer_nums" and "artikul" are required', 
+          errorCode: 400 
+        });
+      }
+  
+      // Преобразуем строку значений в массив
+      const transferNumsList = transferNums.split(',').map((num) => num.trim());
+  
+      // Формируем строку для SQL-запроса
+      const transferNumsInClause = transferNumsList.join(',');
+  
+      // Подключаемся к базе данных
+      const pool = await connectToDatabase();
+      if (!pool) {
+        return res.status(500).json({ success: false, value: null, errorCode: 500 });
+      }
+  
+      // Выполняем первый SQL-запрос для получения QTY_SHIPPED
+      const query = `
+        SELECT TRANSFER_NUM, ITEM_NUM, QTY_SHIPPED
+        FROM OPENQUERY(OW, '
+          SELECT TRANSFER_NUM, ITEM_NUM, QTY_SHIPPED
+          FROM elite.whse_t_l$ 
+          WHERE TRANSFER_NUM IN (${transferNumsInClause}) AND ITEM_NUM = ''${artikul}''
+        ');
+      `;
+      const result = await pool.request().query(query);
+  
+      // Проверяем, есть ли данные в первом запросе
+      if (result.recordset.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          value: 'No data found for the given transfer numbers and artikul', 
+          errorCode: 404 
+        });
+      }
+  
+      // Суммируем QTY_SHIPPED
+      const qtyShipped = result.recordset.reduce((total, record) => total + record.QTY_SHIPPED, 0);
+  
+      // Выполняем второй запрос для получения Fact из таблицы Test_MP_VP
+      const factQuery = `
+        SELECT SUM(Fact) AS Fact
+        FROM Test_MP_VP
+        WHERE VP IN (${transferNumsInClause}) AND Artikul = '${artikul}';
+      `;
+      const factResult = await pool.request().query(factQuery);
+  
+      // Получаем суммарный Fact
+      const fact = factResult.recordset[0]?.Fact || 0;
+  
+      // Вычисляем итоговую сумму
+      const finalSum = qtyShipped - fact;
+  
+      // Отправляем результат клиенту
+      res.status(200).json({ 
+        success: true, 
+        value: result.recordset, 
+        sum: qtyShipped,
+        factSum: finalSum, 
+        errorCode: 200 
+      });
+    } catch (err) {
+      console.error('Error executing query:', err);
+      res.status(500).json({ success: false, value: null, errorCode: 500 });
     }
-
-    // Преобразуем строку значений в массив
-    const transferNumsList = transferNums.split(',').map((num) => num.trim());
-
-    // Формируем строку для SQL-запроса (например: '17569142, 17569143')
-    const transferNumsInClause = transferNumsList.join(',');  // Не ставим кавычки вокруг значений
-
-    // Подключаемся к базе данных
-    const pool = await connectToDatabase();
-    if (!pool) {
-      return res.status(500).json({ success: false, value: null, errorCode: 500 });
-    }
-
-    // Выполняем SQL-запрос через OPENQUERY
-    const query = `
-      SELECT * 
-      FROM OPENQUERY(OW, '
-        SELECT  TRANSFER_NUM, ITEM_NUM, QTY_SHIPPED
-        FROM elite.whse_t_l$ 
-        WHERE TRANSFER_NUM IN (${transferNumsInClause}) and ITEM_NUM =''${artikul}''
-      ');
-    `;
-
-    // Выполняем запрос и получаем результат
-    const result = await pool.request().query(query);
-    const sum = result.recordset.reduce((total, record) => total + record.QTY_SHIPPED, 0);
-
-    // Отправляем результат клиенту
-    res.status(200).json({ success: true, value: result.recordset, sum: sum, errorCode: 200 });
-  } catch (err) {
-    console.error('Error executing query:', err);
-    res.status(500).json({ success: false, value: null, errorCode: 500 });
-  }
-};
+  };
+  
+  
 
 
   module.exports = {
