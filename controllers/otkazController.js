@@ -79,44 +79,88 @@ const { error } = require('winston');
   };
   
 
-const addTaskData = async (req, res) => {
-  const { Nazvanie_Zadaniya, VP, Artikul, Plans, Fact } = req.body;
-
-  // Проверка на наличие необходимых параметров
-  if (!Nazvanie_Zadaniya || !VP || !Artikul || !Plans || !Fact) {
-    return res.status(400).json({
-      success: false,
-      value: 'Nazvanie_Zadaniya, VP, Artikul, Plans, Fact обязательны',
-      errorCode: 400
-    });
-  }
-
-  try {
-    // Подключение к базе данных
-    const pool = await connectToDatabase();
-    if (!pool) {
-      return res.status(500).json({ success: false, value: null, errorCode: 500 });
+  const addOrUpdateTaskData = async (req, res) => {
+    const { Nazvanie_Zadaniya, VP, Artikul, Plans, Fact } = req.body;
+  
+    // Проверка на наличие необходимых параметров
+    if (!Nazvanie_Zadaniya || !VP || !Artikul || !Plans || !Fact) {
+      return res.status(400).json({
+        success: false,
+        value: 'Nazvanie_Zadaniya, VP, Artikul, Plans, Fact обязательны',
+        errorCode: 400
+      });
     }
-
-    // Выполнение SQL-запроса для добавления данных
-    await pool.request()
-      .input('Nazvanie_Zadaniya', mssql.NVarChar(255), Nazvanie_Zadaniya)
-      .input('VP', mssql.NVarChar(255), VP)
-      .input('Artikul', mssql.NVarChar(255), Artikul)
-      .input('Plans', mssql.Int, Plans)
-      .input('Fact', mssql.Int, Fact)
-      .query(`
-        INSERT INTO [SPOe_rc].[dbo].[Test_MP_VP] (Nazvanie_Zadaniya, VP, Artikul, Plans, Fact)
-        VALUES (@Nazvanie_Zadaniya, @VP, @Artikul, @Plans, @Fact)
-      `);
-
-    // Успешный ответ
-    res.status(200).json({ success: true, value: 'Данные успешно добавлены', errorCode: 200 });
-  } catch (error) {
-    console.error('Ошибка:', error);
-    res.status(500).json({ success: false, value: null, errorCode: 500 });
-  }
-};
+  
+    try {
+      // Подключение к базе данных
+      const pool = await connectToDatabase();
+      if (!pool) {
+        return res.status(500).json({ success: false, value: null, errorCode: 500 });
+      }
+  
+      // Проверка существования записи
+      const checkQuery = `
+        SELECT Fact
+        FROM [SPOe_rc].[dbo].[Test_MP_VP]
+        WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+          AND VP = @VP
+          AND Artikul = @Artikul
+          AND Plans = @Plans
+      `;
+  
+      const checkResult = await pool.request()
+        .input('Nazvanie_Zadaniya', mssql.NVarChar(255), Nazvanie_Zadaniya)
+        .input('VP', mssql.NVarChar(255), VP)
+        .input('Artikul', mssql.NVarChar(255), Artikul)
+        .input('Plans', mssql.Int, Plans)
+        .query(checkQuery);
+  
+      if (checkResult.recordset.length > 0) {
+        // Если запись существует, суммируем Fact
+        const currentFact = checkResult.recordset[0].Fact;
+        const newFact = currentFact + Fact;
+  
+        const updateQuery = `
+          UPDATE [SPOe_rc].[dbo].[Test_MP_VP]
+          SET Fact = @Fact
+          WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+            AND VP = @VP
+            AND Artikul = @Artikul
+            AND Plans = @Plans
+        `;
+  
+        await pool.request()
+          .input('Fact', mssql.Int, newFact)
+          .input('Nazvanie_Zadaniya', mssql.NVarChar(255), Nazvanie_Zadaniya)
+          .input('VP', mssql.NVarChar(255), VP)
+          .input('Artikul', mssql.NVarChar(255), Artikul)
+          .input('Plans', mssql.Int, Plans)
+          .query(updateQuery);
+  
+        return res.status(200).json({ success: true, value: 'Fact успешно обновлён', errorCode: 200 });
+      } else {
+        // Если записи нет, добавляем новую
+        const insertQuery = `
+          INSERT INTO [SPOe_rc].[dbo].[Test_MP_VP] (Nazvanie_Zadaniya, VP, Artikul, Plans, Fact)
+          VALUES (@Nazvanie_Zadaniya, @VP, @Artikul, @Plans, @Fact)
+        `;
+  
+        await pool.request()
+          .input('Nazvanie_Zadaniya', mssql.NVarChar(255), Nazvanie_Zadaniya)
+          .input('VP', mssql.NVarChar(255), VP)
+          .input('Artikul', mssql.NVarChar(255), Artikul)
+          .input('Plans', mssql.Int, Plans)
+          .input('Fact', mssql.Int, Fact)
+          .query(insertQuery);
+  
+        return res.status(200).json({ success: true, value: 'Данные успешно добавлены', errorCode: 200 });
+      }
+    } catch (error) {
+      console.error('Ошибка:', error);
+      res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+  };
+  
 const getTransferNumsData = async (req, res) => {
   try {
     // Получаем значения параметров из запроса (например: ?transfer_nums=17569142,17569143)
@@ -166,6 +210,6 @@ const getTransferNumsData = async (req, res) => {
   module.exports = {
     setFactSize,
     getQtyOrderedSum,
-    addTaskData,
+    addOrUpdateTaskData,
     getTransferNumsData
   };

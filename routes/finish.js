@@ -6,5 +6,6 @@ const updateController = require('../controllers/finishController');
 router.post('/update', updateController.updateData);
 router.post('/updateNew', updateController.updateDataNew);
 router.post('/updateOrAdd', updateController.updateOrAddRecord);
+router.post('/setFinishStatus', updateController.setFinishStatus)
 
 module.exports = router;
