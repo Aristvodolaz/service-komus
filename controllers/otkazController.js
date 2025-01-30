@@ -239,11 +239,260 @@ const { error } = require('winston');
   };
   
   
-
-
+  const addRecordForOzon = async (req, res) => {
+    const { ID, Nazvanie_Zadaniya, Artikul, Mesto, Vlozhennost, Pallet_No } = req.body;
+  
+    // Проверка входных данных
+    if (!Nazvanie_Zadaniya || !Artikul || !Mesto || !Vlozhennost || !Pallet_No) {
+      return res.status(400).json({
+        success: false,
+        value: "Nazvanie_Zadaniya, Artikul, Mesto, Vlozhennost, Pallet_No обязательны",
+        errorCode: 400,
+      });
+    }
+  
+    try {
+      // Подключение к базе данных
+      const pool = await connectToDatabase();
+      if (!pool) {
+        return res.status(500).json({ success: false, value: null, errorCode: 500 });
+      }
+  
+      // Получение Fact для текущего артикула и задания
+      const factResult = await pool.request()
+        .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+        .input("Artikul", mssql.Int, Artikul)
+        .query(`
+          SELECT Fact
+          FROM Test_MP_VP
+          WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+        `);
+  
+      if (factResult.recordset.length === 0) {
+        return res.status(200).json({
+          success: false,
+          value: "Fact не найден для данного артикула и задания",
+          errorCode: 200,
+        });
+      }
+  
+      const fact = factResult.recordset[0].Fact;
+  
+      // Сумма текущих значений Mesto * Vlozhennost
+      const currentSumResult = await pool.request()
+        .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+        .input("Artikul", mssql.Int, Artikul)
+        .query(`
+          SELECT COALESCE(SUM(Mesto * Vlozhennost), 0) AS currentSum
+          FROM Test_MP
+          WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+        `);
+  
+      const currentSum = currentSumResult.recordset[0].currentSum;
+  
+      // Проверка превышения лимита Fact
+      const newSum = currentSum + Mesto * Vlozhennost;
+      if (newSum > fact) {
+        return res.status(200).json({
+          success: false,
+          value: "Сумма превышает принятное кол-во товара",
+          errorCode: 200,
+        });
+      }
+  
+      // Если передан ID, ищем запись по этому ID
+      if (ID) {
+        const idRecord = await pool.request()
+          .input("ID", mssql.BigInt, ID)
+          .query(`
+            SELECT ID, Mesto, Vlozhennost, Pallet_No
+            FROM Test_MP
+            WHERE ID = @ID
+          `);
+  
+        if (idRecord.recordset.length > 0) {
+          const existingVlozhennost = idRecord.recordset[0].Vlozhennost;
+          const existingPalletNo = idRecord.recordset[0].Pallet_No;
+  
+          // Если Vlozhennost и Pallet_No совпадают, обновляем запись
+          if (existingVlozhennost === Vlozhennost && existingPalletNo === Pallet_No) {
+            await pool.request()
+              .input("ID", mssql.BigInt, ID)
+              .input("Mesto", mssql.Int, idRecord.recordset[0].Mesto + Mesto)
+              .query(`
+                UPDATE Test_MP
+                SET Mesto = @Mesto
+                WHERE ID = @ID
+              `);
+  
+            return res.status(200).json({
+              success: true,
+              value: "Запись обновлена: места суммированы по ID",
+              errorCode: 200,
+            });
+          }
+        } else {
+          return res.status(200).json({
+            success: false,
+            value: "Запись с таким ID не найдена",
+            errorCode: 200,
+          });
+        }
+      }
+  
+      // Проверяем уникальность записи на основе Vlozhennost и Pallet_No
+      const existingRecord = await pool.request()
+        .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+        .input("Artikul", mssql.Int, Artikul)
+        .input("Vlozhennost", mssql.Int, Vlozhennost)
+        .input("Pallet_No", mssql.Int, Pallet_No)
+        .query(`
+          SELECT ID, Mesto
+          FROM Test_MP
+          WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+            AND Artikul = @Artikul
+            AND Vlozhennost = @Vlozhennost
+            AND Pallet_No = @Pallet_No
+        `);
+  
+      if (existingRecord.recordset.length > 0) {
+        // Если запись существует, обновляем Mesto
+        const recordId = existingRecord.recordset[0].ID;
+        const existingMesto = existingRecord.recordset[0].Mesto;
+  
+        await pool.request()
+          .input("ID", mssql.BigInt, recordId)
+          .input("Mesto", mssql.Int, existingMesto + Mesto)
+          .query(`
+            UPDATE Test_MP
+            SET Mesto = @Mesto
+            WHERE ID = @ID
+          `);
+  
+        return res.status(200).json({
+          success: true,
+          value: "Запись обновлена: места суммированы",
+          errorCode: 200,
+        });
+      } else {
+        // Добавляем новую запись
+        await pool.request()
+          .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+          .input("Artikul", mssql.Int, Artikul)
+          .input("Mesto", mssql.Int, Mesto)
+          .input("Vlozhennost", mssql.Int, Vlozhennost)
+          .input("Pallet_No", mssql.Int, Pallet_No)
+          .query(`
+            INSERT INTO Test_MP (Nazvanie_Zadaniya, Artikul, Mesto, Vlozhennost, Pallet_No)
+            VALUES (@Nazvanie_Zadaniya, @Artikul, @Mesto, @Vlozhennost, @Pallet_No)
+          `);
+  
+        return res.status(200).json({
+          success: true,
+          value: "Новая запись добавлена",
+          errorCode: 200,
+        });
+      }
+    } catch (error) {
+      console.error("Ошибка:", error);
+      res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+  };
+  
+  const addRecordForWB = async (req, res) => {
+    const { Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, SHK_WPS, Pallet_No } = req.body;
+  
+    // Проверка входных данных
+    if (!Nazvanie_Zadaniya || !Artikul || !Kolvo_Tovarov || !SHK_WPS || !Pallet_No) {
+      return res.status(200).json({
+        success: false,
+        value: "Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, SHK_WPS, Pallet_No обязательны",
+        errorCode: 200,
+      });
+    }
+  
+    try {
+      // Подключение к базе данных
+      const pool = await connectToDatabase();
+      if (!pool) {
+        return res.status(500).json({ success: false, value: null, errorCode: 500 });
+      }
+  
+      // Получение Fact из таблицы Test_MP_VP
+      const factResult = await pool.request()
+        .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+        .input("Artikul", mssql.Int, Artikul)
+        .query(`
+          SELECT Fact
+          FROM Test_MP_VP
+          WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+        `);
+  
+      if (factResult.recordset.length === 0) {
+        return res.status(200).json({
+          success: false,
+          value: "Fact не найден для данного задания и артикула",
+          errorCode: 200,
+        });
+      }
+  
+      const fact = factResult.recordset[0].Fact;
+  
+      // Сумма текущих Kolvo_Tovarov из таблицы Test_MP_Privyazka
+      const currentSumResult = await pool.request()
+        .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+        .input("Artikul", mssql.Int, Artikul)
+        .query(`
+          SELECT COALESCE(SUM(Kolvo_Tovarov), 0) AS currentSum
+          FROM Test_MP_Privyazka
+          WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+        `);
+  
+      const currentSum = currentSumResult.recordset[0].currentSum;
+  
+      // Проверка, не превышает ли добавление лимит Fact
+      const newSum = currentSum + Kolvo_Tovarov;
+      if (newSum > fact) {
+        return res.status(200).json({
+          success: false,
+          value: `Суммарное Kolvo_Tovarov (${newSum}) превышает Fact (${fact})`,
+          errorCode: 200,
+        });
+      }
+  
+      // Добавляем новую запись в таблицу Test_MP_Privyazka
+      const insertQuery = `
+        INSERT INTO Test_MP_Privyazka (
+          Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, SHK_WPS, Pallet_No
+        ) VALUES (
+          @Nazvanie_Zadaniya, @Artikul, @Kolvo_Tovarov, @SHK_WPS, @Pallet_No
+        )
+      `;
+  
+      await pool.request()
+        .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+        .input("Artikul", mssql.Int, Artikul)
+        .input("Kolvo_Tovarov", mssql.Int, Kolvo_Tovarov)
+        .input("SHK_WPS", mssql.NVarChar, SHK_WPS)
+        .input("Pallet_No", mssql.NVarChar, Pallet_No)
+        .query(insertQuery);
+  
+      return res.status(200).json({
+        success: true,
+        value: "Запись успешно добавлена в таблицу Test_MP_Privyazka",
+        errorCode: 200,
+      });
+    } catch (error) {
+      console.error("Ошибка:", error);
+      res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+  };
+  
   module.exports = {
     setFactSize,
     getQtyOrderedSum,
     addOrUpdateTaskData,
-    getTransferNumsData
+    getTransferNumsData,
+    addRecordForOzon,
+    addRecordForWB
   };
