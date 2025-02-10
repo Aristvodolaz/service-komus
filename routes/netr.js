@@ -3,6 +3,6 @@ const { addItem } = require('../controllers/netrController');
 
 const router = express.Router();
 
-router.post('/add-item', addItem);
+router.post('/addItemNetr', addItem);
 
 module.exports = router;
