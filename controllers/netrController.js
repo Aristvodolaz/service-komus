@@ -337,7 +337,7 @@ async function distinctName(req, res) {
 async function uploadWPS(req, res) {
     try {
         // Проверяем обязательные параметры
-        const { nazvanie_zadaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp, itog_zakaza, shk_wps } = req.body;
+        const { nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp, itog_zakaza, shk_wps } = req.body;
 
 
         // Подключаемся к базе данных
@@ -349,7 +349,7 @@ async function uploadWPS(req, res) {
         // Проверяем наличие записи
         const queryCheck = `
             SELECT id FROM x_Packer_Netr
-            WHERE nazvanie_zadaniya = @nazvanie_zadaniya
+            WHERE nazvanie_zdaniya = @nazvanie_zdaniya
               AND artikul = @artikul
               AND shk = @shk
               AND mesto = @mesto
@@ -362,8 +362,8 @@ async function uploadWPS(req, res) {
 
         const requestCheck = pool.request();
         requestCheck
-            .input('nazvanie_zadaniya', mssql.NVarChar, nazvanie_zadaniya)
-            .input('artikul', mssql.NVarChar, artikul.toString)
+        .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
+        .input('artikul', mssql.NVarChar, artikul.toString())
             .input('shk', mssql.NVarChar, shk)
             .input('mesto', mssql.NVarChar, mesto.toString())
             .input('vlozhennost', mssql.NVarChar, vlozhennost)
