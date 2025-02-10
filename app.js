@@ -54,7 +54,7 @@ app.use('/download', downloadController);
 app.use('/',fileExcelController);
 app.use('/',palletRoutes);
 
-app.use('/',palletRoutes);
+app.use('/',netrRoutes);
 
 app.use('/export', exportRoutes);
 app.use('/send', updateRoutes);
