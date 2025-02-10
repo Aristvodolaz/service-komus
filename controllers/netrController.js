@@ -339,20 +339,6 @@ async function uploadWPS(req, res) {
         // Проверяем обязательные параметры
         const { nazvanie_zadaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp, itog_zakaza, shk_wps } = req.body;
 
-        if (
-            !nazvanie_zadaniya?.trim() ||
-            !artikul?.trim() ||
-            !shk?.trim() ||
-            !mesto?.trim() ||
-            !vlozhennost?.trim() ||
-            !pallet?.trim() ||
-            !size_vps?.trim() ||
-            !vp?.trim() ||
-            !itog_zakaza ||
-            !shk_wps?.trim()
-        ) {
-            return res.status(400).json({ success: false, message: "Отсутствуют обязательные данные или данные некорректны." });
-        }
 
         // Подключаемся к базе данных
         const pool = await connectToDatabase();
@@ -379,7 +365,7 @@ async function uploadWPS(req, res) {
             .input('nazvanie_zadaniya', mssql.NVarChar, nazvanie_zadaniya)
             .input('artikul', mssql.NVarChar, artikul)
             .input('shk', mssql.NVarChar, shk)
-            .input('mesto', mssql.NVarChar, mesto)
+            .input('mesto', mssql.NVarChar, mesto.toString())
             .input('vlozhennost', mssql.NVarChar, vlozhennost)
             .input('pallet', mssql.NVarChar, pallet)
             .input('size_vps', mssql.NVarChar, size_vps)
