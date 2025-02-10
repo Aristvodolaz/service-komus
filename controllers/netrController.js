@@ -109,6 +109,99 @@ async function getAcceptedQuantity(req, res) {
     }
 }
 
-module.exports = { addItem,
-    getAcceptedQuantity
- };
+
+async function updateItem(req, res) {
+    try {
+        const { id, mesto, vlozhennost, pallet } = req.body;
+
+        if (!id || !mesto || !vlozhennost || !pallet) {
+            return res.status(400).json({ success: false, value: 'Отсутствуют обязательные данные', errorCode: 400 });
+        }
+
+        const pool = await connectToDatabase();
+
+        const updateQuery = `
+            UPDATE [SPOe_rc].[dbo].[x_Packer_Netr]
+            SET mesto = @mesto, vlozhennost = @vlozhennost, pallet = @pallet
+            WHERE id = @id
+        `;
+
+        await pool.request()
+            .input('id', mssql.Int, id)
+            .input('mesto', mssql.NVarChar, mesto.toString())
+            .input('vlozhennost', mssql.NVarChar, vlozhennost)
+            .input('pallet', mssql.NVarChar, pallet)
+            .query(updateQuery);
+
+        res.status(200).json({ success: true, value: 'Запись успешно обновлена', errorCode: 200 });
+
+    } catch (err) {
+        console.error('Ошибка при обновлении записи:', err);
+        res.status(500).json({ success: false, value: err, errorCode: 500 });
+    }
+}
+
+async function getItemsByNazvanieZdaniya(req, res) {
+    try {
+        const { nazvanie_zdaniya } = req.query;
+
+        if (!nazvanie_zdaniya) {
+            return res.status(400).json({ message: 'nazvanie_zdaniya обязательно' });
+        }
+
+        const pool = await connectToDatabase();
+
+        const query = `
+            SELECT * FROM [SPOe_rc].[dbo].[x_Packer_Netr]
+            WHERE nazvanie_zdaniya = @nazvanie_zdaniya
+        `;
+
+        const result = await pool.request()
+            .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
+            .query(query);
+
+        res.status(200).json({ success: true, data: result.recordset, errorCode: 200 });
+
+    } catch (err) {
+        console.error('Ошибка при получении списка записей:', err);
+        res.status(500).json({ success: false, value: err, errorCode: 500 });
+    }
+}
+
+
+async function getPalletToShkWpsMapping(req, res) {
+    try {
+        const { nazvanie_zdaniya } = req.query;
+
+        if (!nazvanie_zdaniya) {
+            return res.status(400).json({ success: false, message: 'nazvanie_zdaniya обязательно' });
+        }
+
+        const pool = await connectToDatabase();
+
+        const query = `
+            SELECT DISTINCT pallet, shk AS shk_wps
+            FROM [SPOe_rc].[dbo].[x_Packer_Netr]
+            WHERE nazvanie_zdaniya = @nazvanie_zdaniya
+        `;
+
+        const result = await pool.request()
+            .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
+            .query(query);
+
+        res.status(200).json({ success: true, data: result.recordset, errorCode: 200 });
+
+    } catch (err) {
+        console.error('Ошибка при получении связки pallet - shk_wps:', err);
+        res.status(500).json({ success: false, value: err, errorCode: 500 });
+    }
+}
+
+
+module.exports = {
+    addItem,
+    getAcceptedQuantity,
+    updateItem,
+    getItemsByNazvanieZdaniya,
+    getPalletToShkWpsMapping
+};
