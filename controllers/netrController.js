@@ -3,9 +3,9 @@ const mssql = require('mssql');
 
 async function addItem(req, res) {
     try {
-        const { nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp } = req.body;
+        const { nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp, itog_zakaza } = req.body;
 
-        if (!nazvanie_zdaniya || !artikul || !shk || !mesto || !vlozhennost || !pallet || !vp) {
+        if (!nazvanie_zdaniya || !artikul || !shk || !mesto || !vlozhennost || !pallet || !vp || !itog_zakaza) {
             return res.status(404).json({ success: false, value: 'Нет данных ', errorCode: 404 });
         }
 
@@ -45,13 +45,13 @@ async function addItem(req, res) {
                 .input('existingId', mssql.Int, existingId)
                 .query(updateQuery);
 
-                res.status(200).json({ success: true, value: 'Ууспешно', errorCode: 200 });
+                res.status(200).json({ success: true, value: 'Успешно', errorCode: 200 });
         } else {
             // Записи нет, создаем новую
             const insertQuery = `
                 INSERT INTO [SPOe_rc].[dbo].[x_Packer_Netr]
-                (nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp)
-                VALUES (@nazvanie_zdaniya, @artikul, @shk, @mesto, @vlozhennost, @pallet, @size_vps, @vp)
+                (nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp, itog_zakaza)
+                VALUES (@nazvanie_zdaniya, @artikul, @shk, @mesto, @vlozhennost, @pallet, @size_vps, @vp, @itog_zakaza)
             `;
 
             await pool.request()
@@ -63,9 +63,11 @@ async function addItem(req, res) {
                 .input('pallet', mssql.NVarChar, pallet)
                 .input('size_vps', mssql.NVarChar, size_vps)
                 .input('vp', mssql.NVarChar, vp)
+                .input('itog_zakaza', mssql.Int, itog_zakaza)
+
                 .query(insertQuery);
 
-                res.status(200).json({ success: true, value: 'Ууспешно добавлено', errorCode: 200 });
+                res.status(200).json({ success: true, value: 'Успешно добавлено', errorCode: 200 });
         }
 
     } catch (err) {
