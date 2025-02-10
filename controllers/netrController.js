@@ -1,11 +1,12 @@
 const { connectToDatabase, sql } = require('../dbConfig');
+const mssql = require('mssql');
 
 async function addItem(req, res) {
     try {
-        const { nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps } = req.body;
+        const { nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp } = req.body;
 
-        if (!nazvanie_zdaniya || !artikul || !shk || !mesto || !vlozhennost || !pallet) {
-            return res.status(400).json({ message: 'Все обязательные поля должны быть заполнены' });
+        if (!nazvanie_zdaniya || !artikul || !shk || !mesto || !vlozhennost || !pallet || !vp) {
+            return res.status(404).json({ success: false, value: 'Нет данных ', errorCode: 404 });
         }
 
         const pool = await connectToDatabase();
@@ -21,11 +22,11 @@ async function addItem(req, res) {
         `;
 
         const checkResult = await pool.request()
-            .input('nazvanie_zdaniya', sql.NVarChar, nazvanie_zdaniya)
-            .input('artikul', sql.NVarChar, artikul)
-            .input('shk', sql.NVarChar, shk)
-            .input('vlozhennost', sql.NVarChar, vlozhennost)
-            .input('pallet', sql.NVarChar, pallet)
+            .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
+            .input('artikul', mssql.NVarChar, artikul)
+            .input('shk', mssql.NVarChar, shk)
+            .input('vlozhennost', mssql.NVarChar, vlozhennost)
+            .input('pallet', mssql.NVarChar, pallet)
             .query(checkQuery);
 
         if (checkResult.recordset.length > 0) {
@@ -40,35 +41,36 @@ async function addItem(req, res) {
             `;
 
             await pool.request()
-                .input('newMesto', sql.NVarChar, newMesto)
-                .input('existingId', sql.Int, existingId)
+                .input('newMesto', mssql.NVarChar, newMesto.toString())
+                .input('existingId', mssql.Int, existingId)
                 .query(updateQuery);
 
-            return res.status(200).json({ message: 'Обновлено место для существующей записи' });
+                res.status(200).json({ success: true, value: 'Ууспешно', errorCode: 200 });
         } else {
             // Записи нет, создаем новую
             const insertQuery = `
                 INSERT INTO [SPOe_rc].[dbo].[x_Packer_Netr]
-                (nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps)
-                VALUES (@nazvanie_zdaniya, @artikul, @shk, @mesto, @vlozhennost, @pallet, @size_vps)
+                (nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp)
+                VALUES (@nazvanie_zdaniya, @artikul, @shk, @mesto, @vlozhennost, @pallet, @size_vps, @vp)
             `;
 
             await pool.request()
-                .input('nazvanie_zdaniya', sql.NVarChar, nazvanie_zdaniya)
-                .input('artikul', sql.NVarChar, artikul)
-                .input('shk', sql.NVarChar, shk)
-                .input('mesto', sql.NVarChar, mesto)
-                .input('vlozhennost', sql.NVarChar, vlozhennost)
-                .input('pallet', sql.NVarChar, pallet)
-                .input('size_vps', sql.NVarChar, size_vps)
+                .input('nazvanie_zdaniya', mssql.NVarChar, nazvanie_zdaniya)
+                .input('artikul', mssql.NVarChar, artikul)
+                .input('shk', mssql.NVarChar, shk)
+                .input('mesto', mssql.NVarChar, mesto.toString())
+                .input('vlozhennost', mssql.NVarChar, vlozhennost)
+                .input('pallet', mssql.NVarChar, pallet)
+                .input('size_vps', mssql.NVarChar, size_vps)
+                .input('vp', mssql.NVarChar, vp)
                 .query(insertQuery);
 
-            return res.status(200).json({ message: 'Добавлена новая запись' });
+                res.status(200).json({ success: true, value: 'Ууспешно добавлено', errorCode: 200 });
         }
 
     } catch (err) {
         console.error('Ошибка при добавлении записи:', err);
-        res.status(500).json({ message: 'Внутренняя ошибка сервера' });
+        res.status(500).json({ success: false, value: err, errorCode: 500 });
     }
 }
 
