@@ -363,7 +363,7 @@ async function uploadWPS(req, res) {
         const requestCheck = pool.request();
         requestCheck
             .input('nazvanie_zadaniya', mssql.NVarChar, nazvanie_zadaniya)
-            .input('artikul', mssql.NVarChar, artikul)
+            .input('artikul', mssql.NVarChar, artikul.toString)
             .input('shk', mssql.NVarChar, shk)
             .input('mesto', mssql.NVarChar, mesto.toString())
             .input('vlozhennost', mssql.NVarChar, vlozhennost)
