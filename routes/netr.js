@@ -5,7 +5,9 @@ const {
     updateItem, 
     getItemsByNazvanieZdaniya,
     getPalletToShkWpsMapping ,
-    uploadData
+    uploadData,
+    downloadData,
+    distinctName
 } = require('../controllers/netrController');
 
 const router = express.Router();
@@ -14,7 +16,8 @@ const router = express.Router();
 router.post('/addItemNetr', addItem);
 
 router.post('/uploadData', uploadData);
-
+router.get('/downloadData', downloadData);
+router.get('/distinctName', distinctName);
 // Получение принятого количества
 router.get('/prinyato', getAcceptedQuantity);
 

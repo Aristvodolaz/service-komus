@@ -266,11 +266,81 @@ async function uploadData(req, res) {
     }
 }
 
+async function downloadData(req, res) {
+    try {
+        const taskName = req.query.task;
+
+        if (!taskName) {
+            return res.status(400).json({ success: false, message: "Параметр 'task' обязателен." });
+        }
+
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, message: "Ошибка подключения к базе данных." });
+        }
+
+        const query = `
+            SELECT * FROM x_Packer_Netr WHERE nazvanie_zdaniya = @taskName
+        `;
+
+        const request = pool.request();
+        request.input('taskName', mssql.NVarChar, taskName);
+
+        const result = await request.query(query);
+
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ success: false, message: "Нет данных по данному заданию." });
+        }
+
+        res.status(200).json({ success: true, data: result.recordset });
+
+    } catch (err) {
+        console.error('Ошибка при получении данных:', err);
+        res.status(500).json({ success: false, message: "Ошибка при получении данных.", error: err.message });
+    }
+}
+
+async function distinctName(req, res) {
+    try {
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, message: "Ошибка подключения к базе данных." });
+        }
+
+        const query = `
+            SELECT DISTINCT nazvanie_zdaniya FROM x_Packer_Netr
+            ORDER BY nazvanie_zdaniya
+        `;
+
+        const request = pool.request();
+        const result = await request.query(query);
+
+        if (!result.recordset || result.recordset.length === 0) {
+            return res.status(404).json({ success: false, message: "Нет доступных заданий." });
+        }
+
+        // Преобразуем результат в массив строк без вложенных объектов
+        const taskNames = result.recordset.map(row => row.nazvanie_zdaniya);
+
+        res.status(200).json({ success: true, data: taskNames });
+
+    } catch (err) {
+        console.error('Ошибка при получении данных:', err);
+        res.status(500).json({ 
+            success: false, 
+            message: "Ошибка при получении данных.", 
+            error: err.message 
+        });
+    }
+}
+
 module.exports = {
     addItem,
     getAcceptedQuantity,
     updateItem,
     getItemsByNazvanieZdaniya,
     getPalletToShkWpsMapping,
-    uploadData
+    uploadData,
+    downloadData,
+    distinctName
 };
