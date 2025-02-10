@@ -74,4 +74,39 @@ async function addItem(req, res) {
     }
 }
 
-module.exports = { addItem };
+
+async function getAcceptedQuantity(req, res) {
+    try {
+        const { nazvanie_zdaniya, artikul } = req.query;
+
+        if (!nazvanie_zdaniya || !artikul) {
+            return res.status(400).json({ message: 'nazvanie_zdaniya и artikul обязательны' });
+        }
+
+        const pool = await connectToDatabase();
+
+        const query = `
+            SELECT SUM(CAST(mesto AS INT) * CAST(vlozhennost AS INT)) AS totalAccepted
+            FROM [SPOe_rc].[dbo].[x_Packer_Netr]
+            WHERE nazvanie_zdaniya = @nazvanie_zdaniya
+              AND artikul = @artikul
+        `;
+
+        const result = await pool.request()
+            .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
+            .input('artikul', mssql.NVarChar(50), artikul)
+            .query(query);
+
+        const totalAccepted = result.recordset[0].totalAccepted || 0;
+
+        res.status(200).json({ success: true, value: totalAccepted.toString(), errorCode: 200 });
+
+    } catch (err) {
+        console.error('Ошибка при получении принятого количества:', err);
+        res.status(500).json({ success: false, value: err, errorCode: 500 });
+    }
+}
+
+module.exports = { addItem,
+    getAcceptedQuantity
+ };
