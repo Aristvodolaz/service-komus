@@ -334,6 +334,98 @@ async function distinctName(req, res) {
     }
 }
 
+async function uploadWPS(req, res) {
+    try {
+        // Проверяем обязательные параметры
+        const { nazvanie_zadaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp, itog_zakaza, shk_wps } = req.body;
+
+        if (
+            !nazvanie_zadaniya?.trim() ||
+            !artikul?.trim() ||
+            !shk?.trim() ||
+            !mesto?.trim() ||
+            !vlozhennost?.trim() ||
+            !pallet?.trim() ||
+            !size_vps?.trim() ||
+            !vp?.trim() ||
+            !itog_zakaza ||
+            !shk_wps?.trim()
+        ) {
+            return res.status(400).json({ success: false, message: "Отсутствуют обязательные данные или данные некорректны." });
+        }
+
+        // Подключаемся к базе данных
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, message: "Ошибка подключения к базе данных." });
+        }
+
+        // Проверяем наличие записи
+        const queryCheck = `
+            SELECT id FROM x_Packer_Netr
+            WHERE nazvanie_zadaniya = @nazvanie_zadaniya
+              AND artikul = @artikul
+              AND shk = @shk
+              AND mesto = @mesto
+              AND vlozhennost = @vlozhennost
+              AND pallet = @pallet
+              AND size_vps = @size_vps
+              AND vp = @vp
+              AND itog_zakaza = @itog_zakaza
+        `;
+
+        const requestCheck = pool.request();
+        requestCheck
+            .input('nazvanie_zadaniya', mssql.NVarChar, nazvanie_zadaniya)
+            .input('artikul', mssql.NVarChar, artikul)
+            .input('shk', mssql.NVarChar, shk)
+            .input('mesto', mssql.NVarChar, mesto)
+            .input('vlozhennost', mssql.NVarChar, vlozhennost)
+            .input('pallet', mssql.NVarChar, pallet)
+            .input('size_vps', mssql.NVarChar, size_vps)
+            .input('vp', mssql.NVarChar, vp)
+            .input('itog_zakaza', mssql.Int, itog_zakaza);
+
+        const existing = await requestCheck.query(queryCheck);
+
+        if (existing.recordset.length === 0) {
+            return res.status(404).json({ success: false, message: "Запись не найдена." });
+        }
+
+        // Обновляем запись
+        const recordId = existing.recordset[0].id;
+        const queryUpdate = `
+            UPDATE x_Packer_Netr
+            SET shk_wps = @shk_wps
+            WHERE id = @id
+        `;
+
+        const transaction = pool.transaction();
+        await transaction.begin();
+
+        try {
+            await transaction.request()
+                .input('shk_wps', mssql.NVarChar, shk_wps)
+                .input('id', mssql.Int, recordId)
+                .query(queryUpdate);
+
+            await transaction.commit();
+
+            console.log(`✅ Запись успешно обновлена. ID: ${recordId}, ШК_ВПС: ${shk_wps}`);
+            res.status(200).json({ success: true, message: "Запись успешно обновлена." });
+        } catch (updateError) {
+            await transaction.rollback();
+            console.error('Ошибка при обновлении записи:', updateError);
+            res.status(500).json({ success: false, message: "Ошибка при обновлении записи.", error: updateError.message });
+        }
+    } catch (err) {
+        console.error('Ошибка при выполнении запроса:', err);
+        res.status(500).json({ success: false, message: "Внутренняя ошибка сервера.", error: err.message });
+    }
+}
+
+
+
 module.exports = {
     addItem,
     getAcceptedQuantity,
@@ -342,5 +434,6 @@ module.exports = {
     getPalletToShkWpsMapping,
     uploadData,
     downloadData,
-    distinctName
+    distinctName,
+    uploadWPS
 };

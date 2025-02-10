@@ -7,7 +7,8 @@ const {
     getPalletToShkWpsMapping ,
     uploadData,
     downloadData,
-    distinctName
+    distinctName,
+    uploadWPS
 } = require('../controllers/netrController');
 
 const router = express.Router();
@@ -16,6 +17,7 @@ const router = express.Router();
 router.post('/addItemNetr', addItem);
 
 router.post('/uploadData', uploadData);
+router.post('/uploadWPS', uploadWPS);
 router.get('/downloadData', downloadData);
 router.get('/distinctName', distinctName);
 // Получение принятого количества
