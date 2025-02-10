@@ -364,12 +364,12 @@ async function uploadWPS(req, res) {
         requestCheck
         .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
         .input('artikul', mssql.NVarChar, artikul.toString())
-            .input('shk', mssql.NVarChar, shk)
+            .input('shk', mssql.NVarChar, shk.toString())
             .input('mesto', mssql.NVarChar, mesto.toString())
-            .input('vlozhennost', mssql.NVarChar, vlozhennost)
-            .input('pallet', mssql.NVarChar, pallet)
-            .input('size_vps', mssql.NVarChar, size_vps)
-            .input('vp', mssql.NVarChar, vp)
+            .input('vlozhennost', mssql.NVarChar, vlozhennost.toString())
+            .input('pallet', mssql.NVarChar, pallet.toString())
+            .input('size_vps', mssql.NVarChar, size_vps.toString())
+            .input('vp', mssql.NVarChar, vp.toString())
             .input('itog_zakaza', mssql.Int, itog_zakaza);
 
         const existing = await requestCheck.query(queryCheck);
