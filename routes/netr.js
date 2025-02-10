@@ -4,13 +4,16 @@ const {
     getAcceptedQuantity, 
     updateItem, 
     getItemsByNazvanieZdaniya,
-    getPalletToShkWpsMapping 
+    getPalletToShkWpsMapping ,
+    uploadData
 } = require('../controllers/netrController');
 
 const router = express.Router();
 
 // Добавление нового элемента
 router.post('/addItemNetr', addItem);
+
+router.post('/uploadData', uploadData);
 
 // Получение принятого количества
 router.get('/prinyato', getAcceptedQuantity);
