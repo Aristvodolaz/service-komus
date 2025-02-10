@@ -26,6 +26,10 @@ const authRoutes = require('./routes/market_place/auth');
 const { updateSrokGodnosti } = require('./controllers/srokController');
 const palletRoutes = require('./routes/pallet'); 
 
+
+/* NETR*/
+const netrRoutes = require('./routes/netr');
+
 const logger = require('./utils/logger');
 
 const app = express();
@@ -48,6 +52,8 @@ app.use('/list',downloadExcelController)
 app.use('/download/files', filesRouter);
 app.use('/download', downloadController);
 app.use('/',fileExcelController);
+app.use('/',palletRoutes);
+
 app.use('/',palletRoutes);
 
 app.use('/export', exportRoutes);
