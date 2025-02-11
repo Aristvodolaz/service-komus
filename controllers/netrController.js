@@ -190,7 +190,33 @@ async function getPalletToShkWpsMapping(req, res) {
     }
 }
 
+async function getListVp(req, res) {
+    try {
+        const { Nazvanie_Zadaniya } = req.query;
 
+        if (!Nazvanie_Zadaniya) {
+            return res.status(400).json({ success: false, message: 'nazvanie_zdaniya обязательно' });
+        }
+
+        const pool = await connectToDatabase();
+
+        const query = `
+            SELECT DISTINCT vp
+            FROM [SPOe_rc].[dbo].[Test_MP]
+            WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+        `;
+
+        const result = await pool.request()
+            .input('Nazvanie_Zadaniya', mssql.NVarChar(255), Nazvanie_Zadaniya)
+            .query(query);
+
+        res.status(200).json({ success: true, data: result.recordset, errorCode: 200 });
+
+    } catch (err) {
+        console.error('Ошибка при получении vp:', err);
+        res.status(500).json({ success: false, value: err, errorCode: 500 });
+    }
+}
 
 async function uploadData(req, res) {
     try {
@@ -385,5 +411,6 @@ module.exports = {
     uploadData,
     downloadData,
     distinctName,
-    uploadWPS
+    uploadWPS,
+    getListVp
 };

@@ -8,7 +8,8 @@ const {
     uploadData,
     downloadData,
     distinctName,
-    uploadWPS
+    uploadWPS,
+    getListVp
 } = require('../controllers/netrController');
 
 const router = express.Router();
@@ -20,6 +21,7 @@ router.post('/uploadData', uploadData);
 router.post('/uploadWPS', uploadWPS);
 router.get('/downloadData', downloadData);
 router.get('/distinctName', distinctName);
+router.get('/getListVp', getListVp);
 // Получение принятого количества
 router.get('/prinyato', getAcceptedQuantity);
 
