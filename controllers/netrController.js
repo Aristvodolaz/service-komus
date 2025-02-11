@@ -81,7 +81,7 @@ async function getAcceptedQuantity(req, res) {
         const pool = await connectToDatabase();
 
         const query = `
-            SELECT SUM(CAST(mesto AS INT) * CAST(vlozhennost AS INT)) AS totalAccepted
+            SELECT SUM(CAST(vlozhennost AS INT)) AS totalAccepted
             FROM [SPOe_rc].[dbo].[x_Packer_Netr]
             WHERE nazvanie_zdaniya = @nazvanie_zdaniya
               AND artikul = @artikul
@@ -101,6 +101,7 @@ async function getAcceptedQuantity(req, res) {
         res.status(500).json({ success: false, value: err, errorCode: 500 });
     }
 }
+
 
 
 async function updateItem(req, res) {
@@ -172,7 +173,7 @@ async function getPalletToShkWpsMapping(req, res) {
         const pool = await connectToDatabase();
 
         const query = `
-            SELECT DISTINCT pallet, shk_wps AS shk_wps
+            SELECT DISTINCT pallet, shk_wps
             FROM [SPOe_rc].[dbo].[x_Packer_Netr]
             WHERE nazvanie_zdaniya = @nazvanie_zdaniya
         `;
@@ -190,33 +191,6 @@ async function getPalletToShkWpsMapping(req, res) {
 }
 
 
-async function getPalletToShkWpsMapping(req, res) {
-    try {
-        const { nazvanie_zdaniya } = req.query;
-
-        if (!nazvanie_zdaniya) {
-            return res.status(400).json({ success: false, message: 'nazvanie_zdaniya обязательно' });
-        }
-
-        const pool = await connectToDatabase();
-
-        const query = `
-            SELECT DISTINCT pallet, shk AS shk_wps
-            FROM [SPOe_rc].[dbo].[x_Packer_Netr]
-            WHERE nazvanie_zdaniya = @nazvanie_zdaniya
-        `;
-
-        const result = await pool.request()
-            .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
-            .query(query);
-
-        res.status(200).json({ success: true, data: result.recordset, errorCode: 200 });
-
-    } catch (err) {
-        console.error('Ошибка при получении связки pallet - shk_wps:', err);
-        res.status(500).json({ success: false, value: err, errorCode: 500 });
-    }
-}
 
 async function uploadData(req, res) {
     try {
@@ -329,7 +303,7 @@ async function distinctName(req, res) {
 async function uploadWPS(req, res) {
     try {
         // Проверяем обязательные параметры
-        const { nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp, itog_zakaza, shk_wps } = req.body;
+        const { nazvanie_zdaniya, artikul, shk,  vlozhennost, pallet, size_vps, vp, itog_zakaza, shk_wps } = req.body;
 
 
         // Подключаемся к базе данных
@@ -344,7 +318,6 @@ async function uploadWPS(req, res) {
             WHERE nazvanie_zdaniya = @nazvanie_zdaniya
               AND artikul = @artikul
               AND shk = @shk
-              AND mesto = @mesto
               AND vlozhennost = @vlozhennost
               AND pallet like @pallet
               AND size_vps = @size_vps
@@ -357,7 +330,6 @@ async function uploadWPS(req, res) {
         .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
         .input('artikul', mssql.NVarChar, artikul.toString())
             .input('shk', mssql.NVarChar, shk.toString())
-            .input('mesto', mssql.NVarChar, mesto.toString())
             .input('vlozhennost', mssql.NVarChar, vlozhennost.toString())
             .input('pallet', mssql.NVarChar, pallet.toString())
             .input('size_vps', mssql.NVarChar, size_vps.toString())
