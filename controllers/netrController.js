@@ -3,76 +3,69 @@ const mssql = require('mssql');
 
 async function addItem(req, res) {
     try {
-        const { nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp, itog_zakaza } = req.body;
+        const { nazvanie_zdaniya, artikul, shk, vlozhennost, pallet, size_vps, vp, itog_zakaza } = req.body;
 
-        if (!nazvanie_zdaniya || !artikul || !shk || !mesto || !vlozhennost || !pallet || !vp || !itog_zakaza) {
-            return res.status(404).json({ success: false, value: 'Нет данных ', errorCode: 404 });
+        if (!nazvanie_zdaniya || !artikul || !shk || !vlozhennost || !pallet || !vp || !itog_zakaza) {
+            return res.status(404).json({ success: false, value: 'Нет данных', errorCode: 404 });
         }
 
         const pool = await connectToDatabase();
 
         // Проверяем, есть ли уже запись с такими параметрами
         const checkQuery = `
-            SELECT id, mesto FROM [SPOe_rc].[dbo].[x_Packer_Netr]
+            SELECT id, vlozhennost FROM [SPOe_rc].[dbo].[x_Packer_Netr]
             WHERE nazvanie_zdaniya = @nazvanie_zdaniya
               AND artikul = @artikul
-              AND shk = @shk
-              AND vlozhennost = @vlozhennost
               AND pallet = @pallet
         `;
 
         const checkResult = await pool.request()
             .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
             .input('artikul', mssql.NVarChar, artikul)
-            .input('shk', mssql.NVarChar, shk)
-            .input('vlozhennost', mssql.NVarChar, vlozhennost)
             .input('pallet', mssql.NVarChar, pallet)
             .query(checkQuery);
 
         if (checkResult.recordset.length > 0) {
-            // Запись найдена, обновляем поле mesto
+            // Запись найдена, суммируем vlozhennost
             const existingId = checkResult.recordset[0].id;
-            const newMesto = parseInt(checkResult.recordset[0].mesto) + parseInt(mesto);
+            const newVlozhennost = parseInt(checkResult.recordset[0].vlozhennost) + parseInt(vlozhennost);
 
             const updateQuery = `
                 UPDATE [SPOe_rc].[dbo].[x_Packer_Netr]
-                SET mesto = @newMesto
+                SET vlozhennost = @newVlozhennost
                 WHERE id = @existingId
             `;
 
             await pool.request()
-                .input('newMesto', mssql.NVarChar, newMesto.toString())
+                .input('newVlozhennost', mssql.NVarChar, newVlozhennost.toString())
                 .input('existingId', mssql.Int, existingId)
                 .query(updateQuery);
 
-                res.status(200).json({ success: true, value: 'Успешно', errorCode: 200 });
+            res.status(200).json({ success: true, value: 'Успешно обновлено', errorCode: 200 });
         } else {
             // Записи нет, создаем новую
             const insertQuery = `
                 INSERT INTO [SPOe_rc].[dbo].[x_Packer_Netr]
-                (nazvanie_zdaniya, artikul, shk, mesto, vlozhennost, pallet, size_vps, vp, itog_zakaza)
-                VALUES (@nazvanie_zdaniya, @artikul, @shk, @mesto, @vlozhennost, @pallet, @size_vps, @vp, @itog_zakaza)
+                (nazvanie_zdaniya, artikul, shk, vlozhennost, pallet, size_vps, vp, itog_zakaza)
+                VALUES (@nazvanie_zdaniya, @artikul, @shk, @vlozhennost, @pallet, @size_vps, @vp, @itog_zakaza)
             `;
 
             await pool.request()
                 .input('nazvanie_zdaniya', mssql.NVarChar, nazvanie_zdaniya)
                 .input('artikul', mssql.NVarChar, artikul)
                 .input('shk', mssql.NVarChar, shk)
-                .input('mesto', mssql.NVarChar, mesto.toString())
                 .input('vlozhennost', mssql.NVarChar, vlozhennost)
                 .input('pallet', mssql.NVarChar, pallet)
                 .input('size_vps', mssql.NVarChar, size_vps)
                 .input('vp', mssql.NVarChar, vp)
                 .input('itog_zakaza', mssql.Int, itog_zakaza)
-
                 .query(insertQuery);
 
-                res.status(200).json({ success: true, value: 'Успешно добавлено', errorCode: 200 });
+            res.status(200).json({ success: true, value: 'Успешно добавлено', errorCode: 200 });
         }
-
     } catch (err) {
         console.error('Ошибка при добавлении записи:', err);
-        res.status(500).json({ success: false, value: err, errorCode: 500 });
+        res.status(500).json({ success: false, value: err.message, errorCode: 500 });
     }
 }
 
@@ -112,9 +105,9 @@ async function getAcceptedQuantity(req, res) {
 
 async function updateItem(req, res) {
     try {
-        const { id, mesto, vlozhennost, pallet } = req.body;
+        const { id, vlozhennost, pallet } = req.body;
 
-        if (!id || !mesto || !vlozhennost || !pallet) {
+        if (!id || !vlozhennost || !pallet) {
             return res.status(400).json({ success: false, value: 'Отсутствуют обязательные данные', errorCode: 400 });
         }
 
@@ -122,13 +115,12 @@ async function updateItem(req, res) {
 
         const updateQuery = `
             UPDATE [SPOe_rc].[dbo].[x_Packer_Netr]
-            SET mesto = @mesto, vlozhennost = @vlozhennost, pallet = @pallet
+            SET vlozhennost = @vlozhennost, pallet = @pallet
             WHERE id = @id
         `;
 
         await pool.request()
             .input('id', mssql.Int, id)
-            .input('mesto', mssql.NVarChar, mesto.toString())
             .input('vlozhennost', mssql.NVarChar, vlozhennost)
             .input('pallet', mssql.NVarChar, pallet)
             .query(updateQuery);
@@ -180,7 +172,7 @@ async function getPalletToShkWpsMapping(req, res) {
         const pool = await connectToDatabase();
 
         const query = `
-            SELECT DISTINCT pallet, shk AS shk_wps
+            SELECT DISTINCT pallet, shk_wps AS shk_wps
             FROM [SPOe_rc].[dbo].[x_Packer_Netr]
             WHERE nazvanie_zdaniya = @nazvanie_zdaniya
         `;
@@ -354,7 +346,7 @@ async function uploadWPS(req, res) {
               AND shk = @shk
               AND mesto = @mesto
               AND vlozhennost = @vlozhennost
-              AND pallet = @pallet
+              AND pallet like @pallet
               AND size_vps = @size_vps
               AND vp = @vp
               AND itog_zakaza = @itog_zakaza
