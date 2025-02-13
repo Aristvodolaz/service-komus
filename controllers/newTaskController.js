@@ -663,6 +663,84 @@ const updateStatusNew = async (req, res) => {
     }
   };
   
+  const addRecordForOzon = async (req, res) => {
+    const { Nazvanie_Zadaniya, Artikul, Mesto, Vlozhennost, Pallet_No } = req.body;
+
+    // Проверка входных данных
+    if (!Nazvanie_Zadaniya || !Artikul || !Mesto || !Vlozhennost || !Pallet_No) {
+        return res.status(400).json({
+            success: false,
+            value: "Nazvanie_Zadaniya, Artikul, Mesto, Vlozhennost, Pallet_No обязательны",
+            errorCode: 400,
+        });
+    }
+
+    try {
+        // Подключение к базе данных
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, value: null, errorCode: 500 });
+        }
+
+        // Проверяем, существует ли уже запись с этими параметрами
+        const existingRecord = await pool.request()
+            .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+            .input("Artikul", mssql.Int, Artikul)
+            .input("Vlozhennost", mssql.Int, Vlozhennost)
+            .input("Pallet_No", mssql.Int, Pallet_No)
+            .query(`
+                SELECT ID, Mesto
+                FROM Test_MP
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+                AND Artikul = @Artikul
+                AND Vlozhennost = @Vlozhennost
+                AND Pallet_No = @Pallet_No
+            `);
+
+        if (existingRecord.recordset.length > 0) {
+            // Если запись найдена, обновляем Mesto (суммируем)
+            const recordId = existingRecord.recordset[0].ID;
+            const existingMesto = existingRecord.recordset[0].Mesto;
+
+            await pool.request()
+                .input("ID", mssql.BigInt, recordId)
+                .input("Mesto", mssql.Int, existingMesto + Mesto)
+                .query(`
+                    UPDATE Test_MP
+                    SET Mesto = @Mesto
+                    WHERE ID = @ID
+                `);
+
+            return res.status(200).json({
+                success: true,
+                value: "Запись обновлена: места суммированы",
+                errorCode: 200,
+            });
+        } else {
+            // Если записи нет, добавляем новую
+            await pool.request()
+                .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+                .input("Artikul", mssql.Int, Artikul)
+                .input("Mesto", mssql.Int, Mesto)
+                .input("Vlozhennost", mssql.Int, Vlozhennost)
+                .input("Pallet_No", mssql.Int, Pallet_No)
+                .query(`
+                    INSERT INTO Test_MP (Nazvanie_Zadaniya, Artikul, Mesto, Vlozhennost, Pallet_No)
+                    VALUES (@Nazvanie_Zadaniya, @Artikul, @Mesto, @Vlozhennost, @Pallet_No)
+                `);
+
+            return res.status(200).json({
+                success: true,
+                value: "Новая запись добавлена",
+                errorCode: 200,
+            });
+        }
+    } catch (error) {
+        console.error("Ошибка:", error);
+        res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+};
+
   
 module.exports = {
   checkOrderCompletionOzon,
@@ -675,5 +753,6 @@ module.exports = {
     duplicateRecordNew,
     getLDUNew,
     endStatusNew,
-    checkOrderCompletionForBox
+    checkOrderCompletionForBox,
+    addRecordForOzon
 }
