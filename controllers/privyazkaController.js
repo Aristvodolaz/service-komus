@@ -122,16 +122,23 @@ const getZapis = async (req, res) => {
         }
         
         const result = await pool.request()
-            .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
-            .input('Artikul', mssql.NVarChar(50), artikul)
-            .query(`
-                SELECT Nazvanie_Zadaniya, Artikul, Srok_Godnosti, SHK_WPS, Pallet_No, Kolvo_Tovarov
-                FROM Test_MP_Privyazka
-                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya 
-                  AND Artikul = @Artikul
-                  AND Pallet_No IS NOT NULL
-                  AND SHK_WPS IS NOT NULL
-            `);
+        .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+        .input('Artikul', mssql.NVarChar(50), artikul)
+        .query(`
+            SELECT 
+                Nazvanie_Zadaniya, 
+                Artikul, 
+                Srok_Godnosti, 
+                SHK_WPS, 
+                Pallet_No, 
+                Kolvo_Tovarov
+            FROM Test_MP_Privyazka
+            WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya 
+              AND Artikul = @Artikul
+              AND Pallet_No IS NOT NULL
+              AND SHK_WPS IS NOT NULL
+        
+        `);
 
         // Check the result
         if (result.recordset.length > 0) {

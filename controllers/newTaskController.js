@@ -851,7 +851,54 @@ const updateStatusNew = async (req, res) => {
     }
 };
 
+const addRecordForWB = async (req, res) => {
+    const { Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, SHK_WPS, Pallet_No } = req.body;
+  
+    // Проверка входных данных
+    if (!Nazvanie_Zadaniya || !Artikul || !Kolvo_Tovarov || !SHK_WPS || !Pallet_No) {
+      return res.status(200).json({
+        success: false,
+        value: "Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, SHK_WPS, Pallet_No обязательны",
+        errorCode: 200,
+      });
+    }
+  
+    try {
+      // Подключение к базе данных
+      const pool = await connectToDatabase();
+      if (!pool) {
+        return res.status(500).json({ success: false, value: null, errorCode: 500 });
+      }
+  
 
+
+      // Добавляем новую запись в таблицу Test_MP_Privyazka
+      const insertQuery = `
+        INSERT INTO Test_MP_Privyazka (
+          Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, SHK_WPS, Pallet_No
+        ) VALUES (
+          @Nazvanie_Zadaniya, @Artikul, @Kolvo_Tovarov, @SHK_WPS, @Pallet_No
+        )
+      `;
+  
+      await pool.request()
+        .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+        .input("Artikul", mssql.Int, Artikul)
+        .input("Kolvo_Tovarov", mssql.Int, Kolvo_Tovarov)
+        .input("SHK_WPS", mssql.NVarChar, SHK_WPS)
+        .input("Pallet_No", mssql.NVarChar, Pallet_No)
+        .query(insertQuery);
+  
+      return res.status(200).json({
+        success: true,
+        value: "Запись успешно добавлена в таблицу Test_MP_Privyazka",
+        errorCode: 200,
+      });
+    } catch (error) {
+      console.error("Ошибка:", error);
+      res.status(500).json({ success: false, value: null, errorCode: 500 });
+    }
+  };
 
   
 module.exports = {
@@ -866,5 +913,6 @@ module.exports = {
     getLDUNew,
     endStatusNew,
     checkOrderCompletionForBox,
-    addRecordForOzon
+    addRecordForOzon,
+    addRecordForWB
 }

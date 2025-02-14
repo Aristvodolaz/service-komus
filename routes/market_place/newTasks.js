@@ -15,4 +15,5 @@ router.get('/checkOrderCompletionWBBox', dataController.checkOrderCompletionForB
 router.post('/closeTask', dataController.addTaskStatusExitNew);
 router.post('/sendEndData', dataController.endStatusNew)
 router.post('/addRecordForOzon', dataController.addRecordForOzon)
+router.post('/addRecordForWB', dataController.addRecordForWB);
 module.exports = router;
