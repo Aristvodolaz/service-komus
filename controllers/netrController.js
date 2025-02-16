@@ -13,12 +13,12 @@ async function addItem(req, res) {
         const srokQuery = `
         SELECT TOP 1 Srok_Godnosti 
         FROM [SPOe_rc].[dbo].[Test_Mp] 
-        WHERE Nazvanie_Zadaniya = @nazvanie_zdaniya AND Artikul = @artikul
+        WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
     `;
 
     const srokResult = await pool.request()
-    .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
-    .input('artikul', mssql.NVarChar, artikul)
+    .input('Nazvanie_Zadaniya', mssql.NVarChar(255), nazvanie_zdaniya)
+    .input('Artikul', mssql.Int, artikul)
     .query(srokQuery);
 
 const srokGodnosti = srokResult.recordset.length > 0 ? srokResult.recordset[0].Srok_Godnosti : null;
