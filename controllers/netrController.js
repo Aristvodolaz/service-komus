@@ -3,13 +3,26 @@ const mssql = require('mssql');
 
 async function addItem(req, res) {
     try {
-        const { nazvanie_zdaniya, artikul, shk, vlozhennost, pallet, size_vps, vp, itog_zakaza } = req.body;
+        const { nazvanie_zdaniya, artikul, shk, vlozhennost, pallet, size_vps, vp, itog_zakaza, nazvanie_tovara } = req.body;
 
         if (!nazvanie_zdaniya || !artikul || !shk || !vlozhennost || !pallet || !vp || !itog_zakaza) {
             return res.status(404).json({ success: false, value: 'Нет данных', errorCode: 404 });
         }
 
         const pool = await connectToDatabase();
+        const srokQuery = `
+        SELECT TOP 1 Srok_Godnosti 
+        FROM [SPOe_rc].[dbo].[Test_Mp] 
+        WHERE nazvanie_zdaniya = @nazvanie_zdaniya AND artikul = @artikul
+    `;
+
+    const srokResult = await pool.request()
+    .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
+    .input('artikul', mssql.NVarChar, artikul)
+    .query(srokQuery);
+
+const srokGodnosti = srokResult.recordset.length > 0 ? srokResult.recordset[0].Srok_Godnosti : null;
+
 
         // Проверяем, есть ли уже запись с такими параметрами
         const checkQuery = `
@@ -46,8 +59,8 @@ async function addItem(req, res) {
             // Записи нет, создаем новую
             const insertQuery = `
                 INSERT INTO [SPOe_rc].[dbo].[x_Packer_Netr]
-                (nazvanie_zdaniya, artikul, shk, vlozhennost, pallet, size_vps, vp, itog_zakaza)
-                VALUES (@nazvanie_zdaniya, @artikul, @shk, @vlozhennost, @pallet, @size_vps, @vp, @itog_zakaza)
+                (nazvanie_zdaniya, artikul, shk, vlozhennost, pallet, size_vps, vp, itog_zakaza, nazvanie_tovara, srok_godnosti)
+                VALUES (@nazvanie_zdaniya, @artikul, @shk, @vlozhennost, @pallet, @size_vps, @vp, @itog_zakaza, @nazvanie_tovara, @srok_godnosti)
             `;
 
             await pool.request()
@@ -59,6 +72,8 @@ async function addItem(req, res) {
                 .input('size_vps', mssql.NVarChar, size_vps)
                 .input('vp', mssql.NVarChar, vp)
                 .input('itog_zakaza', mssql.Int, itog_zakaza)
+                .input('nazvanie_tovara', mssql.NVarChar, nazvanie_tovara)
+                .input('srok_godnosti', mssql.NVarChar, srokGodnosti) 
                 .query(insertQuery);
 
             res.status(200).json({ success: true, value: 'Успешно добавлено', errorCode: 200 });
@@ -329,7 +344,7 @@ async function distinctName(req, res) {
 async function uploadWPS(req, res) {
     try {
         // Проверяем обязательные параметры
-        const { nazvanie_zdaniya, artikul, shk,  vlozhennost, pallet, size_vps, vp, itog_zakaza, shk_wps } = req.body;
+        const { nazvanie_zdaniya, artikul,  vlozhennost, pallet, size_vps, vp, itog_zakaza, shk_wps } = req.body;
 
 
         // Подключаемся к базе данных
@@ -342,8 +357,7 @@ async function uploadWPS(req, res) {
         const queryCheck = `
             SELECT id FROM x_Packer_Netr
             WHERE nazvanie_zdaniya = @nazvanie_zdaniya
-              AND artikul = @artikul
-              AND shk = @shk
+              AND artikul = @artikul   
               AND vlozhennost = @vlozhennost
               AND pallet like @pallet
               AND size_vps = @size_vps
@@ -355,7 +369,6 @@ async function uploadWPS(req, res) {
         requestCheck
         .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
         .input('artikul', mssql.NVarChar, artikul.toString())
-            .input('shk', mssql.NVarChar, shk.toString())
             .input('vlozhennost', mssql.NVarChar, vlozhennost.toString())
             .input('pallet', mssql.NVarChar, pallet.toString())
             .input('size_vps', mssql.NVarChar, size_vps.toString())
