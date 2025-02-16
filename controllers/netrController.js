@@ -13,7 +13,7 @@ async function addItem(req, res) {
         const srokQuery = `
         SELECT TOP 1 Srok_Godnosti 
         FROM [SPOe_rc].[dbo].[Test_Mp] 
-        WHERE nazvanie_zdaniya = @nazvanie_zdaniya AND artikul = @artikul
+        WHERE Nazvanie_Zadaniya = @nazvanie_zdaniya AND Artikul = @artikul
     `;
 
     const srokResult = await pool.request()
