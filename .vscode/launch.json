@@ -2,18 +2,29 @@
     // Используйте IntelliSense, чтобы узнать о возможных атрибутах.
     // Наведите указатель мыши, чтобы просмотреть описания существующих атрибутов.
     // Для получения дополнительной информации посетите: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
+    
+    
+        "version": "0.2.0",
+        
+        "configurations": [
+            
 
-        {
-            "runtimeExecutable": "node",
-            "type": "node",
-            "request": "launch",
-            "name": "Запустить программу",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\app.js"
-        }
-    ]
-}
+            {
+                "type": "node",
+                "request": "launch",
+                "name": "Запустить программу",
+                "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+                "skipFiles": [
+                    "<node_internals>/**"
+                ],
+                "program": "${workspaceFolder}/app.js",
+                "cwd": "${workspaceFolder}",
+                "console": "integratedTerminal",
+                "env": {
+                    "NODE_ENV": "development"
+                }
+            }
+        ]
+    }
+    
+    

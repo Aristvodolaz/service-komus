@@ -1,0 +1,942 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Komus Service API",
+    "description": "API документация для сервиса управления задачами Komus",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3005",
+      "description": "Локальный сервер разработки"
+    }
+  ],
+  "paths": {
+    "/market/tasks": {
+      "get": {
+        "summary": "Получение задач по номеру",
+        "tags": ["Tasks"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "taskNumber",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Номер задачи"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешное получение задач",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Task"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/market/tasks/names": {
+      "get": {
+        "summary": "Получение уникальных имен задач",
+        "tags": ["Tasks"],
+        "responses": {
+          "200": {
+            "description": "Список уникальных имен задач",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/market/tasks/searchShk": {
+      "get": {
+        "summary": "Поиск по штрих-коду",
+        "tags": ["Tasks"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "shk",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Штрих-код"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Результаты поиска",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/market/tasks/serchArticulTask": {
+      "get": {
+        "summary": "Поиск по артикулу",
+        "tags": ["Tasks"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "articul",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Артикул товара"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Результаты поиска по артикулу",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Task"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/market/tasks/updateStatus": {
+      "put": {
+        "summary": "Обновление статуса задачи",
+        "tags": ["Tasks"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskId": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Статус успешно обновлен"
+          }
+        }
+      }
+    },
+    "/market/tasks/updateTasks": {
+      "post": {
+        "summary": "Обновление значений задачи",
+        "tags": ["Tasks"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Задача успешно обновлена"
+          }
+        }
+      }
+    },
+    "/market/tasks/duplicate": {
+      "post": {
+        "summary": "Дублирование записи",
+        "tags": ["Tasks"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Запись успешно дублирована",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/market/tasks/recordNewShk": {
+      "post": {
+        "summary": "Обновление ШК по задаче и артикулу",
+        "tags": ["Tasks"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskNumber": {
+                    "type": "string"
+                  },
+                  "articul": {
+                    "type": "string"
+                  },
+                  "shk": {
+                    "type": "string"
+                  }
+                },
+                "required": ["taskNumber", "articul", "shk"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ШК успешно обновлен"
+          }
+        }
+      }
+    },
+    "/market/tasks/endStatus": {
+      "put": {
+        "summary": "Завершение задачи",
+        "tags": ["Tasks"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Задача успешно завершена"
+          }
+        }
+      }
+    },
+    "/market/tasks/getInfoWPS": {
+      "get": {
+        "summary": "Получение записей по ШК WPS",
+        "tags": ["WPS"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "shk",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Штрих-код WPS"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Информация WPS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WPSInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/download/excel": {
+      "get": {
+        "summary": "Скачивание Excel файла",
+        "tags": ["Files"],
+        "responses": {
+          "200": {
+            "description": "Excel файл",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Авторизация пользователя",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешная авторизация",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверные учетные данные"
+          }
+        }
+      }
+    },
+    "/reason": {
+      "get": {
+        "summary": "Получение списка причин",
+        "tags": ["Reasons"],
+        "responses": {
+          "200": {
+            "description": "Список причин",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reason"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/srok": {
+      "post": {
+        "summary": "Обновление срока годности",
+        "tags": ["Products"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SrokUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Срок годности успешно обновлен"
+          }
+        }
+      }
+    },
+    "/market/otkaz": {
+      "post": {
+        "summary": "Регистрация отказа маркетплейса",
+        "tags": ["Marketplace"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketplaceRefusal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Отказ успешно зарегистрирован"
+          }
+        }
+      },
+      "get": {
+        "summary": "Получение списка отказов",
+        "tags": ["Marketplace"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "marketplace",
+            "schema": {
+              "type": "string",
+              "enum": ["ozon", "wildberries", "yandex"]
+            },
+            "description": "Фильтр по маркетплейсу"
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Начальная дата"
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Конечная дата"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список отказов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceRefusal"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/market/new": {
+      "post": {
+        "summary": "Создание новой задачи маркетплейса",
+        "tags": ["Marketplace"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketplaceTask"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Задача успешно создана",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/article": {
+      "get": {
+        "summary": "Поиск артикула",
+        "tags": ["Products"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Поисковый запрос"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Результаты поиска",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Article"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/download/files": {
+      "get": {
+        "summary": "Получение списка доступных файлов",
+        "tags": ["Files"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": ["excel", "pdf", "all"]
+            },
+            "description": "Тип файлов"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список файлов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/export": {
+      "post": {
+        "summary": "Экспорт данных",
+        "tags": ["Export"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Экспорт запущен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exportId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["pending", "processing"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Статус экспорта",
+        "tags": ["Export"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "exportId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "ID экспорта"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Статус экспорта",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/send": {
+      "post": {
+        "summary": "Отправка данных",
+        "tags": ["Export"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Данные успешно отправлены"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "shk": {
+            "type": "string"
+          },
+          "article": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TaskUpdate": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "shk": {
+            "type": "string"
+          },
+          "article": {
+            "type": "string"
+          }
+        },
+        "required": ["taskId"]
+      },
+      "WPSInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "shk": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          }
+        }
+      },
+      "Reason": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "SrokUpdate": {
+        "type": "object",
+        "properties": {
+          "article": {
+            "type": "string"
+          },
+          "expirationDate": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": ["article", "expirationDate"]
+      },
+      "MarketplaceRefusal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "marketplace": {
+            "type": "string",
+            "enum": ["ozon", "wildberries", "yandex"]
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "article": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["new", "processing", "completed"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["marketplace", "orderNumber", "article", "quantity", "reason"]
+      },
+      "MarketplaceTask": {
+        "type": "object",
+        "properties": {
+          "marketplace": {
+            "type": "string",
+            "enum": ["ozon", "wildberries", "yandex"]
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "article": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": ["article", "quantity"]
+            }
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["marketplace", "orderNumber", "items"]
+      },
+      "Article": {
+        "type": "object",
+        "properties": {
+          "article": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "barcode": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "stock": {
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          }
+        }
+      },
+      "FileInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ExportRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["tasks", "refusals", "inventory"]
+          },
+          "format": {
+            "type": "string",
+            "enum": ["excel", "pdf", "csv"]
+          },
+          "dateFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "dateTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "filters": {
+            "type": "object"
+          }
+        },
+        "required": ["type", "format"]
+      },
+      "ExportStatus": {
+        "type": "object",
+        "properties": {
+          "exportId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "processing", "completed", "failed"]
+          },
+          "progress": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "fileUrl": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "SendRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["email", "ftp", "api"]
+          },
+          "destination": {
+            "type": "string"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "options": {
+            "type": "object"
+          }
+        },
+        "required": ["type", "destination", "files"]
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+} 
