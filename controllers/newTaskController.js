@@ -679,32 +679,45 @@ const updateStatusNew = async (req, res) => {
             return res.status(500).json({ success: false, value: null, errorCode: 500 });
         }
 
-        // Получаем суммарное значение (Mesto * Vlozhennost) по заданию и артикулу
-        const sumQuery = `
-            SELECT SUM(Mesto * Vlozhennost) AS TotalAmount, Itog_Zakaza, Ubrano_Iz_Obrabortki
-            FROM Test_MP
-            WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
-            GROUP BY Itog_Zakaza, Ubrano_Iz_Obrabortki
+        // **ШАГ 1: Получаем оригинальную запись по ID**
+        const idRecordQuery = `
+            SELECT * FROM Test_MP WHERE ID = @ID
         `;
 
-        const sumResult = await pool.request()
-            .input("Nazvanie_Zadaniya", mssql.NVarChar(255), Nazvanie_Zadaniya)
-            .input("Artikul", mssql.Int, Artikul)
-            .query(sumQuery);
+        const idRecord = await pool.request()
+            .input("ID", mssql.BigInt, ID)
+            .query(idRecordQuery);
 
-        const { TotalAmount = 0, Itog_Zakaza, Ubrano_Iz_Obrabortki } = sumResult.recordset[0] || {};
-        const remainingAmount = Itog_Zakaza - Ubrano_Iz_Obrabortki;
-
-        // Проверяем, не превышает ли новое значение лимит
-        if (TotalAmount + (Mesto * Vlozhennost) > remainingAmount) {
-            return res.status(400).json({
+        if (idRecord.recordset.length === 0) {
+            return res.status(404).json({
                 success: false,
-                value: "Превышение допустимого количества",
-                errorCode: 400,
+                value: "Запись с таким ID не найдена",
+                errorCode: 404,
             });
         }
 
-        // Проверяем, существует ли запись с такими же параметрами
+        const originalRecord = idRecord.recordset[0];
+
+        if (originalRecord.Mesto === null && originalRecord.Vlozhennost === null && originalRecord.Pallet_No === null) {
+          await pool.request()
+              .input("ID", mssql.BigInt, ID)
+              .input("Mesto", mssql.Int, Mesto)
+              .input("Vlozhennost", mssql.Int, Vlozhennost)
+              .input("Pallet_No", mssql.Int, Pallet_No)
+              .query(`
+                  UPDATE Test_MP
+                  SET Mesto = @Mesto, Vlozhennost = @Vlozhennost, Pallet_No = @Pallet_No
+                  WHERE ID = @ID
+              `);
+
+          return res.status(200).json({
+              success: true,
+              value: "Запись обновлена: заменены NULL-значения",
+              errorCode: 200,
+          });
+      }
+
+        // **ШАГ 2: Проверяем, существует ли уже такая же запись**
         const existingDuplicateQuery = `
             SELECT * FROM Test_MP
             WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
@@ -720,14 +733,21 @@ const updateStatusNew = async (req, res) => {
             .input("Pallet_No", mssql.Int, Pallet_No)
             .query(existingDuplicateQuery);
 
+
+
         if (existingDuplicate.recordset.length > 0) {
+            // **Если запись уже существует, просто обновляем `Mesto`**
             const recordId = existingDuplicate.recordset[0].ID;
-            const existingMesto = existingDuplicate.recordset[0].Mesto;
+            const existingMesto = existingDuplicate.recordset[0].Mesto; // Берём Mesto из дубликата
 
             await pool.request()
                 .input("ID", mssql.BigInt, recordId)
                 .input("Mesto", mssql.Int, existingMesto + Mesto)
-                .query(`UPDATE Test_MP SET Mesto = @Mesto WHERE ID = @ID`);
+                .query(`
+                    UPDATE Test_MP
+                    SET Mesto = @Mesto
+                    WHERE ID = @ID
+                `);
 
             return res.status(200).json({
                 success: true,
@@ -736,31 +756,100 @@ const updateStatusNew = async (req, res) => {
             });
         }
 
-        // Вставляем новую запись
+        // **ШАГ 3: Если `Vlozhennost` или `Pallet_No` отличаются → Дублируем запись**
         await pool.request()
-            .input("ID", mssql.BigInt, ID)
-            .input("Nazvanie_Zadaniya", mssql.NVarChar(255), Nazvanie_Zadaniya)
-            .input("Artikul", mssql.Int, Artikul)
-            .input("Mesto", mssql.Int, Mesto)
-            .input("Vlozhennost", mssql.Int, Vlozhennost)
-            .input("Pallet_No", mssql.Int, Pallet_No)
-            .input("Time_End", mssql.NVarChar(255), Time_End)
-            .query(`
-                INSERT INTO Test_MP (ID, Nazvanie_Zadaniya, Artikul, Mesto, Vlozhennost, Pallet_No, Time_End)
-                VALUES (@ID, @Nazvanie_Zadaniya, @Artikul, @Mesto, @Vlozhennost, @Pallet_No, @Time_End)
-            `);
-
+        .input('Pref', mssql.NVarChar(50), originalRecord.Pref)
+        .input('Nazvanie_Zadaniya', mssql.NVarChar(255), originalRecord.Nazvanie_Zadaniya)
+        .input('Status_Zadaniya', mssql.Int, 1)
+        .input('Status', mssql.Int, 2)
+        .input('Ispolnitel', mssql.NVarChar(255), originalRecord.Ispolnitel)
+        .input('Artikul', mssql.Int, originalRecord.Artikul)
+        .input('Artikul_Syrya', mssql.NVarChar(50), originalRecord.Artikul_Syrya)
+        .input('Nazvanie_Tovara', mssql.NVarChar(255), originalRecord.Nazvanie_Tovara)
+        .input('SHK', mssql.NVarChar(255), originalRecord.SHK)
+        .input('SHK_SPO', mssql.NVarChar(255), originalRecord.SHK_SPO)
+        .input('SHK_SPO_1', mssql.NVarChar(255), originalRecord.SHK_SPO_1)
+        .input('Kol_vo_Syrya', mssql.NVarChar(255), originalRecord.Kol_vo_Syrya)
+        .input('Itog_Zakaz', mssql.Int, 0)
+        .input('Sht_v_MP', mssql.Int, originalRecord.Sht_v_MP)
+        .input('Itog_MP', mssql.Int, originalRecord.Itog_MP)
+        .input('SOH', mssql.NVarChar(10), originalRecord.SOH)
+        .input('Scklad_Pref', mssql.NVarChar(50), originalRecord.Scklad_Pref)
+        .input('Tip_Postavki', mssql.NVarChar(50), originalRecord.Tip_Postavki)
+        .input('Srok_Godnosti', mssql.NVarChar(50), originalRecord.Srok_Godnosti)
+        .input('Op_1_Bl_1_Sht', mssql.NVarChar(10), originalRecord.Op_1_Bl_1_Sht)
+        .input('Op_2_Bl_2_Sht', mssql.NVarChar(10), originalRecord.Op_2_Bl_2_Sht)
+        .input('Op_3_Bl_3_Sht', mssql.NVarChar(10), originalRecord.Op_3_Bl_3_Sht)
+        .input('Op_4_Bl_4_Sht', mssql.NVarChar(10), originalRecord.Op_4_Bl_4_Sht)
+        .input('Op_5_Bl_5_Sht', mssql.NVarChar(10), originalRecord.Op_5_Bl_5_Sht)
+        .input('Op_6_Blis_6_10_Sht', mssql.NVarChar(10), originalRecord.Op_6_Blis_6_10_Sht)
+        .input('Op_7_Pereschyot', mssql.NVarChar(10), originalRecord.Op_7_Pereschyot)
+        .input('Op_9_Fasovka_Sborka', mssql.NVarChar(10), originalRecord.Op_9_Fasovka_Sborka)
+        .input('Op_10_Markirovka_SHT', mssql.NVarChar(10), originalRecord.Op_10_Markirovka_SHT)
+        .input('Op_11_Markirovka_Prom', mssql.NVarChar(10), originalRecord.Op_11_Markirovka_Prom)
+        .input('Op_12_Markirovka_Prom', mssql.NVarChar(10), originalRecord.Op_12_Markirovka_Prom)
+        .input('Op_13_Markirovka_Fabr', mssql.NVarChar(10), originalRecord.Op_13_Markirovka_Fabr)
+        .input('Op_14_TU_1_Sht', mssql.NVarChar(10), originalRecord.Op_14_TU_1_Sht)
+        .input('Op_15_TU_2_Sht', mssql.NVarChar(10), originalRecord.Op_15_TU_2_Sht)
+        .input('Op_16_TU_3_5', mssql.NVarChar(10), originalRecord.Op_16_TU_3_5)
+        .input('Op_17_TU_6_8', mssql.NVarChar(10), originalRecord.Op_17_TU_6_8)
+        .input('Op_468_Proverka_SHK', mssql.NVarChar(10), originalRecord.Op_468_Proverka_SHK)
+        .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), originalRecord.Op_469_Spetsifikatsiya_TM)
+        .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), originalRecord.Op_470_Dop_Upakovka)
+        .input('Sortiruemyi_Tovar', mssql.NVarChar(10), originalRecord.Sortiruemyi_Tovar)
+        .input('Ne_Sortiruemyi_Tovar', mssql.NVarChar(10), originalRecord.Ne_Sortiruemyi_Tovar)
+        .input('Produkty', mssql.NVarChar(10), originalRecord.Produkty)
+        .input('Opasnyi_Tovar', mssql.NVarChar(10), originalRecord.Opasnyi_Tovar)
+        .input('Zakrytaya_Zona', mssql.NVarChar(10), originalRecord.Zakrytaya_Zona)
+        .input('Krupnogabaritnyi_Tovar', mssql.NVarChar(10), originalRecord.Krupnogabaritnyi_Tovar)
+        .input('Yuvelirnye_Izdelia', mssql.NVarChar(10), originalRecord.Yuvelirnye_Izdelia)
+        .input('Pechat_Etiketki_s_SHK', mssql.NVarChar(10), originalRecord.Pechat_Etiketki_s_SHK)
+        .input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar(10), originalRecord.Pechat_Etiketki_s_Opisaniem)
+        .input('Fakticheskoe_Kol_vo', mssql.Int, originalRecord.Fakticheskoe_Kol_vo)
+        .input('Mesto', mssql.Int, Mesto)
+        .input('Vlozhennost', mssql.Int, Vlozhennost)
+        .input('Pallet_No', mssql.NVarChar(50), Pallet_No.toString())
+        .input('Time_Start', mssql.NVarChar(255), originalRecord.Time_Start)
+        .input('Time_Middle', mssql.NVarChar(255), originalRecord.Time_Middle)
+        .input('Time_End', mssql.NVarChar(255), Time_End)
+        .input('Persent', mssql.NVarChar(50), originalRecord.Persent)
+        .query(`
+          INSERT INTO Test_MP (
+            Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel, Artikul, Artikul_Syrya, 
+             Nazvanie_Tovara, SHK, SHK_SPO, SHK_SPO_1, Kol_vo_Syrya, Itog_Zakaz,
+            Sht_v_MP, Itog_MP, SOH, Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, 
+            Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht, Op_7_Pereschyot, 
+            Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_12_Markirovka_Prom, Scklad_Pref,
+            Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, 
+            Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Sortiruemyi_Tovar, 
+            Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
+            Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, Fakticheskoe_Kol_vo, 
+            Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent
+          ) VALUES (
+            @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, 
+            @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, 
+            @Sht_v_MP, @Itog_MP, @SOH, @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, 
+            @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht, @Op_7_Pereschyot, 
+            @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_12_Markirovka_Prom,@Scklad_Pref, 
+            @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, 
+            @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Sortiruemyi_Tovar, 
+            @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
+            @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @Fakticheskoe_Kol_vo, 
+            @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent
+          )
+        `);
+  
         return res.status(200).json({
             success: true,
-            value: "Запись добавлена успешно",
+            value: "Запись продублирована с новыми значениями",
             errorCode: 200,
         });
+
     } catch (error) {
         console.error("Ошибка:", error);
         res.status(500).json({ success: false, value: null, errorCode: 500 });
     }
 };
-
 
 const addRecordForWB = async (req, res) => {
     const { Nazvanie_Zadaniya, Artikul, Kolvo_Tovarov, SHK_WPS, Pallet_No } = req.body;
