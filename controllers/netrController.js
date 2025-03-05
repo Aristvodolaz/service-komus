@@ -415,7 +415,9 @@ async function uploadWPS(req, res) {
 
 async function deleteRecordsByArtikul(req, res) {
     try {
-        const { nazvanie_zdaniya, artikul } = req.body;
+        // Получаем параметры либо из тела запроса (POST), либо из query (GET)
+        const nazvanie_zdaniya = req.body.nazvanie_zdaniya || req.query.nazvanie_zdaniya;
+        const artikul = req.body.artikul || req.query.artikul;
 
         if (!nazvanie_zdaniya || !artikul) {
             return res.status(400).json({ 
@@ -428,7 +430,7 @@ async function deleteRecordsByArtikul(req, res) {
         const pool = await connectToDatabase();
 
         // Начинаем транзакцию
-        const transaction = new sql.Transaction(pool);
+        const transaction = new mssql.Transaction(pool);
         await transaction.begin();
 
         try {
@@ -449,14 +451,14 @@ async function deleteRecordsByArtikul(req, res) {
 
             // Выполняем удаление
             await transaction.request()
-                .input('nazvanie_zdaniya', sql.NVarChar, nazvanie_zdaniya)
-                .input('artikul', sql.NVarChar, artikul)
+                .input('nazvanie_zdaniya', mssql.NVarChar, nazvanie_zdaniya)
+                .input('artikul', mssql.NVarChar, artikul)
                 .query(deleteQuery);
 
             // Выполняем обновление статусов
             await transaction.request()
-                .input('nazvanie_zdaniya', sql.NVarChar, nazvanie_zdaniya)
-                .input('artikul', sql.NVarChar, artikul)
+                .input('nazvanie_zdaniya', mssql.NVarChar, nazvanie_zdaniya)
+                .input('artikul', mssql.NVarChar, artikul)
                 .query(updateQuery);
 
             // Подтверждаем транзакцию

@@ -643,6 +643,107 @@
           }
         }
       }
+    },
+    "/netr/deleteByArtikul": {
+      "post": {
+        "summary": "Удаление записей по артикулу и названию задания",
+        "tags": ["NETR"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nazvanie_zdaniya": {
+                    "type": "string",
+                    "description": "Название задания"
+                  },
+                  "artikul": {
+                    "type": "string",
+                    "description": "Артикул товара"
+                  }
+                },
+                "required": ["nazvanie_zdaniya", "artikul"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Записи успешно удалены и статусы обновлены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Записи успешно удалены и статусы обновлены"
+                    },
+                    "errorCode": {
+                      "type": "integer",
+                      "example": 200
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Отсутствуют обязательные параметры",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "nazvanie_zdaniya и artikul обязательны"
+                    },
+                    "errorCode": {
+                      "type": "integer",
+                      "example": 400
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Ошибка при удалении записей"
+                    },
+                    "errorCode": {
+                      "type": "integer",
+                      "example": 500
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
