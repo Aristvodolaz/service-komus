@@ -4,12 +4,13 @@ const {
     getAcceptedQuantity, 
     updateItem, 
     getItemsByNazvanieZdaniya,
-    getPalletToShkWpsMapping ,
+    getPalletToShkWpsMapping,
     uploadData,
     downloadData,
     distinctName,
     uploadWPS,
-    getListVp
+    getListVp,
+    deleteRecordsByArtikul
 } = require('../controllers/netrController');
 
 const router = express.Router();
@@ -33,5 +34,8 @@ router.get('/itemsByTask', getItemsByNazvanieZdaniya);
 
 // Получение связки pallet - shk_wps по названию задания
 router.get('/palletToShkWps', getPalletToShkWpsMapping);
+
+// Удаление записей по артикулу и названию задания
+router.post('/deleteByArtikul', deleteRecordsByArtikul);
 
 module.exports = router;

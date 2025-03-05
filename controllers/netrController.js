@@ -413,7 +413,78 @@ async function uploadWPS(req, res) {
     }
 }
 
+async function deleteRecordsByArtikul(req, res) {
+    try {
+        // Получаем параметры либо из тела запроса (POST), либо из query (GET)
+        const nazvanie_zdaniya = req.body.nazvanie_zdaniya || req.query.nazvanie_zdaniya;
+        const artikul = req.body.artikul || req.query.artikul;
 
+        if (!nazvanie_zdaniya || !artikul) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'nazvanie_zdaniya и artikul обязательны', 
+                errorCode: 400 
+            });
+        }
+
+        const pool = await connectToDatabase();
+
+        // Начинаем транзакцию
+        const transaction = new mssql.Transaction(pool);
+        await transaction.begin();
+
+        try {
+            // Удаляем записи из x_Packer_Netr
+            const deleteQuery = `
+                DELETE FROM [SPOe_rc].[dbo].[x_Packer_Netr]
+                WHERE nazvanie_zdaniya = @nazvanie_zdaniya 
+                AND artikul = @artikul
+            `;
+
+            // Обновляем статусы в Test_MP
+            const updateQuery = `
+                UPDATE [SPOe_rc].[dbo].[Test_MP]
+                SET Status = 0, Status_Zadaniya = 0
+                WHERE Nazvanie_Zadaniya = @nazvanie_zdaniya 
+                AND Artikul = @artikul
+            `;
+
+            // Выполняем удаление
+            await transaction.request()
+                .input('nazvanie_zdaniya', mssql.NVarChar, nazvanie_zdaniya)
+                .input('artikul', mssql.NVarChar, artikul)
+                .query(deleteQuery);
+
+            // Выполняем обновление статусов
+            await transaction.request()
+                .input('nazvanie_zdaniya', mssql.NVarChar, nazvanie_zdaniya)
+                .input('artikul', mssql.NVarChar, artikul)
+                .query(updateQuery);
+
+            // Подтверждаем транзакцию
+            await transaction.commit();
+
+            res.status(200).json({ 
+                success: true, 
+                message: 'Записи успешно удалены и статусы обновлены', 
+                errorCode: 200 
+            });
+
+        } catch (err) {
+            // В случае ошибки откатываем транзакцию
+            await transaction.rollback();
+            throw err;
+        }
+
+    } catch (err) {
+        console.error('Ошибка при удалении записей:', err);
+        res.status(500).json({ 
+            success: false, 
+            message: err.message, 
+            errorCode: 500 
+        });
+    }
+}
 
 module.exports = {
     addItem,
@@ -425,5 +496,6 @@ module.exports = {
     downloadData,
     distinctName,
     uploadWPS,
-    getListVp
+    getListVp,
+    deleteRecordsByArtikul
 };

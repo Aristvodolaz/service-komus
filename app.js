@@ -1,5 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 
 /*for gruzy*/
 const dataRouter = require('./routes/test');
@@ -36,6 +38,9 @@ const app = express();
 const port = 3005;
 
 app.use(bodyParser.json());
+
+// Добавляем маршрут для Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 /*for gruzy*/
 // app.use('/srok', dataRouter);
