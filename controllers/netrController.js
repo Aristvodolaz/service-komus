@@ -129,6 +129,25 @@ async function updateItem(req, res) {
 
         const pool = await connectToDatabase();
 
+        // Если vlozhennost = 0, удаляем запись
+        if (vlozhennost === '0' || vlozhennost === 0) {
+            const deleteQuery = `
+                DELETE FROM [SPOe_rc].[dbo].[x_Packer_Netr]
+                WHERE id = @id
+            `;
+
+            await pool.request()
+                .input('id', mssql.Int, id)
+                .query(deleteQuery);
+
+            return res.status(200).json({ 
+                success: true, 
+                value: 'Запись успешно удалена', 
+                errorCode: 200 
+            });
+        }
+
+        // Если vlozhennost не 0, обновляем запись
         const updateQuery = `
             UPDATE [SPOe_rc].[dbo].[x_Packer_Netr]
             SET vlozhennost = @vlozhennost, pallet = @pallet
@@ -141,11 +160,19 @@ async function updateItem(req, res) {
             .input('pallet', mssql.NVarChar, pallet)
             .query(updateQuery);
 
-        res.status(200).json({ success: true, value: 'Запись успешно обновлена', errorCode: 200 });
+        res.status(200).json({ 
+            success: true, 
+            value: 'Запись успешно обновлена', 
+            errorCode: 200 
+        });
 
     } catch (err) {
-        console.error('Ошибка при обновлении записи:', err);
-        res.status(500).json({ success: false, value: err, errorCode: 500 });
+        console.error('Ошибка при обновлении/удалении записи:', err);
+        res.status(500).json({ 
+            success: false, 
+            value: err.message, 
+            errorCode: 500 
+        });
     }
 }
 
@@ -241,6 +268,25 @@ async function uploadData(req, res) {
         if (!pool) {
             return res.status(500).json({ message: "Ошибка подключения к базе данных." });
         }
+
+        // Проверяем существование задания
+        const checkQuery = `
+            SELECT COUNT(*) as count 
+            FROM Test_MP 
+            WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+        `;
+
+        const checkResult = await pool.request()
+            .input('Nazvanie_Zadaniya', mssql.NVarChar, data.Nazvanie_Zadaniya)
+            .query(checkQuery);
+
+        if (checkResult.recordset[0].count > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Задание с таким названием уже существует в базе данных.", 
+                errorCode: 400 
+            });
+        }
   
         const query = `
             INSERT INTO Test_MP 
@@ -266,10 +312,18 @@ async function uploadData(req, res) {
   
         await request.query(query);
   
-        res.status(200).json({ message: "Данные успешно записаны в базу." });
+        res.status(200).json({ 
+            success: true,
+            message: "Данные успешно записаны в базу.",
+            errorCode: 200
+        });
     } catch (err) {
         console.error('Ошибка при записи данных в базу:', err);
-        res.status(500).json({ message: "Ошибка при записи данных в базу." });
+        res.status(500).json({ 
+            success: false,
+            message: "Ошибка при записи данных в базу.",
+            errorCode: 500
+        });
     }
 }
 
@@ -486,6 +540,47 @@ async function deleteRecordsByArtikul(req, res) {
     }
 }
 
+async function hideTask(req, res) {
+    try {
+        const { nazvanie_zdaniya } = req.body;
+
+        if (!nazvanie_zdaniya) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'nazvanie_zdaniya обязательно', 
+                errorCode: 400 
+            });
+        }
+
+        const pool = await connectToDatabase();
+
+        // Обновляем статусы в Test_MP
+        const updateQuery = `
+            UPDATE [SPOe_rc].[dbo].[Test_MP]
+            SET Status = 2, Status_Zadaniya = 1
+            WHERE Nazvanie_Zadaniya = @nazvanie_zdaniya
+        `;
+
+        await pool.request()
+            .input('nazvanie_zdaniya', mssql.NVarChar, nazvanie_zdaniya)
+            .query(updateQuery);
+
+        res.status(200).json({ 
+            success: true, 
+            message: 'Задание успешно скрыто', 
+            errorCode: 200 
+        });
+
+    } catch (err) {
+        console.error('Ошибка при скрытии задания:', err);
+        res.status(500).json({ 
+            success: false, 
+            message: err.message, 
+            errorCode: 500 
+        });
+    }
+}
+
 module.exports = {
     addItem,
     getAcceptedQuantity,
@@ -497,5 +592,6 @@ module.exports = {
     distinctName,
     uploadWPS,
     getListVp,
-    deleteRecordsByArtikul
+    deleteRecordsByArtikul,
+    hideTask
 };

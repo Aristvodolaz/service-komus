@@ -10,7 +10,8 @@ const {
     distinctName,
     uploadWPS,
     getListVp,
-    deleteRecordsByArtikul
+    deleteRecordsByArtikul,
+    hideTask
 } = require('../controllers/netrController');
 
 const router = express.Router();
@@ -37,5 +38,8 @@ router.get('/palletToShkWps', getPalletToShkWpsMapping);
 
 // Удаление записей по артикулу и названию задания
 router.post('/deleteByArtikul', deleteRecordsByArtikul);
+
+// Скрытие задания
+router.post('/hideTask', hideTask);
 
 module.exports = router;
