@@ -280,14 +280,6 @@ async function uploadData(req, res) {
             .input('Nazvanie_Zadaniya', mssql.NVarChar, data.Nazvanie_Zadaniya)
             .query(checkQuery);
 
-        if (checkResult.recordset[0].count > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Задание с таким названием уже существует в базе данных.", 
-                errorCode: 400 
-            });
-        }
-  
         const query = `
             INSERT INTO Test_MP 
             (Artikul, Nazvanie_Tovara, SHK,  Itog_Zakaz, Srok_Godnosti, 
