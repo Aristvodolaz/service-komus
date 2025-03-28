@@ -361,8 +361,9 @@ async function distinctName(req, res) {
         }
 
         const query = `
-            SELECT DISTINCT nazvanie_zdaniya FROM x_Packer_Netr
-            ORDER BY nazvanie_zdaniya
+               SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP
+            where Scklad_Pref = 'NETR' and Status_Zadaniya = 0
+            ORDER BY Nazvanie_Zadaniya
         `;
 
         const request = pool.request();
@@ -373,7 +374,7 @@ async function distinctName(req, res) {
         }
 
         // Преобразуем результат в массив строк без вложенных объектов
-        const taskNames = result.recordset.map(row => row.nazvanie_zdaniya);
+        const taskNames = result.recordset.map(row => row.Nazvanie_Zadaniya);
 
         res.status(200).json({ success: true, data: taskNames });
 
