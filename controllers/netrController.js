@@ -361,9 +361,8 @@ async function distinctName(req, res) {
         }
 
         const query = `
-            SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP
-            where Scklad_Pref = 'NETR' and Status_Zadaniya = 0
-            ORDER BY Nazvanie_Zadaniya
+            SELECT DISTINCT nazvanie_zdaniya FROM x_Packer_Netr
+            ORDER BY nazvanie_zdaniya
         `;
 
         const request = pool.request();
