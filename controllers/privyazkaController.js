@@ -21,9 +21,21 @@ const addZapis = async (req, res) => {
                 WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK_WPS = @SHK_WPS
             `);
 
+        const checkUsingPallet = await pool.request()
+                .input('SHK_WPS', mssql.NVarChar(255), shk)
+                .input('Pallet_No', mssql.NVarChar(255), pallet + "")
+                .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+                .query(`
+                    SELECT COUNT(*) AS count 
+                    from Test_MP_Privyazka
+                    where Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK_WPS = @Pallet_No`);
+        
+        const {countUsingPallet} = checkUsingPallet.recordset[0];
+
+                
         const { count } = checkResult.recordset[0];
 
-        if (count > 0) {
+        if (count > 0 || countUsingPallet > 0) {
             return res.status(400).json({ success: false, value: 'Данный ШК уже был использован для этого задания', errorCode: 400 });
         }
 
