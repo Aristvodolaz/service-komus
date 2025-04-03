@@ -496,8 +496,9 @@ router.post('/upload-data-new', async (req, res) => {
       request.input('Nomenklatura', mssql.BigInt, data.Nomenklatura);
       request.input('Nazvanie_Tovara', mssql.NVarChar, data.Nazvanie_Tovara);
       request.input('SHK', mssql.NVarChar, data.SHK ? data.SHK.toString() : null);
-      request.input('SHK_Syrya', mssql.NVarChar, shkSyrya ? shkSyrya : data.SHK_Syrya);
-      request.input('SHK_SPO', mssql.NVarChar, data.SHK_SPO ? data.SHK_SPO.toString() : null);
+      const safeShkSyrya = typeof data.SHK_Syrya === 'number' ? data.SHK_Syrya.toString() : data.SHK_Syrya;
+      request.input('SHK_Syrya', mssql.NVarChar, shkSyrya || safeShkSyrya);
+            request.input('SHK_SPO', mssql.NVarChar, data.SHK_SPO ? data.SHK_SPO.toString() : null);
       request.input('Kol_vo_Syrya', mssql.Int, data.Kol_vo_Syrya);
       request.input('Itog_Zakaz', mssql.Int, data.Itog_Zakaz);
       request.input('SOH', mssql.NVarChar, data.SOH ? data.SOH.toString() : null);
