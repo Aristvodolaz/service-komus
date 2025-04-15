@@ -72,7 +72,9 @@ const updateStatusNew = async (req, res) => {
             Krupnogabaritnyi_Tovar,
             Yuvelirnye_Izdelia,
             Pechat_Etiketki_s_SHK,
-            Pechat_Etiketki_s_Opisaniem
+            Pechat_Etiketki_s_Opisaniem,
+            PriznakSortirovki,
+            Upakovka_v_Gofro, Upakovka_v_PE_Paket
           FROM Test_MP
           WHERE ID = @ID
         `);
@@ -156,6 +158,9 @@ const updateStatusNew = async (req, res) => {
         .input('Yuvelirnye_Izdelia', mssql.NVarChar(10), originalRecord.Yuvelirnye_Izdelia)
         .input('Pechat_Etiketki_s_SHK', mssql.NVarChar(10), originalRecord.Pechat_Etiketki_s_SHK)
         .input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar(10), originalRecord.Pechat_Etiketki_s_Opisaniem)
+        .input('PriznakSortirovki', mssql.NVarChar(10), originalRecord.PriznakSortirovki)
+        .input('Upakovka_v_PE_Paket', mssql.NVarChar(10), originalRecord.Upakovka_v_PE_Paket)
+        .input('Upakovka_v_Gofro', mssql.NVarChar(10), originalRecord.Upakovka_v_Gofro)
         .input('Fakticheskoe_Kol_vo', mssql.Int, originalRecord.Fakticheskoe_Kol_vo)
         .input('Mesto', mssql.NVarChar(50), mesto)
         .input('Vlozhennost', mssql.NVarChar(50), vlozhennost)
@@ -175,7 +180,8 @@ const updateStatusNew = async (req, res) => {
             Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Sortiruemyi_Tovar, 
             Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
             Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, Fakticheskoe_Kol_vo, 
-            Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent
+            Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent,       PriznakSortirovki,
+            Upakovka_v_Gofro, Upakovka_v_PE_Paket
           ) VALUES (
             @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, 
             @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, 
@@ -186,7 +192,8 @@ const updateStatusNew = async (req, res) => {
             @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Sortiruemyi_Tovar, 
             @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
             @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @Fakticheskoe_Kol_vo, 
-            @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent
+            @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent ,       @PriznakSortirovki,
+            @Upakovka_v_Gofro, @Upakovka_v_PE_Paket
           )
         `);
   
@@ -316,6 +323,8 @@ const updateStatusNew = async (req, res) => {
       Yuvelirnye_Izdelia,
       Pechat_Etiketki_s_SHK,
       Pechat_Etiketki_s_Opisaniem,
+      PriznakSortirovki,
+      Upakovka_v_Gofro, Upakovka_v_PE_Paket
     } = req.body; // Получаем данные из тела запроса
   
     console.log(Op_1_Bl_1_Sht);
@@ -357,6 +366,9 @@ const updateStatusNew = async (req, res) => {
         .input('Yuvelirnye_Izdelia', mssql.NVarChar(10), Yuvelirnye_Izdelia ?? '0')
         .input('Pechat_Etiketki_s_SHK', mssql.NVarChar(10), Pechat_Etiketki_s_SHK ?? '0')
         .input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar(10), Pechat_Etiketki_s_Opisaniem ?? '0')
+        .input('PriznakSortirovki', mssql.NVarChar(10), PriznakSortirovki ?? '0')
+        .input('Upakovka_v_Gofro', mssql.NVarChar(10), Upakovka_v_Gofro ?? '0')
+        .input('Upakovka_v_PE_Paket', mssql.NVarChar(10), Upakovka_v_PE_Paket ?? '0')
         .query(`
           UPDATE Test_MP
           SET 
@@ -388,6 +400,8 @@ const updateStatusNew = async (req, res) => {
             Yuvelirnye_Izdelia = @Yuvelirnye_Izdelia,
             Pechat_Etiketki_s_SHK = @Pechat_Etiketki_s_SHK,
             Pechat_Etiketki_s_Opisaniem = @Pechat_Etiketki_s_Opisaniem
+              PriznakSortirovki = @PriznakSortirovki,
+            Upakovka_v_Gofro = @Upakovka_v_Gofro, Upakovka_v_PE_Paket = @Upakovka_v_PE_Paket
           WHERE ID = @ID
         `);
         
@@ -805,6 +819,9 @@ const updateStatusNew = async (req, res) => {
         .input('Yuvelirnye_Izdelia', mssql.NVarChar(10), originalRecord.Yuvelirnye_Izdelia)
         .input('Pechat_Etiketki_s_SHK', mssql.NVarChar(10), originalRecord.Pechat_Etiketki_s_SHK)
         .input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar(10), originalRecord.Pechat_Etiketki_s_Opisaniem)
+        .input('PriznakSortirovki', mssql.NVarChar(10), originalRecord.PriznakSortirovki )
+        .input('Upakovka_v_Gofro', mssql.NVarChar(10), originalRecord.Upakovka_v_Gofro )
+        .input('Upakovka_v_PE_Paket', mssql.NVarChar(10), originalRecord.Upakovka_v_PE_Paket )
         .input('Fakticheskoe_Kol_vo', mssql.Int, originalRecord.Fakticheskoe_Kol_vo)
         .input('Mesto', mssql.Int, Mesto)
         .input('Vlozhennost', mssql.Int, Vlozhennost)
@@ -824,7 +841,8 @@ const updateStatusNew = async (req, res) => {
             Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Sortiruemyi_Tovar, 
             Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
             Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, Fakticheskoe_Kol_vo, 
-            Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent
+            Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent,         PriznakSortirovki ,
+            Upakovka_v_Gofro , Upakovka_v_PE_Paket
           ) VALUES (
             @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, 
             @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, 
@@ -835,7 +853,7 @@ const updateStatusNew = async (req, res) => {
             @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Sortiruemyi_Tovar, 
             @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
             @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @Fakticheskoe_Kol_vo, 
-            @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent
+            @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent, @PriznakSortirovki, @Upakovka_v_Gofro, @Upakovka_v_PE_Paket
           )
         `);
   
