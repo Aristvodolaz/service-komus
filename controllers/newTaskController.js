@@ -399,7 +399,7 @@ const updateStatusNew = async (req, res) => {
             Krupnogabaritnyi_Tovar = @Krupnogabaritnyi_Tovar,
             Yuvelirnye_Izdelia = @Yuvelirnye_Izdelia,
             Pechat_Etiketki_s_SHK = @Pechat_Etiketki_s_SHK,
-            Pechat_Etiketki_s_Opisaniem = @Pechat_Etiketki_s_Opisaniem
+            Pechat_Etiketki_s_Opisaniem = @Pechat_Etiketki_s_Opisaniem,
               PriznakSortirovki = @PriznakSortirovki,
             Upakovka_v_Gofro = @Upakovka_v_Gofro, Upakovka_v_PE_Paket = @Upakovka_v_PE_Paket
           WHERE ID = @ID
