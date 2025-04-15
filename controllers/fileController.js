@@ -154,7 +154,7 @@ function processData(rows) {
     'Op_13_Markirovka_Fabr', 'Op_14_TU_1_Sht', 'Op_15_TU_2_Sht', 'Op_16_TU_3_5',
     'Op_17_TU_6_8', 'Op_468_Proverka_SHK', 'Op_469_Spetsifikatsiya_TM',
     'Op_470_Dop_Upakovka', 'Pechat_Etiketki_s_SHK', 'Pechat_Etiketki_s_Opisaniem',
-    'Sortiruemyi_Tovar', 'Ne_Sortiruemyi_Tovar', 'Produkty',  'Upakovka_v_Gofro', 'Upakovka_v_PE_Paket'
+    'Sortiruemyi_Tovar', 'Ne_Sortiruemyi_Tovar', 'Produkty',  'Upakovka_v_Gofro', 'Upakovka_v_PE_Paket', 'PriznakSortirovki'
   ];
 
   // Проходим по каждой строке данных и проверяем соответствующие столбцы
@@ -180,7 +180,7 @@ function processData(rows) {
     'Op_13_Markirovka_Fabr', 'Op_14_TU_1_Sht', 'Op_15_TU_2_Sht', 'Op_16_TU_3_5',
     'Op_17_TU_6_8', 'Op_468_Proverka_SHK', 'Op_469_Spetsifikatsiya_TM',
     'Op_470_Dop_Upakovka', 'Pechat_Etiketki_s_SHK', 'Pechat_Etiketki_s_Opisaniem',
-    'Sortiruemyi_Tovar', 'Ne_Sortiruemyi_Tovar', 'Produkty',  'Upakovka_v_Gofro', 'Upakovka_v_PE_Paket'
+    'Sortiruemyi_Tovar', 'Ne_Sortiruemyi_Tovar', 'Produkty',  'Upakovka_v_Gofro', 'Upakovka_v_PE_Paket', 'PriznakSortirovki'
   ];
 
   // Проходим по каждой строке данных и очищаем данные
@@ -269,7 +269,7 @@ router.get('/download', async (req, res) => {
                Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
                Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty,
                Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem,
-               Upakovka_v_Gofro, Upakovka_v_PE_Paket,
+               Upakovka_v_Gofro, Upakovka_v_PE_Paket,PriznakSortirovki,
                Fakticheskoe_Kol_vo, Ubrano_iz_Zakaza, Time_Start, Time_End
         FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
       `;
@@ -282,7 +282,7 @@ router.get('/download', async (req, res) => {
                Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
                Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, 
                Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, 
-               Upakovka_v_Gofro, Upakovka_v_PE_Paket,
+               Upakovka_v_Gofro, Upakovka_v_PE_Paket, PriznakSortirovki,
                Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
                Time_Start, Time_End
         FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
@@ -386,14 +386,14 @@ router.post('/upload-data', async (req, res) => {
            Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht,
            Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, 
            Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, 
-           Mesto, Vlozhennost, Pallet_No, Pref, Nazvanie_Zadaniya, Status, Status_Zadaniya, Scklad_Pref, Upakovka_v_Gofro, Upakovka_v_PE_Paket)
+           Mesto, Vlozhennost, Pallet_No, Pref, Nazvanie_Zadaniya, Status, Status_Zadaniya, Scklad_Pref, Upakovka_v_Gofro, Upakovka_v_PE_Paket, PriznakSortirovki)
         VALUES 
           (@Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @Kol_vo_Syrya, @Itog_Zakaz, @SOH,
            @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht,
            @Op_7_Pereschyot, @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, 
            @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, 
            @Mesto, @Vlozhennost, @Pallet_No, @Pref, @Nazvanie_Zadaniya, @Status, @Status_Zadaniya, @Scklad_Pref,
-            @Upakovka_v_Gofro, @Upakovka_v_PE_Paket)
+            @Upakovka_v_Gofro, @Upakovka_v_PE_Paket, @PriznakSortirovki)
       `;
       
       const request = pool.request();
@@ -431,6 +431,7 @@ router.post('/upload-data', async (req, res) => {
       request.input('Op_470_Dop_Upakovka', mssql.NVarChar, data.Op_470_Dop_Upakovka);
       request.input('Upakovka_v_Gofro', mssql.NVarChar, data.Upakovka_v_Gofro);
       request.input('Upakovka_v_PE_Paket', mssql.NVarChar, data.Upakovka_v_PE_Paket);
+      request.input('PriznakSortirovki', mssql.NVarChar, data.PriznakSortirovki);
       request.input('Mesto', mssql.Int, data.Mesto);
       request.input('Vlozhennost', mssql.Int, data.Vlozhennost);
       request.input('Pallet_No', mssql.Int, data.Pallet_No);
@@ -479,7 +480,7 @@ router.post('/upload-data-new', async (req, res) => {
           Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, 
           Mesto, Vlozhennost, Pallet_No, Pref, Nazvanie_Zadaniya, Status, Status_Zadaniya, Scklad_Pref, 
           Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
-          Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, vp, Plan_Otkaz, Upakovka_v_Gofro, Upakovka_v_PE_Paket)
+          Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, vp, Plan_Otkaz, Upakovka_v_Gofro, Upakovka_v_PE_Paket, PriznakSortirovki)
           VALUES 
           (@Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @Kol_vo_Syrya, @Itog_Zakaz, @SOH,
           @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht,
@@ -487,7 +488,7 @@ router.post('/upload-data-new', async (req, res) => {
           @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, 
           @Mesto, @Vlozhennost, @Pallet_No, @Pref, @Nazvanie_Zadaniya, @Status, @Status_Zadaniya, @Scklad_Pref,
           @Sortiruemyi_Tovar, @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
-          @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @vp, @Plan_Otkaz, @Upakovka_v_Gofro, @Upakovka_v_PE_Paket)
+          @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @vp, @Plan_Otkaz, @Upakovka_v_Gofro, @Upakovka_v_PE_Paket, @PriznakSortirovki)
       `;
 
       const request = pool.request();
@@ -522,6 +523,7 @@ router.post('/upload-data-new', async (req, res) => {
       request.input('Op_468_Proverka_SHK', mssql.NVarChar, data.Op_468_Proverka_SHK);
       request.input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar, data.Op_469_Spetsifikatsiya_TM);
       request.input('Op_470_Dop_Upakovka', mssql.NVarChar, data.Op_470_Dop_Upakovka);
+      request.input('PriznakSortirovki', mssql.NVarChar, data.PriznakSortirovki);
       request.input('Mesto', mssql.Int, data.Mesto);
       request.input('Vlozhennost', mssql.Int, data.Vlozhennost);
       request.input('Pallet_No', mssql.Int, data.Pallet_No);
