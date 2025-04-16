@@ -26,11 +26,11 @@ const getPalletsByTaskName = async (req, res) => {
           .input('taskName', mssql.NVarChar(255), taskName)
           .query(`
             SELECT 
-              CAST(Pallet_No AS NVARCHAR(255)) AS Pallet_No, 
+              CAST(REPLACE(Pallet_No, CHAR(10), '') AS NVARCHAR(255)) AS Pallet_No, 
               COUNT(*) AS Total_Kolvo
             FROM Test_MP_Privyazka
             WHERE Nazvanie_Zadaniya = @taskName AND Pallet_No IS NOT NULL
-            GROUP BY Pallet_No
+            GROUP BY CAST(REPLACE(Pallet_No, CHAR(10), '') AS NVARCHAR(255))
           `);
       } else {
         // Запрос для таблицы Test_MP
@@ -38,11 +38,11 @@ const getPalletsByTaskName = async (req, res) => {
           .input('taskName', mssql.NVarChar(255), taskName)
           .query(`
             SELECT 
-              CAST(Pallet_No AS NVARCHAR(255)) AS Pallet_No, 
+              CAST(REPLACE(Pallet_No, CHAR(10), '') AS NVARCHAR(255)) AS Pallet_No, 
               Sum(Mesto) AS Total_Kolvo
             FROM Test_MP
             WHERE Nazvanie_Zadaniya = @taskName AND Pallet_No IS NOT NULL
-            GROUP BY Pallet_No
+            GROUP BY CAST(REPLACE(Pallet_No, CHAR(10), '') AS NVARCHAR(255))
           `);
       }
   
@@ -54,7 +54,7 @@ const getPalletsByTaskName = async (req, res) => {
         success: true,
         value: {
           pallets: result.recordset.map(record => ({
-            Pallet_No: record.Pallet_No, // Уже строка благодаря CAST
+            Pallet_No: record.Pallet_No.replace(/\n/g, ''), // Удаляем символы \n
             Total_Kolvo: record.Total_Kolvo || 0,
           })),
           totalPlaces,
