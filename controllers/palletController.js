@@ -26,11 +26,11 @@ const getPalletsByTaskName = async (req, res) => {
           .input('taskName', mssql.NVarChar(255), taskName)
           .query(`
             SELECT 
-              CAST(REPLACE(Pallet_No, CHAR(10), '') AS NVARCHAR(255)) AS Pallet_No, 
+              CAST(Pallet_No AS NVARCHAR(255)) AS Pallet_No, 
               COUNT(*) AS Total_Kolvo
             FROM Test_MP_Privyazka
             WHERE Nazvanie_Zadaniya = @taskName AND Pallet_No IS NOT NULL
-            GROUP BY CAST(REPLACE(Pallet_No, CHAR(10), '') AS NVARCHAR(255))
+            GROUP BY Pallet_No
           `);
       } else {
         // Запрос для таблицы Test_MP
@@ -38,11 +38,11 @@ const getPalletsByTaskName = async (req, res) => {
           .input('taskName', mssql.NVarChar(255), taskName)
           .query(`
             SELECT 
-              CAST(REPLACE(Pallet_No, CHAR(10), '') AS NVARCHAR(255)) AS Pallet_No, 
+              CAST(Pallet_No AS NVARCHAR(255)) AS Pallet_No, 
               Sum(Mesto) AS Total_Kolvo
             FROM Test_MP
             WHERE Nazvanie_Zadaniya = @taskName AND Pallet_No IS NOT NULL
-            GROUP BY CAST(REPLACE(Pallet_No, CHAR(10), '') AS NVARCHAR(255))
+            GROUP BY Pallet_No
           `);
       }
   
