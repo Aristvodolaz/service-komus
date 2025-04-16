@@ -26,7 +26,7 @@ const getPalletsByTaskName = async (req, res) => {
           .input('taskName', mssql.NVarChar(255), taskName)
           .query(`
             SELECT 
-              CAST(Pallet_No AS NVARCHAR(255)) AS Pallet_No, 
+              REPLACE(CAST(Pallet_No AS NVARCHAR(255)), CHAR(10), '') AS Pallet_No, 
               COUNT(*) AS Total_Kolvo
             FROM Test_MP_Privyazka
             WHERE Nazvanie_Zadaniya = @taskName AND Pallet_No IS NOT NULL
@@ -38,7 +38,7 @@ const getPalletsByTaskName = async (req, res) => {
           .input('taskName', mssql.NVarChar(255), taskName)
           .query(`
             SELECT 
-              CAST(Pallet_No AS NVARCHAR(255)) AS Pallet_No, 
+              REPLACE(CAST(Pallet_No AS NVARCHAR(255)), CHAR(10), '') AS Pallet_No, 
               Sum(Mesto) AS Total_Kolvo
             FROM Test_MP
             WHERE Nazvanie_Zadaniya = @taskName AND Pallet_No IS NOT NULL
@@ -54,7 +54,7 @@ const getPalletsByTaskName = async (req, res) => {
         success: true,
         value: {
           pallets: result.recordset.map(record => ({
-            Pallet_No: record.Pallet_No.replace(/\n/g, ''), // Удаляем символы \n
+            Pallet_No: record.Pallet_No,
             Total_Kolvo: record.Total_Kolvo || 0,
           })),
           totalPlaces,

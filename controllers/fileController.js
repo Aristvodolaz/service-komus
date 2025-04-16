@@ -253,8 +253,8 @@ router.get('/download', async (req, res) => {
           p.Kolvo_Tovarov,
           p.SHK_Coroba,
           p.Srok_Godnosti,
-          p.Pallet_No,
-          p.SHK_WPS
+          REPLACE(CAST(p.Pallet_No AS NVARCHAR(255)), CHAR(10), '') as Pallet_No,
+          REPLACE(CAST(p.SHK_WPS AS NVARCHAR(255)), CHAR(10), '') as SHK_WPS
         FROM Test_MP_Privyazka p
         LEFT JOIN Test_MP m
           ON p.Artikul = m.Artikul AND m.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
