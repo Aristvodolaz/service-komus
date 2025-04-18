@@ -52,7 +52,7 @@ const searchBySHKOrArticul = async (req, res) => {
     if (result.length === 0) {
       return res.status(404).json({ success: false, msg: 'Артикул не найден', errorCode: 404 });
     } else {
-      return res.status(404).json({ success: false, msg: 'Артикул не найден', errorCode: 404 });
+      return res.status(200).json({ success: false, msg: 'Артикул не найден', errorCode: 200 });
     }
   } catch (error) {
     console.error('Ошибка при поиске по ШК или артикулу:', error);
