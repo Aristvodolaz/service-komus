@@ -941,7 +941,7 @@ const updateStatusNew = async (req, res) => {
         Razbrakovka_tovara,
         Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
         Upakovka_tovara_v_gofromeyler,
-        Khranenie_tovara,
+        Khranenie_tovara
           ) VALUES (
             @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, 
             @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, 
@@ -963,7 +963,7 @@ const updateStatusNew = async (req, res) => {
         @Razbrakovka_tovara,
         @Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
         @Upakovka_tovara_v_gofromeyler,
-        @Khranenie_tovara,
+        @Khranenie_tovara
           )
         `);
   
