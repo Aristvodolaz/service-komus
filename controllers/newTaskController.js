@@ -74,7 +74,18 @@ const updateStatusNew = async (req, res) => {
             Pechat_Etiketki_s_SHK,
             Pechat_Etiketki_s_Opisaniem,
             PriznakSortirovki,
-            Upakovka_v_Gofro, Upakovka_v_PE_Paket
+            Upakovka_v_Gofro, Upakovka_v_PE_Paket,
+              Vlozhit_v_upakovku_pechatnyi_material,
+          Izmerenie_VGH_i_peredacha_informatsii,
+          Indeks_za_srochnost_koeff_1_5,
+          Kompleksnaya_priemka_tovara,
+          Priemka_tovara_v_transportnykh_korobakh,
+          Priemka_tovara_palletnaya,
+          Prochie_raboty_vklyuchaya_ustranenie_anomalii,
+          Razbrakovka_tovara,
+          Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
+          Upakovka_tovara_v_gofromeyler,
+          Khranenie_tovara
           FROM Test_MP
           WHERE ID = @ID
         `);
@@ -161,6 +172,17 @@ const updateStatusNew = async (req, res) => {
         .input('PriznakSortirovki', mssql.NVarChar(10), originalRecord.PriznakSortirovki)
         .input('Upakovka_v_PE_Paket', mssql.NVarChar(10), originalRecord.Upakovka_v_PE_Paket)
         .input('Upakovka_v_Gofro', mssql.NVarChar(10), originalRecord.Upakovka_v_Gofro)
+        .input('Vlozhit_v_upakovku_pechatnyi_material', mssql.NVarChar(10), Vlozhit_v_upakovku_pechatnyi_material ?? '0')
+        .input('Izmerenie_VGH_i_peredacha_informatsii', mssql.NVarChar(10), Izmerenie_VGH_i_peredacha_informatsii ?? '0')
+        .input('Indeks_za_srochnost_koeff_1_5', mssql.NVarChar(10), Indeks_za_srochnost_koeff_1_5 ?? '0')
+        .input('Kompleksnaya_priemka_tovara', mssql.NVarChar(10), Kompleksnaya_priemka_tovara ?? '0')
+        .input('Priemka_tovara_v_transportnykh_korobakh', mssql.NVarChar(10), Priemka_tovara_v_transportnykh_korobakh ?? '0')
+        .input('Priemka_tovara_palletnaya', mssql.NVarChar(10), Priemka_tovara_palletnaya ?? '0')
+        .input('Prochie_raboty_vklyuchaya_ustranenie_anomalii', mssql.NVarChar(10), Prochie_raboty_vklyuchaya_ustranenie_anomalii ?? '0')
+        .input('Razbrakovka_tovara', mssql.NVarChar(10), Razbrakovka_tovara ?? '0')
+        .input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar(10), Sborka_naborov_ot_2_shtuk_raznykh_tovarov ?? '0')
+        .input('Upakovka_tovara_v_gofromeyler', mssql.NVarChar(10), Upakovka_tovara_v_gofromeyler ?? '0')
+        .input('Khranenie_tovara', mssql.NVarChar(10), Khranenie_tovara ?? '0')
         .input('Fakticheskoe_Kol_vo', mssql.Int, originalRecord.Fakticheskoe_Kol_vo)
         .input('Mesto', mssql.NVarChar(50), mesto)
         .input('Vlozhennost', mssql.NVarChar(50), vlozhennost)
@@ -181,7 +203,18 @@ const updateStatusNew = async (req, res) => {
             Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
             Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, Fakticheskoe_Kol_vo, 
             Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent,       PriznakSortirovki,
-            Upakovka_v_Gofro, Upakovka_v_PE_Paket
+            Upakovka_v_Gofro, Upakovka_v_PE_Paket,
+              Vlozhit_v_upakovku_pechatnyi_material,
+        Izmerenie_VGH_i_peredacha_informatsii,
+        Indeks_za_srochnost_koeff_1_5,
+        Kompleksnaya_priemka_tovara,
+        Priemka_tovara_v_transportnykh_korobakh,
+        Priemka_tovara_palletnaya,
+        Prochie_raboty_vklyuchaya_ustranenie_anomalii,
+        Razbrakovka_tovara,
+        Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
+        Upakovka_tovara_v_gofromeyler,
+        Khranenie_tovara,
           ) VALUES (
             @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, 
             @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, 
@@ -193,7 +226,17 @@ const updateStatusNew = async (req, res) => {
             @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
             @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @Fakticheskoe_Kol_vo, 
             @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent ,       @PriznakSortirovki,
-            @Upakovka_v_Gofro, @Upakovka_v_PE_Paket
+            @Upakovka_v_Gofro, @Upakovka_v_PE_Paket, @Vlozhit_v_upakovku_pechatnyi_material,
+        @Izmerenie_VGH_i_peredacha_informatsii,
+        @Indeks_za_srochnost_koeff_1_5,
+        @Kompleksnaya_priemka_tovara,
+        @Priemka_tovara_v_transportnykh_korobakh,
+        @Priemka_tovara_palletnaya,
+        @Prochie_raboty_vklyuchaya_ustranenie_anomalii,
+        @Razbrakovka_tovara,
+        @Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
+        @Upakovka_tovara_v_gofromeyler,
+        @Khranenie_tovara
           )
         `);
   
@@ -324,7 +367,19 @@ const updateStatusNew = async (req, res) => {
       Pechat_Etiketki_s_SHK,
       Pechat_Etiketki_s_Opisaniem,
       PriznakSortirovki,
-      Upakovka_v_Gofro, Upakovka_v_PE_Paket
+      Upakovka_v_Gofro, Upakovka_v_PE_Paket,
+      Vlozhit_v_upakovku_pechatnyi_material,
+      Izmerenie_VGH_i_peredacha_informatsii,
+      Indeks_za_srochnost_koeff_1_5,
+      Kompleksnaya_priemka_tovara,
+      Priemka_tovara_v_transportnykh_korobakh,
+      Priemka_tovara_palletnaya,
+      Prochie_raboty_vklyuchaya_ustranenie_anomalii,
+      Razbrakovka_tovara,
+      Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
+      Upakovka_tovara_v_gofromeyler,
+      Khranenie_tovara
+      
     } = req.body; // Получаем данные из тела запроса
   
     console.log(Op_1_Bl_1_Sht);
@@ -369,6 +424,17 @@ const updateStatusNew = async (req, res) => {
         .input('PriznakSortirovki', mssql.NVarChar(10), PriznakSortirovki ?? '0')
         .input('Upakovka_v_Gofro', mssql.NVarChar(10), Upakovka_v_Gofro ?? '0')
         .input('Upakovka_v_PE_Paket', mssql.NVarChar(10), Upakovka_v_PE_Paket ?? '0')
+        .input('Vlozhit_v_upakovku_pechatnyi_material', mssql.NVarChar(10), Vlozhit_v_upakovku_pechatnyi_material ?? '0')
+        .input('Izmerenie_VGH_i_peredacha_informatsii', mssql.NVarChar(10), Izmerenie_VGH_i_peredacha_informatsii ?? '0')
+        .input('Indeks_za_srochnost_koeff_1_5', mssql.NVarChar(10), Indeks_za_srochnost_koeff_1_5 ?? '0')
+        .input('Kompleksnaya_priemka_tovara', mssql.NVarChar(10), Kompleksnaya_priemka_tovara ?? '0')
+        .input('Priemka_tovara_v_transportnykh_korobakh', mssql.NVarChar(10), Priemka_tovara_v_transportnykh_korobakh ?? '0')
+        .input('Priemka_tovara_palletnaya', mssql.NVarChar(10), Priemka_tovara_palletnaya ?? '0')
+        .input('Prochie_raboty_vklyuchaya_ustranenie_anomalii', mssql.NVarChar(10), Prochie_raboty_vklyuchaya_ustranenie_anomalii ?? '0')
+        .input('Razbrakovka_tovara', mssql.NVarChar(10), Razbrakovka_tovara ?? '0')
+        .input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar(10), Sborka_naborov_ot_2_shtuk_raznykh_tovarov ?? '0')
+        .input('Upakovka_tovara_v_gofromeyler', mssql.NVarChar(10), Upakovka_tovara_v_gofromeyler ?? '0')
+        .input('Khranenie_tovara', mssql.NVarChar(10), Khranenie_tovara ?? '0')
         .query(`
           UPDATE Test_MP
           SET 
@@ -401,7 +467,18 @@ const updateStatusNew = async (req, res) => {
             Pechat_Etiketki_s_SHK = @Pechat_Etiketki_s_SHK,
             Pechat_Etiketki_s_Opisaniem = @Pechat_Etiketki_s_Opisaniem,
               PriznakSortirovki = @PriznakSortirovki,
-            Upakovka_v_Gofro = @Upakovka_v_Gofro, Upakovka_v_PE_Paket = @Upakovka_v_PE_Paket
+            Upakovka_v_Gofro = @Upakovka_v_Gofro, Upakovka_v_PE_Paket = @Upakovka_v_PE_Paket,
+                    Vlozhit_v_upakovku_pechatnyi_material = @Vlozhit_v_upakovku_pechatnyi_material,
+        Izmerenie_VGH_i_peredacha_informatsii = @Izmerenie_VGH_i_peredacha_informatsii,
+        Indeks_za_srochnost_koeff_1_5 = @Indeks_za_srochnost_koeff_1_5,
+        Kompleksnaya_priemka_tovara = @Kompleksnaya_priemka_tovara,
+        Priemka_tovara_v_transportnykh_korobakh = @Priemka_tovara_v_transportnykh_korobakh,
+        Priemka_tovara_palletnaya = @Priemka_tovara_palletnaya,
+        Prochie_raboty_vklyuchaya_ustranenie_anomalii = @Prochie_raboty_vklyuchaya_ustranenie_anomalii,
+        Razbrakovka_tovara = @Razbrakovka_tovara,
+        Sborka_naborov_ot_2_shtuk_raznykh_tovarov = @Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
+        Upakovka_tovara_v_gofromeyler = @Upakovka_tovara_v_gofromeyler,
+        Khranenie_tovara = @Khranenie_tovara
           WHERE ID = @ID
         `);
         
@@ -822,6 +899,17 @@ const updateStatusNew = async (req, res) => {
         .input('PriznakSortirovki', mssql.NVarChar(10), originalRecord.PriznakSortirovki )
         .input('Upakovka_v_Gofro', mssql.NVarChar(10), originalRecord.Upakovka_v_Gofro )
         .input('Upakovka_v_PE_Paket', mssql.NVarChar(10), originalRecord.Upakovka_v_PE_Paket )
+        .input('Vlozhit_v_upakovku_pechatnyi_material',      mssql.NVarChar(10), originalRecord.Vlozhit_v_upakovku_pechatnyi_material)
+        .input('Izmerenie_VGH_i_peredacha_informatsii',     mssql.NVarChar(10), originalRecord.Izmerenie_VGH_i_peredacha_informatsii)
+        .input('Indeks_za_srochnost_koeff_1_5',              mssql.NVarChar(10), originalRecord.Indeks_za_srochnost_koeff_1_5)
+        .input('Kompleksnaya_priemka_tovara',               mssql.NVarChar(10), originalRecord.Kompleksnaya_priemka_tovara)
+        .input('Priemka_tovara_v_transportnykh_korobakh',   mssql.NVarChar(10), originalRecord.Priemka_tovara_v_transportnykh_korobakh)
+        .input('Priemka_tovara_palletnaya',                 mssql.NVarChar(10), originalRecord.Priemka_tovara_palletnaya)
+        .input('Prochie_raboty_vklyuchaya_ustranenie_anomalii', mssql.NVarChar(10), originalRecord.Prochie_raboty_vklyuchaya_ustranenie_anomalii)
+        .input('Razbrakovka_tovara',                        mssql.NVarChar(10), originalRecord.Razbrakovka_tovara)
+        .input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar(10), originalRecord.Sborka_naborov_ot_2_shtuk_raznykh_tovarov)
+        .input('Upakovka_tovara_v_gofromeyler',             mssql.NVarChar(10), originalRecord.Upakovka_tovara_v_gofromeyler)
+        .input('Khranenie_tovara',                          mssql.NVarChar(10), originalRecord.Khranenie_tovara)
         .input('Fakticheskoe_Kol_vo', mssql.Int, originalRecord.Fakticheskoe_Kol_vo)
         .input('Mesto', mssql.Int, Mesto)
         .input('Vlozhennost', mssql.Int, Vlozhennost)
@@ -842,7 +930,18 @@ const updateStatusNew = async (req, res) => {
             Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
             Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, Fakticheskoe_Kol_vo, 
             Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent,         PriznakSortirovki ,
-            Upakovka_v_Gofro , Upakovka_v_PE_Paket
+            Upakovka_v_Gofro , Upakovka_v_PE_Paket,
+                    Vlozhit_v_upakovku_pechatnyi_material,
+        Izmerenie_VGH_i_peredacha_informatsii,
+        Indeks_za_srochnost_koeff_1_5,
+        Kompleksnaya_priemka_tovara,
+        Priemka_tovara_v_transportnykh_korobakh,
+        Priemka_tovara_palletnaya,
+        Prochie_raboty_vklyuchaya_ustranenie_anomalii,
+        Razbrakovka_tovara,
+        Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
+        Upakovka_tovara_v_gofromeyler,
+        Khranenie_tovara,
           ) VALUES (
             @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, 
             @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, 
@@ -853,7 +952,18 @@ const updateStatusNew = async (req, res) => {
             @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Sortiruemyi_Tovar, 
             @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
             @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @Fakticheskoe_Kol_vo, 
-            @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent, @PriznakSortirovki, @Upakovka_v_Gofro, @Upakovka_v_PE_Paket
+            @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent, @PriznakSortirovki, @Upakovka_v_Gofro,
+           @Upakovka_v_PE_Paket, @Vlozhit_v_upakovku_pechatnyi_material,
+        @Izmerenie_VGH_i_peredacha_informatsii,
+        @Indeks_za_srochnost_koeff_1_5,
+        @Kompleksnaya_priemka_tovara,
+        @Priemka_tovara_v_transportnykh_korobakh,
+        @Priemka_tovara_palletnaya,
+        @Prochie_raboty_vklyuchaya_ustranenie_anomalii,
+        @Razbrakovka_tovara,
+        @Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
+        @Upakovka_tovara_v_gofromeyler,
+        @Khranenie_tovara,
           )
         `);
   
