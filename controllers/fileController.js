@@ -473,22 +473,27 @@ router.post('/upload-data', async (req, res) => {
       request.input('Mesto', mssql.Int, data.Mesto);
       request.input('Vlozhennost', mssql.Int, data.Vlozhennost);
       request.input('Pallet_No', mssql.Int, data.Pallet_No);
-      request.input('Pref', mssql.NVarChar, data.pref);  // добавляем поле 'Pref'
+      request.input('Pref', mssql.NVarChar, data.pref);
       request.input('Nazvanie_Zadaniya', mssql.NVarChar, data.Nazvanie_Zadaniya);
       request.input('Status', mssql.Int, data.Status);
       request.input('Status_Zadaniya', mssql.Int, data.Status_Zadaniya);
       request.input('Scklad_Pref', mssql.NVarChar, data.Scklad_Pref);
-      request.input("Vlozhit_v_upakovku_pechatnyi_material", mssql.NVarChar, data.Vlozhit_v_upakovku_pechatnyi_material);
-    request.input("Izmerenie_VGH_i_peredacha_informatsii", mssql.NVarChar, data.Izmerenie_VGH_i_peredacha_informatsii);
-    request.input("Indeks_za_srochnost_koeff_1_5", mssql.NVarChar, data.Indeks_za_srochnost_koeff_1_5);
-    request.input("Kompleksnaya_priemka_tovara", mssql.NVarChar, data.Kompleksnaya_priemka_tovara);
-    request.input("Priemka_tovara_v_transportnykh_korobakh", mssql.NVarChar, data.Priemka_tovara_v_transportnykh_korobakh);
-    request.input("Priemka_tovara_palletnaya", mssql.NVarChar, data.Priemka_tovara_palletnaya);
-    request.input("Prochie_raboty_vklyuchaya_ustranenie_anomalii", mssql.NVarChar, data.Prochie_raboty_vklyuchaya_ustranenie_anomalii);
-    request.input("Razbrakovka_tovara", mssql.NVarChar, data.Razbrakovka_tovara);
-    request.input("Sborka_naborov_ot_2_shtuk_raznykh_tovarov", mssql.NVarChar, data.Sborka_naborov_ot_2_shtuk_raznykh_tovarov);
-    request.input("Upakovka_tovara_v_gofromeyler", mssql.NVarChar, data.Upakovka_tovara_v_gofromeyler);
-    request.input("Khranenie_tovara", mssql.NVarChar, data.Khranenie_tovara);
+      request.input('Upakovka_v_Gofro', mssql.NVarChar, data.Upakovka_v_Gofro);
+      request.input('Upakovka_v_PE_Paket', mssql.NVarChar, data.Upakovka_v_PE_Paket);
+      request.input('PriznakSortirovki', mssql.NVarChar, data.PriznakSortirovki);
+      
+      // Добавляем недостающие параметры
+      request.input('Vlozhit_v_upakovku_pechatnyi_material', mssql.NVarChar, data.Vlozhit_v_upakovku_pechatnyi_material);
+      request.input('Izmerenie_VGH_i_peredacha_informatsii', mssql.NVarChar, data.Izmerenie_VGH_i_peredacha_informatsii);
+      request.input('Indeks_za_srochnost_koeff_1_5', mssql.NVarChar, data.Indeks_za_srochnost_koeff_1_5);
+      request.input('Kompleksnaya_priemka_tovara', mssql.NVarChar, data.Kompleksnaya_priemka_tovara);
+      request.input('Priemka_tovara_v_transportnykh_korobakh', mssql.NVarChar, data.Priemka_tovara_v_transportnykh_korobakh);
+      request.input('Priemka_tovara_palletnaya', mssql.NVarChar, data.Priemka_tovara_palletnaya);
+      request.input('Prochie_raboty_vklyuchaya_ustranenie_anomalii', mssql.NVarChar, data.Prochie_raboty_vklyuchaya_ustranenie_anomalii);
+      request.input('Razbrakovka_tovara', mssql.NVarChar, data.Razbrakovka_tovara);
+      request.input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar, data.Sborka_naborov_ot_2_shtuk_raznykh_tovarov);
+      request.input('Upakovka_tovara_v_gofromeyler', mssql.NVarChar, data.Upakovka_tovara_v_gofromeyler);
+      request.input('Khranenie_tovara', mssql.NVarChar, data.Khranenie_tovara);
 
       await request.query(query);
   
@@ -598,16 +603,19 @@ router.post('/upload-data-new', async (req, res) => {
       request.input('Upakovka_v_PE_Paket', mssql.NVarChar, data.Upakovka_v_PE_Paket);
       request.input('vp', mssql.NVarChar, data.vp ? data.vp.toString() :null);
       request.input('Plan_Otkaz', mssql.NVarChar, data.Plan_Otkaz ? data.Plan_Otkaz.toString(): null);
-      request.input("Izmerenie_VGH_i_peredacha_informatsii", mssql.NVarChar, data.Izmerenie_VGH_i_peredacha_informatsii);
-      request.input("Indeks_za_srochnost_koeff_1_5", mssql.NVarChar, data.Indeks_za_srochnost_koeff_1_5);
-      request.input("Kompleksnaya_priemka_tovara", mssql.NVarChar, data.Kompleksnaya_priemka_tovara);
-      request.input("Priemka_tovara_v_transportnykh_korobakh", mssql.NVarChar, data.Priemka_tovara_v_transportnykh_korobakh);
-      request.input("Priemka_tovara_palletnaya", mssql.NVarChar, data.Priemka_tovara_palletnaya);
-      request.input("Prochie_raboty_vklyuchaya_ustranenie_anomalii", mssql.NVarChar, data.Prochie_raboty_vklyuchaya_ustranenie_anomalii);
-      request.input("Razbrakovka_tovara", mssql.NVarChar, data.Razbrakovka_tovara);
-      request.input("Sborka_naborov_ot_2_shtuk_raznykh_tovarov", mssql.NVarChar, data.Sborka_naborov_ot_2_shtuk_raznykh_tovarov);
-      request.input("Upakovka_tovara_v_gofromeyler", mssql.NVarChar, data.Upakovka_tovara_v_gofromeyler);
-      request.input("Khranenie_tovara", mssql.NVarChar, data.Khranenie_tovara);
+      
+      // Добавляем недостающие параметры
+      request.input('Vlozhit_v_upakovku_pechatnyi_material', mssql.NVarChar, data.Vlozhit_v_upakovku_pechatnyi_material);
+      request.input('Izmerenie_VGH_i_peredacha_informatsii', mssql.NVarChar, data.Izmerenie_VGH_i_peredacha_informatsii);
+      request.input('Indeks_za_srochnost_koeff_1_5', mssql.NVarChar, data.Indeks_za_srochnost_koeff_1_5);
+      request.input('Kompleksnaya_priemka_tovara', mssql.NVarChar, data.Kompleksnaya_priemka_tovara);
+      request.input('Priemka_tovara_v_transportnykh_korobakh', mssql.NVarChar, data.Priemka_tovara_v_transportnykh_korobakh);
+      request.input('Priemka_tovara_palletnaya', mssql.NVarChar, data.Priemka_tovara_palletnaya);
+      request.input('Prochie_raboty_vklyuchaya_ustranenie_anomalii', mssql.NVarChar, data.Prochie_raboty_vklyuchaya_ustranenie_anomalii);
+      request.input('Razbrakovka_tovara', mssql.NVarChar, data.Razbrakovka_tovara);
+      request.input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar, data.Sborka_naborov_ot_2_shtuk_raznykh_tovarov);
+      request.input('Upakovka_tovara_v_gofromeyler', mssql.NVarChar, data.Upakovka_tovara_v_gofromeyler);
+      request.input('Khranenie_tovara', mssql.NVarChar, data.Khranenie_tovara);
       
       await request.query(query);
 
