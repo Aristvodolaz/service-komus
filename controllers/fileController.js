@@ -74,7 +74,7 @@ router.get('/completed-tasks', async (req, res) => {
     }
 
     // Выполняем SQL-запрос для получения названий всех заданий, где Status_Zadaniya = 1
-    const query = "SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP WHERE Status_Zadaniya = 1";
+    const query = "SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP WHERE Status_Zadaniya = 1 and  Scklad_Pref = 'MSC-Polaris' ";
     const result = await pool.request().query(query);
 
     // Формируем список названий заданий
@@ -95,7 +95,7 @@ router.get('/tasks-status-1', async (req, res) => {
           return res.status(500).json({ message: "Ошибка подключения к базе данных." });
       }
 
-      const query = "SELECT Nazvanie_Zadaniya FROM Test_MP WHERE Status_Zadaniya = 1";
+      const query = "SELECT Nazvanie_Zadaniya FROM Test_MP WHERE Status_Zadaniya = 1 ";
       const result = await pool.request().query(query);
 
       const tasks = result.recordset.map(row => row.Nazvanie_Zadaniya);
