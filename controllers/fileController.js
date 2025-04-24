@@ -649,7 +649,7 @@ FROM Test_MP
 WHERE Nazvanie_Zadaniya IN (
     SELECT Nazvanie_Zadaniya
     FROM Test_MP
-    WHERE Status != 0 AND Status_Zadaniya = 0
+    WHERE Status != 0 AND Status_Zadaniya = 0 and Scklad_Pref = 'MSC-Polaris'
     GROUP BY Nazvanie_Zadaniya
     HAVING COUNT(CASE WHEN Status_Zadaniya = 0 THEN 1 END) = COUNT(*)
 )
