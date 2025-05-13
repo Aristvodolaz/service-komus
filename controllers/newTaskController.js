@@ -74,7 +74,8 @@ const updateStatusNew = async (req, res) => {
             Pechat_Etiketki_s_SHK,
             Pechat_Etiketki_s_Opisaniem,
             PriznakSortirovki,
-            Upakovka_v_Gofro, Upakovka_v_PE_Paket,
+            CAST(Upakovka_v_Gofro as NVARCHAR(255)) as Upakovka_v_Gofro,
+            Upakovka_v_PE_Paket,
               Vlozhit_v_upakovku_pechatnyi_material,
           Izmerenie_VGH_i_peredacha_informatsii,
           Indeks_za_srochnost_koeff_1_5,
@@ -422,7 +423,7 @@ const updateStatusNew = async (req, res) => {
         .input('Pechat_Etiketki_s_SHK', mssql.NVarChar(10), Pechat_Etiketki_s_SHK ?? '0')
         .input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar(10), Pechat_Etiketki_s_Opisaniem ?? '0')
         .input('PriznakSortirovki', mssql.NVarChar(10), PriznakSortirovki ?? '0')
-        .input('Upakovka_v_Gofro', mssql.NVarChar(10), Upakovka_v_Gofro ?? '0')
+        .input('Upakovka_v_Gofro', mssql.NVarChar(255), Upakovka_v_Gofro ?? '0')
         .input('Upakovka_v_PE_Paket', mssql.NVarChar(10), Upakovka_v_PE_Paket ?? '0')
         .input('Vlozhit_v_upakovku_pechatnyi_material', mssql.NVarChar(10), Vlozhit_v_upakovku_pechatnyi_material ?? '0')
         .input('Izmerenie_VGH_i_peredacha_informatsii', mssql.NVarChar(10), Izmerenie_VGH_i_peredacha_informatsii ?? '0')
@@ -897,7 +898,7 @@ const updateStatusNew = async (req, res) => {
         .input('Pechat_Etiketki_s_SHK', mssql.NVarChar(10), originalRecord.Pechat_Etiketki_s_SHK)
         .input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar(10), originalRecord.Pechat_Etiketki_s_Opisaniem)
         .input('PriznakSortirovki', mssql.NVarChar(10), originalRecord.PriznakSortirovki )
-        .input('Upakovka_v_Gofro', mssql.NVarChar(10), originalRecord.Upakovka_v_Gofro )
+        .input('Upakovka_v_Gofro', mssql.NVarChar(255), originalRecord.Upakovka_v_Gofro )
         .input('Upakovka_v_PE_Paket', mssql.NVarChar(10), originalRecord.Upakovka_v_PE_Paket )
         .input('Vlozhit_v_upakovku_pechatnyi_material',      mssql.NVarChar(10), originalRecord.Vlozhit_v_upakovku_pechatnyi_material)
         .input('Izmerenie_VGH_i_peredacha_informatsii',     mssql.NVarChar(10), originalRecord.Izmerenie_VGH_i_peredacha_informatsii)

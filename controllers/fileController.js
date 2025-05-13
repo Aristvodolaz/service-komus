@@ -598,11 +598,12 @@ router.post('/upload-data-new', async (req, res) => {
       request.input('Krupnogabaritnyi_Tovar', mssql.NVarChar, data.Krupnogabaritnyi_Tovar);
       request.input('Yuvelirnye_Izdelia', mssql.NVarChar, data.Yuvelirnye_Izdelia);
       request.input('Pechat_Etiketki_s_SHK', mssql.NVarChar, data.Pechat_Etiketki_s_SHK);
-      request.input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar, data.Pechat_Etiketki_s_Opisaniem);
-      request.input('Upakovka_v_Gofro', mssql.NVarChar, data.Upakovka_v_Gofro);
-      request.input('Upakovka_v_PE_Paket', mssql.NVarChar, data.Upakovka_v_PE_Paket);
-      request.input('vp', mssql.NVarChar, data.vp ? data.vp.toString() :null);
-      request.input('Plan_Otkaz', mssql.NVarChar, data.Plan_Otkaz ? data.Plan_Otkaz.toString(): null);
+      request.input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar(10), data.Pechat_Etiketki_s_Opisaniem ?? '0');
+      request.input('vp', mssql.NVarChar(10), data.vp ?? '0');
+      request.input('Plan_Otkaz', mssql.NVarChar(10), data.Plan_Otkaz ?? '0');
+      request.input('Upakovka_v_Gofro', mssql.NVarChar(255), data.Upakovka_v_Gofro ?? '0');
+      request.input('Upakovka_v_PE_Paket', mssql.NVarChar(10), data.Upakovka_v_PE_Paket ?? '0');
+      request.input('PriznakSortirovki', mssql.NVarChar(10), data.PriznakSortirovki ?? '0');
       
       // Добавляем недостающие параметры
       request.input('Vlozhit_v_upakovku_pechatnyi_material', mssql.NVarChar, data.Vlozhit_v_upakovku_pechatnyi_material);
