@@ -603,7 +603,6 @@ router.post('/upload-data-new', async (req, res) => {
       request.input('Plan_Otkaz', mssql.NVarChar(10), data.Plan_Otkaz ?? '0');
       request.input('Upakovka_v_Gofro', mssql.NVarChar(255), data.Upakovka_v_Gofro ?? '0');
       request.input('Upakovka_v_PE_Paket', mssql.NVarChar(10), data.Upakovka_v_PE_Paket ?? '0');
-      request.input('PriznakSortirovki', mssql.NVarChar(10), data.PriznakSortirovki ?? '0');
       
       // Добавляем недостающие параметры
       request.input('Vlozhit_v_upakovku_pechatnyi_material', mssql.NVarChar, data.Vlozhit_v_upakovku_pechatnyi_material);
