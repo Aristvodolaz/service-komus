@@ -7,11 +7,104 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3005",
-      "description": "Локальный сервер разработки"
+      "url": "http://10.171.12.36:3005",
+      "description": "Сервер разработки"
     }
   ],
   "paths": {
+    "/market/tasks/name/search": {
+      "get": {
+        "summary": "Поиск задач по названию",
+        "tags": ["Администратирование"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Название задачи (поддерживает частичное совпадение)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный поиск задач",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Отсутствует обязательный параметр name"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        }
+      }
+    },
+    "/market/tasks/name/delete": {
+      "delete": {
+        "summary": "Удаление задач по названию",
+        "tags": ["Администратирование"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Название задачи для удаления"
+                  }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Задачи успешно удалены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "deletedTasks": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Task"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Отсутствует обязательный параметр name"
+          },
+          "404": {
+            "description": "Задачи с таким названием не найдены"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        }
+      }
+    },
     "/market/tasks": {
       "get": {
         "summary": "Получение задач по номеру",

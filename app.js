@@ -13,6 +13,7 @@ const tasksController = require('./routes/market_place/tasks');
 const otkazController = require('./routes/market_place/otkaz');
 const tasksNewController = require('./routes/market_place/newTasks');
 const srokNewController = require('./routes/srok');
+const taskNameRouter = require('./routes/taskName');
 
 /* for excel*/
 const fileController = require('./routes/market_place/file');
@@ -48,6 +49,7 @@ app.use('/reason', reasonRouter);
 
 /* for market place*/
 app.use('/market/tasks', tasksController);
+app.use('/market/tasks/name', taskNameRouter);
 app.use('/market/new', tasksNewController);
 app.use('/market/otkaz', otkazController);
 app.use('/srok', srokNewController);
