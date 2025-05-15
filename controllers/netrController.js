@@ -283,10 +283,10 @@ async function uploadData(req, res) {
         const query = `
             INSERT INTO Test_MP 
             (Artikul, Nazvanie_Tovara, SHK,  Itog_Zakaz, Srok_Godnosti, 
-            Pref, Nazvanie_Zadaniya, Status, Status_Zadaniya, Scklad_Pref, vp )
+            Pref, Nazvanie_Zadaniya, Status, Status_Zadaniya, Scklad_Pref, vp, Nomenklatura)
             VALUES 
             (@Artikul, @Nazvanie_Tovara, @SHK, @Itog_Zakaz, 
-          @Srok_Godnosti,@Pref, @Nazvanie_Zadaniya, @Status, @Status_Zadaniya, @Scklad_Pref, @vp)
+          @Srok_Godnosti,@Pref, @Nazvanie_Zadaniya, @Status, @Status_Zadaniya, @Scklad_Pref, @vp, @Nomenklatura)
         `;
   
         const request = pool.request();
@@ -301,6 +301,7 @@ async function uploadData(req, res) {
         request.input('Status', mssql.Int, data.Status);
         request.input('Status_Zadaniya', mssql.Int, data.Status_Zadaniya);
         request.input('Scklad_Pref', mssql.NVarChar, "NETR");
+        request.input('Nomenklatura', mssql.NVarChar, data.Nomenklatura);  
   
         await request.query(query);
   
@@ -333,7 +334,10 @@ async function downloadData(req, res) {
         }
 
         const query = `
-            SELECT * FROM x_Packer_Netr WHERE nazvanie_zdaniya = @taskName
+           SELECT p.*, t.Nomenklatura 
+            FROM x_Packer_Netr p
+            LEFT JOIN Test_MP t ON p.shk = t.shk AND p.nazvanie_zdaniya = t.Nazvanie_Zadaniya
+            WHERE p.nazvanie_zdaniya = @taskName
         `;
 
         const request = pool.request();
