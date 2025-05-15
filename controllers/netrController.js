@@ -301,7 +301,7 @@ async function uploadData(req, res) {
         request.input('Status', mssql.Int, data.Status);
         request.input('Status_Zadaniya', mssql.Int, data.Status_Zadaniya);
         request.input('Scklad_Pref', mssql.NVarChar, "NETR");
-        request.input('Nomenklatura', mssql.NVarChar, data.Nomenklatura);  
+        request.input('Nomenklatura', mssql.NVarChar, data.Nomenklatura?.toString() || null);
   
         await request.query(query);
   
