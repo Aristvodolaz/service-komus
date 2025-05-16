@@ -24,6 +24,7 @@ const fileExcelController = require('./controllers/fileController');
 
 const exportRoutes = require('./routes/export');
 const updateRoutes = require('./routes/finish');
+const handRoutes = require('./routes/hand');
 const articleRoutes = require('./routes/market_place/article');
 const authRoutes = require('./routes/market_place/auth');
 const { updateSrokGodnosti } = require('./controllers/srokController');
@@ -60,7 +61,7 @@ app.use('/download/files', filesRouter);
 app.use('/download', downloadController);
 app.use('/',fileExcelController);
 app.use('/',palletRoutes);
-
+app.use('/',handRoutes);
 app.use('/',netrRoutes);
 
 app.use('/export', exportRoutes);
