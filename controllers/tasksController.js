@@ -938,6 +938,15 @@ const resetOzon = async (req, res) => {
       throw new Error('Ошибка подключения к базе данных');
     }
 
+    // Удаляем приемку для OZON по заданию и артикулу
+    await pool.request()
+      .input('TaskName', mssql.NVarChar, taskName)
+      .input('Articul', mssql.NVarChar, articul)
+      .query(`
+        DELETE FROM [SPOe_rc].[dbo].[Test_MP_VP]
+        WHERE Nazvanie_Zadaniya = @TaskName AND Artikul = @Articul
+      `);
+
     // Получаем записи по `taskName` и `articul`, сортируем по `ID`
     const result = await pool.request()
       .input('TaskName', mssql.NVarChar, taskName)
@@ -1007,7 +1016,16 @@ const resetWB = async (req, res) => {
       .input('TaskName', mssql.NVarChar, taskName)
       .query(`
         DELETE FROM Test_MP_Privyazka
-        WHERE Artikul = @Articul AND NazvanieZadaniya = @TaskName
+        WHERE Artikul = @Articul AND Nazvanie_Zadaniya = @TaskName
+      `);
+
+    // Удаляем приемку (Fact) по текущему заданию и артикулу
+    await pool.request()
+      .input('TaskName', mssql.NVarChar, taskName)
+      .input('Articul', mssql.NVarChar, articul)
+      .query(`
+        DELETE FROM [SPOe_rc].[dbo].[Test_MP_VP]
+        WHERE Nazvanie_Zadaniya = @TaskName AND Artikul = @Articul
       `);
 
     // Обнуляем запись в `Test_MP` по `ID`

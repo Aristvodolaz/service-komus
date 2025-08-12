@@ -186,7 +186,16 @@ const getPalletsByTaskName = async (req, res) => {
           DELETE FROM Test_MP_Privyazka
           WHERE Artikul = @Articul AND Nazvanie_Zadaniya = @TaskName
         `);
-  
+
+      // Также очищаем приемку по заданию и артикулу
+      await pool.request()
+        .input('TaskName', mssql.NVarChar, taskName)
+        .input('Articul', mssql.NVarChar, articul)
+        .query(`
+          DELETE FROM [SPOe_rc].[dbo].[Test_MP_VP]
+          WHERE Nazvanie_Zadaniya = @TaskName AND Artikul = @Articul
+        `);
+
       // Обнуляем запись в `Test_MP` по `ID`
       await pool.request()
         .input('ID', mssql.BigInt, BigInt(id))
@@ -221,6 +230,15 @@ const getPalletsByTaskName = async (req, res) => {
         throw new Error('Ошибка подключения к базе данных');
       }
   
+      // Очищаем приемку из Test_MP_VP по заданию и артикулу
+      await pool.request()
+        .input('TaskName', mssql.NVarChar, taskName)
+        .input('Articul', mssql.NVarChar, articul)
+        .query(`
+          DELETE FROM [SPOe_rc].[dbo].[Test_MP_VP]
+          WHERE Nazvanie_Zadaniya = @TaskName AND Artikul = @Articul
+        `);
+
       // Получаем записи по `taskName` и `articul`, сортируем по `ID`
       const result = await pool.request()
         .input('TaskName', mssql.NVarChar, taskName)
