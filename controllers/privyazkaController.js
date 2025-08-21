@@ -111,7 +111,7 @@ const checkShkWpsExists = async (req, res) => {
         const { count } = checkResult.recordset[0];
 
         if (count > 0) {
-            return res.json({ success: false, message: 'ШК ВПС уже существует для данного задания', errorCode: 200 });
+            return res.json({ success: true , message: 'ШК ВПС уже существует для данного задания', errorCode: 200 });
         } else {
             return res.json({ success: true, value: 'SHK_WPS не найден для данного задания', errorCode: 200 });
         }
