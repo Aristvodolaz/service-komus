@@ -12,5 +12,7 @@ router.get('/sklads', dataController.getSklads)
 router.get('/checkSHKWps', dataController.checkShkWpsExists)
 router.post('/udpateWBNew', dataController.updatePalletAndKolvoNew)
 router.post('/endStatusNew', dataController.endZapisNew)
+router.get('/uniqueTaskNames', dataController.getUniqueTaskNames)
+router.get('/taskRecords', dataController.getTaskRecordsByName)
 
 module.exports = router;

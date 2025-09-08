@@ -380,6 +380,78 @@ const getSklads = async (req, res) => {
     }
 };
 
+// Метод для получения уникальных значений Nazvanie_Zadaniya из таблицы Test_MP_VP
+const getUniqueTaskNames = async (req, res) => {
+    try {
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка подключения к базе данных' });
+        }
+
+        // Запрос для получения уникальных значений Nazvanie_Zadaniya
+        const result = await pool.request()
+            .query(`
+                SELECT DISTINCT Nazvanie_Zadaniya
+                FROM [SPOe_rc].[dbo].[Test_MP_VP]
+                ORDER BY Nazvanie_Zadaniya
+            `);
+
+        // Проверяем, есть ли записи в результате запроса
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ success: false, value: [], errorCode: 404, message: 'Записи не найдены' });
+        }
+
+        // Успешный ответ с данными
+        res.json({ success: true, value: result.recordset, errorCode: 200 });
+    } catch (error) {
+        console.error('Ошибка при получении уникальных названий заданий:', error);
+        res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Внутренняя ошибка сервера' });
+    }
+};
+
+// Метод для получения всех записей из Test_MP_VP по Nazvanie_Zadaniya
+const getTaskRecordsByName = async (req, res) => {
+    const { name } = req.query;
+
+    // Проверяем наличие обязательного параметра
+    if (!name) {
+        return res.status(400).json({ success: false, value: null, errorCode: 400, message: 'Параметр name обязателен' });
+    }
+
+    try {
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка подключения к базе данных' });
+        }
+
+        // Запрос для получения всех записей по Nazvanie_Zadaniya
+        const result = await pool.request()
+            .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+            .query(`
+                SELECT [Nazvanie_Zadaniya]
+                      ,[VP]
+                      ,[Artikul]
+                      ,[Plans]
+                      ,[Fact]
+                      ,[Razlichie]
+                FROM [SPOe_rc].[dbo].[Test_MP_VP]
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+                ORDER BY Artikul
+            `);
+
+        // Проверяем, есть ли записи в результате запроса
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ success: false, value: [], errorCode: 404, message: 'Записи не найдены' });
+        }
+
+        // Успешный ответ с данными
+        res.json({ success: true, value: result.recordset, errorCode: 200 });
+    } catch (error) {
+        console.error('Ошибка при получении записей по названию задания:', error);
+        res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Внутренняя ошибка сервера' });
+    }
+};
+
 
 module.exports = {
     addZapis,
@@ -391,5 +463,7 @@ module.exports = {
     getSklads,
     updatePalletAndKolvoNew,
     checkShkWpsExists,
-    endZapisNew
+    endZapisNew,
+    getUniqueTaskNames,
+    getTaskRecordsByName
 };
