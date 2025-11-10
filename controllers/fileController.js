@@ -501,9 +501,6 @@ router.post('/upload-data', async (req, res) => {
     }
 });
 
-module.exports = router;
-
-
 router.post('/upload-data-new', async (req, res) => {
   try {
       const data = req.body;
@@ -622,9 +619,6 @@ router.post('/upload-data-new', async (req, res) => {
   }
 });
 
-module.exports = router;
-
-
 // 6. Новый маршрут для получения списка уникальных заданий в работе
 // 6. Новый маршрут для получения уникальных заданий с прогрессом
 router.get('/tasks-in-progress', async (req, res) => {
@@ -697,8 +691,6 @@ GROUP BY Nazvanie_Zadaniya;
     res.status(500).json({ message: "Ошибка при получении списка заданий в работе." });
   }
 });
-
-module.exports = router;
 
 // Новый маршрут для получения уникальных загруженных файлов
 router.get('/uploaded-tasks', async (req, res) => {

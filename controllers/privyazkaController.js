@@ -452,6 +452,121 @@ const getTaskRecordsByName = async (req, res) => {
     }
 };
 
+// Метод для поиска SHK_COroba по SHK_WPS из таблицы Test_MP_Privyazka
+const getShkCorobaByShkWps = async (req, res) => {
+    const { shk_wps } = req.query;
+
+    // Проверяем наличие обязательного параметра
+    if (!shk_wps) {
+        return res.status(400).json({ success: false, value: null, errorCode: 400, message: 'Параметр shk_wps обязателен' });
+    }
+
+    try {
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка подключения к базе данных' });
+        }
+
+        // Запрос для поиска SHK_COroba по SHK_WPS
+        const result = await pool.request()
+            .input('SHK_WPS', mssql.NVarChar(255), shk_wps)
+            .query(`
+                SELECT SHK_Coroba
+                FROM Test_MP_Privyazka
+                WHERE SHK_WPS = @SHK_WPS
+            `);
+
+        // Проверяем, есть ли записи в результате запроса
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ success: false, value: null, errorCode: 404, message: 'SHK_Coroba не найден для указанного SHK_WPS' });
+        }
+
+        // Успешный ответ с данными
+        res.json({ success: true, value: result.recordset[0].SHK_Coroba, errorCode: 200 });
+    } catch (error) {
+        console.error('Ошибка при поиске SHK_Coroba по SHK_WPS:', error);
+        res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Внутренняя ошибка сервера' });
+    }
+};
+
+// Метод для добавления/обновления SHK_Coroba по Nazvanie_Zadaniya, Artikul и SHK_WPS
+const updateShkCoroba = async (req, res) => {
+    const { name, artikul, shk_wps, shk_coroba } = req.body;
+
+    // Проверяем наличие обязательных параметров
+    if (!name || !artikul || !shk_wps || !shk_coroba) {
+        return res.status(400).json({ 
+            success: false, 
+            value: null, 
+            errorCode: 400, 
+            message: 'Параметры name, artikul, shk_wps и shk_coroba обязательны' 
+        });
+    }
+
+    try {
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка подключения к базе данных' });
+        }
+
+        // Проверяем существование записи
+        const checkResult = await pool.request()
+            .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+            .input('Artikul', mssql.Int, artikul)
+            .input('SHK_WPS', mssql.NVarChar(255), shk_wps)
+            .query(`
+                SELECT COUNT(*) as count 
+                FROM Test_MP_Privyazka
+                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya 
+                  AND Artikul = @Artikul 
+                  AND SHK_WPS = @SHK_WPS
+            `);
+
+        const { count } = checkResult.recordset[0];
+
+        let result;
+        if (count > 0) {
+            // Обновляем существующую запись
+            result = await pool.request()
+                .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
+                .input('Artikul', mssql.Int, artikul)
+                .input('SHK_WPS', mssql.NVarChar(255), shk_wps)
+                .input('SHK_Coroba', mssql.NVarChar(255), shk_coroba)
+                .query(`
+                    UPDATE Test_MP_Privyazka
+                    SET SHK_Coroba = @SHK_Coroba
+                    WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya 
+                      AND Artikul = @Artikul 
+                      AND SHK_WPS = @SHK_WPS
+                `);
+
+            if (result.rowsAffected[0] === 0) {
+                return res.status(404).json({ 
+                    success: false, 
+                    value: 'Не удалось обновить запись', 
+                    errorCode: 404 
+                });
+            }
+
+            return res.json({ 
+                success: true, 
+                value: 'SHK_Coroba успешно обновлен', 
+                errorCode: 200 
+            });
+        } else {
+            // Запись не найдена
+            return res.status(404).json({ 
+                success: false, 
+                value: 'Запись не найдена. Необходимо сначала создать запись с указанными параметрами', 
+                errorCode: 404 
+            });
+        }
+    } catch (error) {
+        console.error('Ошибка при обновлении SHK_Coroba:', error);
+        res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Внутренняя ошибка сервера' });
+    }
+};
+
 
 module.exports = {
     addZapis,
@@ -465,5 +580,7 @@ module.exports = {
     checkShkWpsExists,
     endZapisNew,
     getUniqueTaskNames,
-    getTaskRecordsByName
+    getTaskRecordsByName,
+    getShkCorobaByShkWps,      // Экспорт метода для поиска SHK_Coroba по SHK_WPS
+    updateShkCoroba            // Экспорт метода для добавления/обновления SHK_Coroba
 };

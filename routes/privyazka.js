@@ -14,5 +14,7 @@ router.post('/udpateWBNew', dataController.updatePalletAndKolvoNew)
 router.post('/endStatusNew', dataController.endZapisNew)
 router.get('/uniqueTaskNames', dataController.getUniqueTaskNames)
 router.get('/taskRecords', dataController.getTaskRecordsByName)
+router.get('/getShkCoroba', dataController.getShkCorobaByShkWps)
+router.post('/updateShkCoroba', dataController.updateShkCoroba)
 
 module.exports = router;
