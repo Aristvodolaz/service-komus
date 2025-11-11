@@ -499,7 +499,7 @@ const updateShkCoroba = async (req, res) => {
             success: false, 
             value: null, 
             errorCode: 400, 
-            message: 'Параметры shk_wps и shk_coroba обязательны' 
+            message: 'Параметры shk_wps и shk_coroba обязательны   ' 
         });
     }
 
@@ -544,7 +544,6 @@ const updateShkCoroba = async (req, res) => {
                     errorCode: 404 
                 });
             }
-
             return res.json({ 
                 success: true, 
                 value: 'SHK_Coroba успешно обновлен', 
@@ -564,6 +563,7 @@ const updateShkCoroba = async (req, res) => {
     }
 };
 
+ 
 
 module.exports = {
     addZapis,
