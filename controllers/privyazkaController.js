@@ -489,17 +489,17 @@ const getShkCorobaByShkWps = async (req, res) => {
     }
 };
 
-// Метод для добавления/обновления SHK_Coroba по Nazvanie_Zadaniya, Artikul и SHK_WPS
+// Метод для добавления/обновления SHK_Coroba по SHK_WPS
 const updateShkCoroba = async (req, res) => {
-    const { name, artikul, shk_wps, shk_coroba } = req.body;
+    const { shk_wps, shk_coroba } = req.body;
 
     // Проверяем наличие обязательных параметров
-    if (!name || !artikul || !shk_wps || !shk_coroba) {
+    if (!shk_wps || !shk_coroba) {
         return res.status(400).json({ 
             success: false, 
             value: null, 
             errorCode: 400, 
-            message: 'Параметры name, artikul, shk_wps и shk_coroba обязательны' 
+            message: 'Параметры shk_wps и shk_coroba обязательны' 
         });
     }
 
@@ -511,33 +511,30 @@ const updateShkCoroba = async (req, res) => {
 
         // Проверяем существование записи
         const checkResult = await pool.request()
-            .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
-            .input('Artikul', mssql.Int, artikul)
             .input('SHK_WPS', mssql.NVarChar(255), shk_wps)
             .query(`
                 SELECT COUNT(*) as count 
                 FROM Test_MP_Privyazka
-                WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya 
-                  AND Artikul = @Artikul 
-                  AND SHK_WPS = @SHK_WPS
+                WHERE SHK_WPS = @SHK_WPS
             `);
 
         const { count } = checkResult.recordset[0];
 
         let result;
         if (count > 0) {
-            // Обновляем существующую запись
+            // Обновляем последнюю добавленную запись с указанным SHK_WPS
             result = await pool.request()
-                .input('Nazvanie_Zadaniya', mssql.NVarChar(255), name)
-                .input('Artikul', mssql.Int, artikul)
                 .input('SHK_WPS', mssql.NVarChar(255), shk_wps)
                 .input('SHK_Coroba', mssql.NVarChar(255), shk_coroba)
                 .query(`
                     UPDATE Test_MP_Privyazka
                     SET SHK_Coroba = @SHK_Coroba
-                    WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya 
-                      AND Artikul = @Artikul 
-                      AND SHK_WPS = @SHK_WPS
+                    WHERE ID = (
+                        SELECT TOP 1 ID 
+                        FROM Test_MP_Privyazka 
+                        WHERE SHK_WPS = @SHK_WPS 
+                        ORDER BY ID DESC
+                    )
                 `);
 
             if (result.rowsAffected[0] === 0) {
@@ -557,7 +554,7 @@ const updateShkCoroba = async (req, res) => {
             // Запись не найдена
             return res.status(404).json({ 
                 success: false, 
-                value: 'Запись не найдена. Необходимо сначала создать запись с указанными параметрами', 
+                value: 'Запись с указанным SHK_WPS не найдена', 
                 errorCode: 404 
             });
         }
