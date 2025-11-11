@@ -526,7 +526,7 @@ const updateShkCoroba = async (req, res) => {
     }
 };
 
-// Метод для поиска SHK_COroba по SHK_WPS из таблицы Test_MP_Privyazka
+// Метод для поиска SHK_Coroba по SHK_WPS из таблицы Test_MP_Privyazka
 const getShkCorobaByShkWps = async (req, res) => {
     const { shk_wps } = req.query;
 
@@ -541,13 +541,16 @@ const getShkCorobaByShkWps = async (req, res) => {
             return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка подключения к базе данных' });
         }
 
-        // Запрос для поиска SHK_COroba по SHK_WPS
+        // Запрос для поиска последней записи с непустым SHK_Coroba по SHK_WPS
         const result = await pool.request()
             .input('SHK_WPS', mssql.NVarChar(255), shk_wps)
             .query(`
-                SELECT SHK_Coroba
+                SELECT TOP 1 SHK_Coroba
                 FROM Test_MP_Privyazka
                 WHERE SHK_WPS = @SHK_WPS
+                AND SHK_Coroba IS NOT NULL
+                AND SHK_Coroba <> ''
+                ORDER BY ID DESC
             `);
 
         // Проверяем, есть ли записи в результате запроса
