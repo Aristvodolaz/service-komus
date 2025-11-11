@@ -452,43 +452,6 @@ const getTaskRecordsByName = async (req, res) => {
     }
 };
 
-// Метод для поиска SHK_COroba по SHK_WPS из таблицы Test_MP_Privyazka
-const getShkCorobaByShkWps = async (req, res) => {
-    const { shk_wps } = req.query;
-
-    // Проверяем наличие обязательного параметра
-    if (!shk_wps) {
-        return res.status(400).json({ success: false, value: null, errorCode: 400, message: 'Параметр shk_wps обязателен' });
-    }
-
-    try {
-        const pool = await connectToDatabase();
-        if (!pool) {
-            return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка подключения к базе данных' });
-        }
-
-        // Запрос для поиска SHK_COroba по SHK_WPS
-        const result = await pool.request()
-            .input('SHK_WPS', mssql.NVarChar(255), shk_wps)
-            .query(`
-                SELECT SHK_Coroba
-                FROM Test_MP_Privyazka
-                WHERE SHK_WPS = @SHK_WPS
-            `);
-
-        // Проверяем, есть ли записи в результате запроса
-        if (result.recordset.length === 0) {
-            return res.status(404).json({ success: false, value: null, errorCode: 404, message: 'SHK_Coroba не найден для указанного SHK_WPS' });
-        }
-
-        // Успешный ответ с данными
-        res.json({ success: true, value: result.recordset[0].SHK_Coroba, errorCode: 200 });
-    } catch (error) {
-        console.error('Ошибка при поиске SHK_Coroba по SHK_WPS:', error);
-        res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Внутренняя ошибка сервера' });
-    }
-};
-
 // Метод для добавления/обновления SHK_Coroba по SHK_WPS
 const updateShkCoroba = async (req, res) => {
     const { shk_wps, shk_coroba } = req.body;
@@ -562,6 +525,44 @@ const updateShkCoroba = async (req, res) => {
         res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Внутренняя ошибка сервера' });
     }
 };
+
+// Метод для поиска SHK_COroba по SHK_WPS из таблицы Test_MP_Privyazka
+const getShkCorobaByShkWps = async (req, res) => {
+    const { shk_wps } = req.query;
+
+    // Проверяем наличие обязательного параметра
+    if (!shk_wps) {
+        return res.status(400).json({ success: false, value: null, errorCode: 400, message: 'Параметр shk_wps обязателен' });
+    }
+
+    try {
+        const pool = await connectToDatabase();
+        if (!pool) {
+            return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка подключения к базе данных' });
+        }
+
+        // Запрос для поиска SHK_COroba по SHK_WPS
+        const result = await pool.request()
+            .input('SHK_WPS', mssql.NVarChar(255), shk_wps)
+            .query(`
+                SELECT SHK_Coroba
+                FROM Test_MP_Privyazka
+                WHERE SHK_WPS = @SHK_WPS
+            `);
+
+        // Проверяем, есть ли записи в результате запроса
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ success: false, value: null, errorCode: 404, message: 'SHK_Coroba не найден для указанного SHK_WPS' });
+        }
+
+        // Успешный ответ с данными
+        res.json({ success: true, value: result.recordset[0].SHK_Coroba, errorCode: 200 });
+    } catch (error) {
+        console.error('Ошибка при поиске SHK_Coroba по SHK_WPS:', error);
+        res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Внутренняя ошибка сервера' });
+    }
+};
+
 
  
 
