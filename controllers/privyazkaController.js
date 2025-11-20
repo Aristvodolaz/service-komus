@@ -36,9 +36,9 @@ const addZapis = async (req, res) => {
         const { count } = checkResult.recordset[0];
 
         // if (countUsingPallet > 0) {
-        if (count > 0 || countUsingPallet > 0) {
-            return res.status(400).json({ success: false, value: 'Данный ШК уже был использован для этого задания', errorCode: 400 });
-        }
+        // if (count > 0 || countUsingPallet > 0) {
+        //     return res.status(400).json({ success: false, value: 'Данный ШК уже был использован для этого задания', errorCode: 400 });
+        // }
 
         // Проверка на существование записи с таким же Названием задания и артикулом, у которой есть срок годности
         const checkSrokGodnosti = await pool.request()
