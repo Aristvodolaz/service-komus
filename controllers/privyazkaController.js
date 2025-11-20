@@ -110,11 +110,11 @@ const checkShkWpsExists = async (req, res) => {
 
         const { count } = checkResult.recordset[0];
 
-        if (count > 0) {
-            return res.json({ success: false , message: 'ШК ВПС уже существует для данного задания', errorCode: 200 });
-        } else {
+        // if (count > 0) {
+        //     return res.json({ success: false , message: 'ШК ВПС уже существует для данного задания', errorCode: 200 });
+        // } else {
             return res.json({ success: true, value: 'SHK_WPS не найден для данного задания', errorCode: 200 });
-        }
+        // }
     } catch (error) {
         console.error('Ошибка при проверке SHK_WPS:', error);
         return res.status(500).json({ success: false, value: null, errorCode: 500, message: 'Ошибка сервера' });
