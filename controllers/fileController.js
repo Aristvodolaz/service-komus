@@ -74,7 +74,7 @@ router.get('/completed-tasks', async (req, res) => {
     }
 
     // Выполняем SQL-запрос для получения названий всех заданий, где Status_Zadaniya = 1
-    const query = "SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP WHERE Status_Zadaniya = 1 and  Scklad_Pref = 'MSC-Polaris' ";
+    const query = "SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP WHERE Status_Zadaniya = 1 and  Scklad_Pref IN ('MSC-Polaris', 'NETR') ";
     const result = await pool.request().query(query);
 
     // Формируем список названий заданий
