@@ -5,6 +5,7 @@ const { sql, connectToDatabase } = require('../dbConfig');
 const path = require('path');
 const xlsx = require('xlsx'); // Для работы с Excel
 const mssql = require('mssql');
+const { determineTipPostavki } = require('../utils/tipPostavkiHelper');
 
 const router = express.Router();
 
@@ -521,6 +522,11 @@ router.post('/upload-data-new', async (req, res) => {
           }
       }
 
+      // Determine tipPostavki from filename (Nazvanie_Zadaniya)
+      // Logic: if filename contains "короб" or "коробочн" → true (box delivery)
+      //        if filename contains "паллет" → false (pallet delivery)
+      const tipPostavki = determineTipPostavki(data.Nazvanie_Zadaniya);
+
       const query = `
           INSERT INTO Test_MP 
           (Artikul, Artikul_Syrya, Nomenklatura, Nazvanie_Tovara, SHK, SHK_Syrya, SHK_SPO, Kol_vo_Syrya, Itog_Zakaz, SOH, 
@@ -530,7 +536,7 @@ router.post('/upload-data-new', async (req, res) => {
           Mesto, Vlozhennost, Pallet_No, Pref, Nazvanie_Zadaniya, Status, Status_Zadaniya, Scklad_Pref, 
           Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
           Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, vp, Plan_Otkaz, Upakovka_v_Gofro, Upakovka_v_PE_Paket, PriznakSortirovki, 
-  Vlozhit_v_upakovku_pechatnyi_material, Izmerenie_VGH_i_peredacha_informatsii, Indeks_za_srochnost_koeff_1_5, Kompleksnaya_priemka_tovara, Priemka_tovara_v_transportnykh_korobakh, Priemka_tovara_palletnaya, Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara, Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler
+  Vlozhit_v_upakovku_pechatnyi_material, Izmerenie_VGH_i_peredacha_informatsii, Indeks_za_srochnost_koeff_1_5, Kompleksnaya_priemka_tovara, Priemka_tovara_v_transportnykh_korobakh, Priemka_tovara_palletnaya, Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara, Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler, tipPostavki
 )
           VALUES 
           (@Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @Kol_vo_Syrya, @Itog_Zakaz, @SOH,
@@ -540,7 +546,7 @@ router.post('/upload-data-new', async (req, res) => {
           @Mesto, @Vlozhennost, @Pallet_No, @Pref, @Nazvanie_Zadaniya, @Status, @Status_Zadaniya, @Scklad_Pref,
           @Sortiruemyi_Tovar, @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
           @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @vp, @Plan_Otkaz, @Upakovka_v_Gofro, @Upakovka_v_PE_Paket, @PriznakSortirovki
-                      , @Vlozhit_v_upakovku_pechatnyi_material, @Izmerenie_VGH_i_peredacha_informatsii, @Indeks_za_srochnost_koeff_1_5, @Kompleksnaya_priemka_tovara, @Priemka_tovara_v_transportnykh_korobakh, @Priemka_tovara_palletnaya, @Prochie_raboty_vklyuchaya_ustranenie_anomalii, @Razbrakovka_tovara, @Sborka_naborov_ot_2_shtuk_raznykh_tovarov, @Upakovka_tovara_v_gofromeyler
+                      , @Vlozhit_v_upakovku_pechatnyi_material, @Izmerenie_VGH_i_peredacha_informatsii, @Indeks_za_srochnost_koeff_1_5, @Kompleksnaya_priemka_tovara, @Priemka_tovara_v_transportnykh_korobakh, @Priemka_tovara_palletnaya, @Prochie_raboty_vklyuchaya_ustranenie_anomalii, @Razbrakovka_tovara, @Sborka_naborov_ot_2_shtuk_raznykh_tovarov, @Upakovka_tovara_v_gofromeyler, @tipPostavki
 )
       `;
 
@@ -556,6 +562,7 @@ router.post('/upload-data-new', async (req, res) => {
       request.input('Itog_Zakaz', mssql.Int, data.Itog_Zakaz);
       request.input('SOH', mssql.NVarChar, data.SOH ? data.SOH.toString() : null);
       request.input('Tip_Postavki', mssql.NVarChar, data.Tip_Postavki);
+      request.input('tipPostavki', mssql.Bit, tipPostavki); // Add new tipPostavki field
       request.input('Srok_Godnosti', mssql.NVarChar, data.Srok_Godnosti);
       request.input('Op_1_Bl_1_Sht', mssql.NVarChar, data.Op_1_Bl_1_Sht);
       request.input('Op_2_Bl_2_Sht', mssql.NVarChar, data.Op_2_Bl_2_Sht);

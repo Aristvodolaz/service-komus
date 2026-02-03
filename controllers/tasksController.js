@@ -1,6 +1,7 @@
 const mssql = require('mssql');
 const { connectToDatabase, sql } = require('../dbConfig');
 const { error } = require('winston');
+const { determineTipPostavki } = require('../utils/tipPostavkiHelper');
 
 const getArticulsByTaskNumber = async (req, res) => {
   const { taskNumber } = req.query;
@@ -89,7 +90,7 @@ const getUniqueTaskNames = async (req, res) => {
     }
 
     let query = `
-      SELECT Nazvanie_Zadaniya, Scklad_Pref 
+      SELECT Nazvanie_Zadaniya, Scklad_Pref, tipPostavki
       FROM Test_MP 
       WHERE Status_Zadaniya = 0
     `;
@@ -109,7 +110,7 @@ const getUniqueTaskNames = async (req, res) => {
 
     // Группируем результат по полям
     query += `
-      GROUP BY Nazvanie_Zadaniya, Scklad_Pref
+      GROUP BY Nazvanie_Zadaniya, Scklad_Pref, tipPostavki
     `;
 
     const result = await request.query(query);
@@ -119,6 +120,9 @@ const getUniqueTaskNames = async (req, res) => {
       value: result.recordset.map(row => ({
         Nazvanie_Zadaniya: row.Nazvanie_Zadaniya,
         Scklad_Pref: row.Scklad_Pref,
+        tipPostavki: row.tipPostavki !== null 
+          ? row.tipPostavki 
+          : determineTipPostavki(row.Nazvanie_Zadaniya), // Calculate from name if not set in DB
       })),
       errorCode: 200,
     });
