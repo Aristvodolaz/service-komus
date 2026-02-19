@@ -401,7 +401,7 @@ async function distinctName(req, res) {
 
         // Use MAX(CAST(Mono AS INT)) to convert BIT to INT for aggregation
         const query = `
-            SELECT DISTINCT Nazvanie_Zadaniya, MAX(CAST(Mono AS INT)) as Mono
+            SELECT DISTINCT Nazvanie_Zadaniya, MAX(CAST(ISNULL(Mono, 0) AS INT)) as Mono
             FROM Test_MP
             WHERE Scklad_Pref = 'NETR' AND Status_Zadaniya = 0
             GROUP BY Nazvanie_Zadaniya
@@ -415,13 +415,10 @@ async function distinctName(req, res) {
             return res.status(404).json({ success: false, message: "Нет доступных заданий." });
         }
 
-        // Return task names with Mono flag (convert back to boolean)
-        const tasks = result.recordset.map(row => ({
-            nazvanie: row.Nazvanie_Zadaniya,
-            mono: row.Mono === 1 // Convert INT back to boolean
-        }));
+        // Преобразуем результат в массив строк без вложенных объектов (как было раньше)
+        const taskNames = result.recordset.map(row => row.Nazvanie_Zadaniya);
 
-        res.status(200).json({ success: true, data: tasks });
+        res.status(200).json({ success: true, data: taskNames });
 
     } catch (err) {
         console.error('Ошибка при получении данных:', err);
