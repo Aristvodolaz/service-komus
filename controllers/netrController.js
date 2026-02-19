@@ -399,12 +399,9 @@ async function distinctName(req, res) {
             return res.status(500).json({ success: false, message: "Ошибка подключения к базе данных." });
         }
 
-        // Use MAX(CAST(Mono AS INT)) to convert BIT to INT for aggregation
         const query = `
-            SELECT DISTINCT Nazvanie_Zadaniya, MAX(CAST(ISNULL(Mono, 0) AS INT)) as Mono
-            FROM Test_MP
+            SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP
             WHERE Scklad_Pref = 'NETR' AND Status_Zadaniya = 0
-            GROUP BY Nazvanie_Zadaniya
             ORDER BY Nazvanie_Zadaniya
         `;
 
@@ -415,7 +412,7 @@ async function distinctName(req, res) {
             return res.status(404).json({ success: false, message: "Нет доступных заданий." });
         }
 
-        // Преобразуем результат в массив строк без вложенных объектов (как было раньше)
+        // Преобразуем результат в массив строк без вложенных объектов
         const taskNames = result.recordset.map(row => row.Nazvanie_Zadaniya);
 
         res.status(200).json({ success: true, data: taskNames });
