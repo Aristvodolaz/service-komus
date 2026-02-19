@@ -5,7 +5,7 @@ const { sql, connectToDatabase } = require('../dbConfig');
 const path = require('path');
 const xlsx = require('xlsx'); // Для работы с Excel
 const mssql = require('mssql');
-const { determineTipPostavki } = require('../utils/tipPostavkiHelper');
+const { determineTipPostavki, determineMono } = require('../utils/tipPostavkiHelper');
 
 const router = express.Router();
 
@@ -526,6 +526,10 @@ router.post('/upload-data-new', async (req, res) => {
       // Logic: if filename contains "короб" or "коробочн" → true (box delivery)
       //        if filename contains "паллет" → false (pallet delivery)
       const tipPostavki = determineTipPostavki(data.Nazvanie_Zadaniya);
+      
+      // Determine Mono flag from filename (Nazvanie_Zadaniya)
+      // Logic: if filename contains "МОНО" → true (only one article per pallet)
+      const mono = determineMono(data.Nazvanie_Zadaniya);
 
       const query = `
           INSERT INTO Test_MP 
@@ -536,7 +540,7 @@ router.post('/upload-data-new', async (req, res) => {
           Mesto, Vlozhennost, Pallet_No, Pref, Nazvanie_Zadaniya, Status, Status_Zadaniya, Scklad_Pref, 
           Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
           Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, vp, Plan_Otkaz, Upakovka_v_Gofro, Upakovka_v_PE_Paket, PriznakSortirovki, 
-  Vlozhit_v_upakovku_pechatnyi_material, Izmerenie_VGH_i_peredacha_informatsii, Indeks_za_srochnost_koeff_1_5, Kompleksnaya_priemka_tovara, Priemka_tovara_v_transportnykh_korobakh, Priemka_tovara_palletnaya, Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara, Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler, tipPostavki
+  Vlozhit_v_upakovku_pechatnyi_material, Izmerenie_VGH_i_peredacha_informatsii, Indeks_za_srochnost_koeff_1_5, Kompleksnaya_priemka_tovara, Priemka_tovara_v_transportnykh_korobakh, Priemka_tovara_palletnaya, Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara, Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler, tipPostavki, Mono
 )
           VALUES 
           (@Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @Kol_vo_Syrya, @Itog_Zakaz, @SOH,
@@ -546,7 +550,7 @@ router.post('/upload-data-new', async (req, res) => {
           @Mesto, @Vlozhennost, @Pallet_No, @Pref, @Nazvanie_Zadaniya, @Status, @Status_Zadaniya, @Scklad_Pref,
           @Sortiruemyi_Tovar, @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
           @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @vp, @Plan_Otkaz, @Upakovka_v_Gofro, @Upakovka_v_PE_Paket, @PriznakSortirovki
-                      , @Vlozhit_v_upakovku_pechatnyi_material, @Izmerenie_VGH_i_peredacha_informatsii, @Indeks_za_srochnost_koeff_1_5, @Kompleksnaya_priemka_tovara, @Priemka_tovara_v_transportnykh_korobakh, @Priemka_tovara_palletnaya, @Prochie_raboty_vklyuchaya_ustranenie_anomalii, @Razbrakovka_tovara, @Sborka_naborov_ot_2_shtuk_raznykh_tovarov, @Upakovka_tovara_v_gofromeyler, @tipPostavki
+                      , @Vlozhit_v_upakovku_pechatnyi_material, @Izmerenie_VGH_i_peredacha_informatsii, @Indeks_za_srochnost_koeff_1_5, @Kompleksnaya_priemka_tovara, @Priemka_tovara_v_transportnykh_korobakh, @Priemka_tovara_palletnaya, @Prochie_raboty_vklyuchaya_ustranenie_anomalii, @Razbrakovka_tovara, @Sborka_naborov_ot_2_shtuk_raznykh_tovarov, @Upakovka_tovara_v_gofromeyler, @tipPostavki, @Mono
 )
       `;
 
@@ -616,6 +620,7 @@ router.post('/upload-data-new', async (req, res) => {
       request.input('Razbrakovka_tovara', mssql.NVarChar, data.Razbrakovka_tovara);
       request.input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar, data.Sborka_naborov_ot_2_shtuk_raznykh_tovarov);
       request.input('Upakovka_tovara_v_gofromeyler', mssql.NVarChar, data.Upakovka_tovara_v_gofromeyler);
+      request.input('Mono', mssql.Bit, mono); // Add Mono field
       
       await request.query(query);
 

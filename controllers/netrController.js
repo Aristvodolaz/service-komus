@@ -10,19 +10,49 @@ async function addItem(req, res) {
         }
 
         const pool = await connectToDatabase();
-        const srokQuery = `
-        SELECT TOP 1 Srok_Godnosti 
-        FROM [SPOe_rc].[dbo].[Test_Mp] 
-        WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
-    `;
+        
+        // Get Srok_Godnosti and Mono flag from Test_MP
+        const taskInfoQuery = `
+            SELECT TOP 1 Srok_Godnosti, Mono, Scklad_Pref
+            FROM [SPOe_rc].[dbo].[Test_Mp] 
+            WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+        `;
 
-    const srokResult = await pool.request()
-    .input('Nazvanie_Zadaniya', mssql.NVarChar(255), nazvanie_zdaniya)
-    .input('Artikul', mssql.Int, artikul)
-    .query(srokQuery);
+        const taskInfoResult = await pool.request()
+            .input('Nazvanie_Zadaniya', mssql.NVarChar(255), nazvanie_zdaniya)
+            .input('Artikul', mssql.Int, artikul)
+            .query(taskInfoQuery);
 
-const srokGodnosti = srokResult.recordset.length > 0 ? srokResult.recordset[0].Srok_Godnosti : null;
+        const srokGodnosti = taskInfoResult.recordset.length > 0 ? taskInfoResult.recordset[0].Srok_Godnosti : null;
+        const isMono = taskInfoResult.recordset.length > 0 ? taskInfoResult.recordset[0].Mono : false;
+        const sckladPref = taskInfoResult.recordset.length > 0 ? taskInfoResult.recordset[0].Scklad_Pref : null;
 
+        // MONO-PALLET CHECK: Only for NETR warehouse
+        // If Mono = true, check if pallet already has a different article
+        if (isMono && sckladPref === 'NETR') {
+            const monoPalletCheckQuery = `
+                SELECT DISTINCT artikul 
+                FROM [SPOe_rc].[dbo].[x_Packer_Netr]
+                WHERE nazvanie_zdaniya = @nazvanie_zdaniya
+                  AND pallet = @pallet
+                  AND artikul != @artikul
+            `;
+
+            const monoPalletCheck = await pool.request()
+                .input('nazvanie_zdaniya', mssql.NVarChar(255), nazvanie_zdaniya)
+                .input('pallet', mssql.NVarChar, pallet)
+                .input('artikul', mssql.NVarChar, artikul)
+                .query(monoPalletCheckQuery);
+
+            if (monoPalletCheck.recordset.length > 0) {
+                const existingArtikul = monoPalletCheck.recordset[0].artikul;
+                return res.status(400).json({ 
+                    success: false, 
+                    value: `ОШИБКА: На паллете ${pallet} уже находится артикул ${existingArtikul}. В режиме МОНО на одном паллете может быть только один артикул.`, 
+                    errorCode: 400 
+                });
+            }
+        }
 
         // Проверяем, есть ли уже запись с такими параметрами
         const checkQuery = `
@@ -269,6 +299,10 @@ async function uploadData(req, res) {
             return res.status(500).json({ message: "Ошибка подключения к базе данных." });
         }
 
+        // Determine Mono flag from task name
+        const { determineMono } = require('../utils/tipPostavkiHelper');
+        const mono = determineMono(data.Nazvanie_Zadaniya);
+
         // Проверяем существование задания
         const checkQuery = `
             SELECT COUNT(*) as count 
@@ -283,10 +317,10 @@ async function uploadData(req, res) {
         const query = `
             INSERT INTO Test_MP 
             (Artikul, Nazvanie_Tovara, SHK,  Itog_Zakaz, Srok_Godnosti, 
-            Pref, Nazvanie_Zadaniya, Status, Status_Zadaniya, Scklad_Pref, vp, Nomenklatura)
+            Pref, Nazvanie_Zadaniya, Status, Status_Zadaniya, Scklad_Pref, vp, Nomenklatura, Mono)
             VALUES 
             (@Artikul, @Nazvanie_Tovara, @SHK, @Itog_Zakaz, 
-          @Srok_Godnosti,@Pref, @Nazvanie_Zadaniya, @Status, @Status_Zadaniya, @Scklad_Pref, @vp, @Nomenklatura)
+          @Srok_Godnosti,@Pref, @Nazvanie_Zadaniya, @Status, @Status_Zadaniya, @Scklad_Pref, @vp, @Nomenklatura, @Mono)
         `;
   
         const request = pool.request();
@@ -302,6 +336,7 @@ async function uploadData(req, res) {
         request.input('Status_Zadaniya', mssql.Int, data.Status_Zadaniya);
         request.input('Scklad_Pref', mssql.NVarChar, "NETR");
         request.input('Nomenklatura', mssql.NVarChar, data.Nomenklatura?.toString() || null);
+        request.input('Mono', mssql.Bit, mono);
   
         await request.query(query);
   
@@ -365,8 +400,10 @@ async function distinctName(req, res) {
         }
 
         const query = `
-               SELECT DISTINCT Nazvanie_Zadaniya FROM Test_MP
-            where Scklad_Pref = 'NETR' and Status_Zadaniya = 0
+            SELECT DISTINCT Nazvanie_Zadaniya, MAX(Mono) as Mono
+            FROM Test_MP
+            WHERE Scklad_Pref = 'NETR' AND Status_Zadaniya = 0
+            GROUP BY Nazvanie_Zadaniya
             ORDER BY Nazvanie_Zadaniya
         `;
 
@@ -377,10 +414,13 @@ async function distinctName(req, res) {
             return res.status(404).json({ success: false, message: "Нет доступных заданий." });
         }
 
-        // Преобразуем результат в массив строк без вложенных объектов
-        const taskNames = result.recordset.map(row => row.Nazvanie_Zadaniya);
+        // Return task names with Mono flag
+        const tasks = result.recordset.map(row => ({
+            nazvanie: row.Nazvanie_Zadaniya,
+            mono: row.Mono || false
+        }));
 
-        res.status(200).json({ success: true, data: taskNames });
+        res.status(200).json({ success: true, data: tasks });
 
     } catch (err) {
         console.error('Ошибка при получении данных:', err);
