@@ -259,7 +259,6 @@ router.get('/download', async (req, res) => {
 
     const isWB = taskName.includes('WB');
     const isKorob = determineTipPostavki(taskName) === true; // OZON коробочная поставка
-    const usePrivyazka = isWB || isKorob;
     console.log(`Загрузка данных для задания: ${taskName}, isWB: ${isWB}, isKorob: ${isKorob}`);
 
     const pool = await connectToDatabase();
@@ -268,7 +267,42 @@ router.get('/download', async (req, res) => {
     }
 
     let query1, query2;
-    if (usePrivyazka) {
+    // WB: всегда по логике Привязка + полный отчёт из Test_MP (без изменений)
+    if (isWB) {
+      query1 = `
+        SELECT 
+          p.Nazvanie_Zadaniya,
+          p.Artikul,
+          m.SHK as Barcode,
+          p.Kolvo_Tovarov,
+          p.SHK_Coroba,
+          p.Srok_Godnosti,
+          REPLACE(CAST(p.Pallet_No AS NVARCHAR(255)), CHAR(10), '') as Pallet_No,
+          REPLACE(CAST(p.SHK_WPS AS NVARCHAR(255)), CHAR(10), '') as SHK_WPS
+        FROM Test_MP_Privyazka p
+        LEFT JOIN Test_MP m
+          ON p.Artikul = m.Artikul AND m.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+        WHERE p.Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+      `;
+
+      query2 = `
+        SELECT vp, Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nomenklatura, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
+               Itog_MP, SOH, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht,
+               Op_6_Blis_6_10_Sht, Op_7_Pereschyot, Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom,
+               Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, Op_468_Proverka_SHK,
+               Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
+               Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty,
+               Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem,
+               Upakovka_v_Gofro, Upakovka_v_PE_Paket,PriznakSortirovki
+               , 
+  Vlozhit_v_upakovku_pechatnyi_material, Izmerenie_VGH_i_peredacha_informatsii, Indeks_za_srochnost_koeff_1_5, Kompleksnaya_priemka_tovara, Priemka_tovara_v_transportnykh_korobakh, Priemka_tovara_palletnaya, Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara, Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler
+
+               
+               ,Fakticheskoe_Kol_vo, Ubrano_iz_Zakaza, Time_Start, Time_End
+        FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
+      `;
+    } else if (isKorob) {
+      // OZON короб: паллеты из Test_MP_Privyazka + общий отчёт со всеми полями из Test_MP (по аналогии с WB)
       query1 = `
         SELECT 
           p.Nazvanie_Zadaniya,
@@ -302,6 +336,7 @@ router.get('/download', async (req, res) => {
         FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
       `;
     } else {
+      // OZON паллетная: только Test_MP
       query1 = `
         SELECT vp, Nazvanie_Zadaniya, Artikul, Artikul_Syrya, Nomenklatura, Nazvanie_Tovara, SHK, SHK_Syrya, Kol_vo_Syrya, Itog_Zakaz,
                Itog_MP, SOH, Srok_Godnosti, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, Yuvelirnye_Izdelia,
@@ -329,10 +364,8 @@ router.get('/download', async (req, res) => {
     }
 
     let result2 = null;
-    // Дополнительный набор данных (query2) используем для всех заданий,
-    // где работаем через привязку (WB и OZON короб), чтобы сформировать
-    // общий отчет со всеми полями из Test_MP.
-    if ((isWB || usePrivyazka) && query2) {
+    // dataSet2 (общий отчёт со всеми полями): только для WB и OZON короб
+    if (query2) {
       result2 = await request.query(query2);
     }
 
