@@ -1056,6 +1056,85 @@ const resetWB = async (req, res) => {
   }
 };
 
+// Отчёт отклонений: для OZON короб «Расчётное кол» = сумма из краткого отчёта (Test_MP_Privyazka), «Итог заказа» из полного (Test_MP)
+const getDeviationsReport = async (req, res) => {
+  const { taskName } = req.query;
+
+  if (!taskName) {
+    return res.status(400).json({ success: false, value: 'taskName is required', errorCode: 400 });
+  }
+
+  try {
+    const pool = await connectToDatabase();
+    if (!pool) {
+      throw new Error('Ошибка подключения к базе данных');
+    }
+
+    const isWB = taskName.includes('WB');
+    const isKorob = determineTipPostavki(taskName) === true;
+    const usePrivyazkaForCalculated = isWB || isKorob;
+
+    if (usePrivyazkaForCalculated) {
+      // WB и OZON короб: расчётное кол-во из краткого отчёта (Test_MP_Privyazka), итог заказа из полного (Test_MP)
+      const query = `
+        SELECT 
+          t.Artikul,
+          MAX(t.Nazvanie_Tovara) AS Nazvanie_Tovara,
+          MAX(t.Itog_Zakaz) AS Itog_Zakaz,
+          ISNULL(SUM(p.Kolvo_Tovarov), 0) AS CalculatedQty
+        FROM Test_MP t
+        LEFT JOIN Test_MP_Privyazka p 
+          ON p.Nazvanie_Zadaniya = t.Nazvanie_Zadaniya AND p.Artikul = t.Artikul
+        WHERE t.Nazvanie_Zadaniya = @taskName
+        GROUP BY t.Artikul, t.Nazvanie_Zadaniya
+      `;
+      const result = await pool.request()
+        .input('taskName', mssql.NVarChar(255), taskName)
+        .query(query);
+
+      return res.status(200).json({
+        success: true,
+        value: result.recordset.map(row => ({
+          Artikul: row.Artikul,
+          Nazvanie_Tovara: row.Nazvanie_Tovara,
+          Itog_Zakaz: row.Itog_Zakaz || 0,
+          CalculatedQty: row.CalculatedQty || 0,
+        })),
+        errorCode: 200,
+      });
+    }
+
+    // OZON паллетная: расчётное = Mesto*Vlozhennost по Test_MP
+    const queryPallet = `
+      SELECT 
+        Artikul,
+        MAX(Nazvanie_Tovara) AS Nazvanie_Tovara,
+        MAX(Itog_Zakaz) AS Itog_Zakaz,
+        ISNULL(SUM(ISNULL(Mesto, 0) * ISNULL(Vlozhennost, 0)), 0) AS CalculatedQty
+      FROM Test_MP
+      WHERE Nazvanie_Zadaniya = @taskName
+      GROUP BY Artikul
+    `;
+    const resultPallet = await pool.request()
+      .input('taskName', mssql.NVarChar(255), taskName)
+      .query(queryPallet);
+
+    res.status(200).json({
+      success: true,
+      value: resultPallet.recordset.map(row => ({
+        Artikul: row.Artikul,
+        Nazvanie_Tovara: row.Nazvanie_Tovara,
+        Itog_Zakaz: row.Itog_Zakaz || 0,
+        CalculatedQty: row.CalculatedQty || 0,
+      })),
+      errorCode: 200,
+    });
+  } catch (error) {
+    console.error('Ошибка при получении отчёта отклонений:', error);
+    res.status(500).json({ success: false, value: null, errorCode: 500 });
+  }
+};
+
 module.exports = {
   getArticulsByTaskNumber,
   getUniqueTaskNames,
@@ -1080,5 +1159,6 @@ module.exports = {
   setStatusNew,
   deleteRecordByOzon,
   resetOzon,
-  resetWB
+  resetWB,
+  getDeviationsReport
 };
