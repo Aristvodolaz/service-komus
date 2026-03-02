@@ -258,7 +258,9 @@ router.get('/download', async (req, res) => {
     }
 
     const isWB = taskName.includes('WB');
-    console.log(`Загрузка данных для задания: ${taskName}, isWB: ${isWB}`);
+    const isKorob = determineTipPostavki(taskName) === true; // OZON коробочная поставка
+    const usePrivyazka = isWB || isKorob;
+    console.log(`Загрузка данных для задания: ${taskName}, isWB: ${isWB}, isKorob: ${isKorob}`);
 
     const pool = await connectToDatabase();
     if (!pool) {
@@ -266,7 +268,7 @@ router.get('/download', async (req, res) => {
     }
 
     let query1, query2;
-    if (isWB) {
+    if (usePrivyazka) {
       query1 = `
         SELECT 
           p.Nazvanie_Zadaniya,
@@ -327,7 +329,9 @@ router.get('/download', async (req, res) => {
     }
 
     let result2 = null;
-    if (isWB) {
+    // Дополнительный набор данных (query2) по-прежнему используется только для WB,
+    // чтобы не менять существующее поведение для OZON.
+    if (isWB && query2) {
       result2 = await request.query(query2);
     }
 

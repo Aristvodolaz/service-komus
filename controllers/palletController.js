@@ -1,5 +1,6 @@
 const mssql = require('mssql');
 const { connectToDatabase } = require('../dbConfig');
+const { determineTipPostavki } = require('../utils/tipPostavkiHelper');
 const getPalletsByTaskName = async (req, res) => {
     const { taskName } = req.query;
   
@@ -19,8 +20,11 @@ const getPalletsByTaskName = async (req, res) => {
       }
   
       let result;
+
+      const isWBTask = taskName.includes('WB');
+      const isKorobTask = determineTipPostavki(taskName) === true;
   
-      if (taskName.includes('WB')) {
+      if (isWBTask || isKorobTask) {
         // Запрос для таблицы Test_MP_Privyazka
         result = await pool.request()
           .input('taskName', mssql.NVarChar(255), taskName)
@@ -90,8 +94,11 @@ const getPalletsByTaskName = async (req, res) => {
       if (!pool) {
         throw new Error('Ошибка подключения к базе данных');
       }
+
+      const isWBTask = task.includes('WB');
+      const isKorobTask = determineTipPostavki(task) === true;
   
-      const tableName = task.includes('WB') ? 'Test_MP_Privyazka' : 'Test_MP';
+      const tableName = (isWBTask || isKorobTask) ? 'Test_MP_Privyazka' : 'Test_MP';
       let result;
   
       // Запрос к базе данных
