@@ -1,6 +1,7 @@
 const mssql = require('mssql');
 const { connectToDatabase, sql } = require('../dbConfig');
 const { error } = require('winston');
+const { determineTipPostavki } = require('../utils/tipPostavkiHelper');
 
 
   const setFactSize = async (req, res) => {
@@ -412,33 +413,53 @@ const { error } = require('winston');
     }
   
     try {
-      // Подключение к базе данных
       const pool = await connectToDatabase();
       if (!pool) {
         return res.status(500).json({ success: false, value: null, errorCode: 500 });
       }
-  
-      // Получение Fact из таблицы Test_MP_VP
-      const factResult = await pool.request()
-        .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
-        .input("Artikul", mssql.Int, Artikul)
-        .query(`
-          SELECT Fact
-          FROM Test_MP_VP
-          WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
-        `);
-  
-      if (factResult.recordset.length === 0) {
-        return res.status(200).json({
-          success: false,
-          value: "Fact не найден для данного задания и артикула",
-          errorCode: 200,
-        });
+
+      // OZON короб: лимит берём из полного отчёта (Test_MP.Itog_Zakaz), краткий отчёт — Test_MP_Privyazka (Kolvo_Tovarov)
+      const isOzonKorob = !Nazvanie_Zadaniya.includes('WB') && determineTipPostavki(Nazvanie_Zadaniya) === true;
+      let limitByArtikul;
+
+      if (isOzonKorob) {
+        const itogResult = await pool.request()
+          .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+          .input("Artikul", mssql.Int, Artikul)
+          .query(`
+            SELECT MAX(Itog_Zakaz) AS Itog_Zakaz
+            FROM Test_MP
+            WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+          `);
+        if (itogResult.recordset.length === 0 || itogResult.recordset[0].Itog_Zakaz == null) {
+          return res.status(200).json({
+            success: false,
+            value: "Итог заказа (Itog_Zakaz) не найден для данного задания и артикула в полном отчёте",
+            errorCode: 200,
+          });
+        }
+        limitByArtikul = itogResult.recordset[0].Itog_Zakaz;
+      } else {
+        // WB: лимит из Test_MP_VP (Fact)
+        const factResult = await pool.request()
+          .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
+          .input("Artikul", mssql.Int, Artikul)
+          .query(`
+            SELECT Fact
+            FROM Test_MP_VP
+            WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+          `);
+        if (factResult.recordset.length === 0) {
+          return res.status(200).json({
+            success: false,
+            value: "Fact не найден для данного задания и артикула",
+            errorCode: 200,
+          });
+        }
+        limitByArtikul = factResult.recordset[0].Fact;
       }
   
-      const fact = factResult.recordset[0].Fact;
-  
-      // Сумма текущих Kolvo_Tovarov из таблицы Test_MP_Privyazka
+      // Сумма текущих Kolvo_Tovarov из таблицы Test_MP_Privyazka (краткий отчёт)
       const currentSumResult = await pool.request()
         .input("Nazvanie_Zadaniya", mssql.NVarChar, Nazvanie_Zadaniya)
         .input("Artikul", mssql.Int, Artikul)
@@ -450,12 +471,12 @@ const { error } = require('winston');
   
       const currentSum = currentSumResult.recordset[0].currentSum;
   
-      // Проверка, не превышает ли добавление лимит Fact
+      // Проверка: краткий отчёт (currentSum + новое) не должен превышать лимит (полный отчёт Itog_Zakaz или Fact)
       const newSum = currentSum + Kolvo_Tovarov;
-      if (newSum > fact) {
+      if (newSum > limitByArtikul) {
         return res.status(200).json({
           success: false,
-          value: `Суммарное Kolvo_Tovarov (${newSum}) превышает Fact (${fact})`,
+          value: `Суммарное Kolvo_Tovarov (${newSum}) превышает ${isOzonKorob ? 'Итог заказа' : 'Fact'} (${limitByArtikul})`,
           errorCode: 200,
         });
       }
