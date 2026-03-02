@@ -329,9 +329,10 @@ router.get('/download', async (req, res) => {
     }
 
     let result2 = null;
-    // Дополнительный набор данных (query2) по-прежнему используется только для WB,
-    // чтобы не менять существующее поведение для OZON.
-    if (isWB && query2) {
+    // Дополнительный набор данных (query2) используем для всех заданий,
+    // где работаем через привязку (WB и OZON короб), чтобы сформировать
+    // общий отчет со всеми полями из Test_MP.
+    if ((isWB || usePrivyazka) && query2) {
       result2 = await request.query(query2);
     }
 
