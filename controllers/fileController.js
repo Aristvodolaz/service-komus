@@ -257,7 +257,8 @@ router.get('/download', async (req, res) => {
     }
 
     const isWB = taskName.includes('WB');
-    const isKorob = determineTipPostavki(taskName) === true; // OZON коробочная поставка
+    const prefFromTask = taskName.split(' ')[0];
+    const isKorob = determineTipPostavki(taskName, prefFromTask) === true; // OZON коробочная / pref wb
     console.log(`Загрузка данных для задания: ${taskName}, isWB: ${isWB}, isKorob: ${isKorob}`);
 
     const pool = await connectToDatabase();
@@ -402,7 +403,7 @@ router.post('/upload-data', async (req, res) => {
           shkSyrya = await getPieceGTINForArticulSyrya(pool, [data.Artikul_Syrya]);
         }
       }
-      const tipPostavki = determineTipPostavki(data.Nazvanie_Zadaniya);
+      const tipPostavki = determineTipPostavki(data.Nazvanie_Zadaniya, data.pref);
       const mono = determineMono(data.Nazvanie_Zadaniya);
       // Пример запроса на вставку данных в таблицу Test_MP
       const query = `
@@ -527,7 +528,7 @@ router.post('/upload-data-new', async (req, res) => {
       // Determine tipPostavki from filename (Nazvanie_Zadaniya)
       // Logic: if filename contains "короб" or "коробочн" → true (box delivery)
       //        if filename contains "паллет" → false (pallet delivery)
-      const tipPostavki = determineTipPostavki(data.Nazvanie_Zadaniya);
+      const tipPostavki = determineTipPostavki(data.Nazvanie_Zadaniya, data.pref);
       
       // Determine Mono flag from filename (Nazvanie_Zadaniya)
       // Logic: if filename contains "МОНО" → true (only one article per pallet)

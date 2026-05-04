@@ -90,7 +90,7 @@ const getUniqueTaskNames = async (req, res) => {
     }
 
     let query = `
-      SELECT Nazvanie_Zadaniya, Scklad_Pref, tipPostavki, Mono
+      SELECT Nazvanie_Zadaniya, Scklad_Pref, tipPostavki, Mono, MAX(Pref) AS Pref
       FROM Test_MP 
       WHERE Status_Zadaniya = 0
     `;
@@ -122,7 +122,7 @@ const getUniqueTaskNames = async (req, res) => {
         Scklad_Pref: row.Scklad_Pref,
         tipPostavki: row.tipPostavki !== null 
           ? row.tipPostavki 
-          : determineTipPostavki(row.Nazvanie_Zadaniya), // Calculate from name if not set in DB
+          : determineTipPostavki(row.Nazvanie_Zadaniya, row.Pref), // pref wb → 1; иначе по названию
         mono: row.Mono !== null 
           ? row.Mono 
           : determineMono(row.Nazvanie_Zadaniya), // Calculate from name if not set in DB

@@ -419,7 +419,8 @@ const { determineTipPostavki } = require('../utils/tipPostavkiHelper');
       }
 
       // OZON короб: лимит берём из полного отчёта (Test_MP.Itog_Zakaz), краткий отчёт — Test_MP_Privyazka (Kolvo_Tovarov)
-      const isOzonKorob = !Nazvanie_Zadaniya.includes('WB') && determineTipPostavki(Nazvanie_Zadaniya) === true;
+      const prefTask = Nazvanie_Zadaniya.split(' ')[0];
+      const isOzonKorob = !Nazvanie_Zadaniya.includes('WB') && determineTipPostavki(Nazvanie_Zadaniya, prefTask) === true;
       let limitByArtikul;
 
       if (isOzonKorob) {

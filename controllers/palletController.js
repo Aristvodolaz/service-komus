@@ -22,7 +22,7 @@ const getPalletsByTaskName = async (req, res) => {
       let result;
 
       const isWBTask = taskName.includes('WB');
-      const isKorobTask = determineTipPostavki(taskName) === true;
+      const isKorobTask = determineTipPostavki(taskName, taskName.split(' ')[0]) === true;
   
       if (isWBTask || isKorobTask) {
         // Запрос для таблицы Test_MP_Privyazka
@@ -96,7 +96,7 @@ const getPalletsByTaskName = async (req, res) => {
       }
 
       const isWBTask = task.includes('WB');
-      const isKorobTask = determineTipPostavki(task) === true;
+      const isKorobTask = determineTipPostavki(task, task.split(' ')[0]) === true;
   
       const tableName = (isWBTask || isKorobTask) ? 'Test_MP_Privyazka' : 'Test_MP';
       let result;

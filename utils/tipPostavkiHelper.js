@@ -1,9 +1,18 @@
 /**
- * Helper function to determine tipPostavki (delivery type) from task name
+ * Helper function to determine tipPostavki (delivery type) from task name and optional pref
  * @param {string} nazvanie_zadaniya - Task name or filename
+ * @param {string} [pref] - Pref из файла/запроса (первое слово имени файла); при "wb" → true (1) по умолчанию для новых заданий
  * @returns {boolean|null} - true for box delivery (коробочная), false for pallet delivery (паллетная), null if unknown
  */
-function determineTipPostavki(nazvanie_zadaniya) {
+function determineTipPostavki(nazvanie_zadaniya, pref) {
+  // WB по префиксу задания: tipPostavki = 1 (корневая логика отчётов OZON/WB)
+  if (pref != null && String(pref).trim() !== '') {
+    const p = String(pref).trim().toLowerCase();
+    if (p === 'wb') {
+      return true;
+    }
+  }
+
   if (!nazvanie_zadaniya || typeof nazvanie_zadaniya !== 'string') {
     return null;
   }
