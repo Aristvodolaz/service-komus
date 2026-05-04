@@ -404,6 +404,7 @@ const getLDUBySHK = async (req, res) => {
           Udalenie_Stikera_Markirovki,
           Dopolnitelnaya_Zashchita_Tovara,
           Markirovka_Transportnogo_Koroba,
+          Spetsifikatsiya_TM,
           Formirovanie_Pallet_Otgruzki,
           Upakovochnyi_Material,
           Markirovka_Palleta_TM,
@@ -469,6 +470,7 @@ const getRecordsBySHKWPS = async (req, res) => {
           Udalenie_Stikera_Markirovki,
           Dopolnitelnaya_Zashchita_Tovara,
           Markirovka_Transportnogo_Koroba,
+          Spetsifikatsiya_TM,
           Formirovanie_Pallet_Otgruzki,
           Upakovochnyi_Material,
           Markirovka_Palleta_TM,
@@ -640,6 +642,7 @@ const duplicateRecord = async (req, res) => {
       .input('Udalenie_Stikera_Markirovki', mssql.NVarChar(50), o.Udalenie_Stikera_Markirovki)
       .input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar(50), o.Dopolnitelnaya_Zashchita_Tovara)
       .input('Markirovka_Transportnogo_Koroba', mssql.NVarChar(50), o.Markirovka_Transportnogo_Koroba)
+      .input('Spetsifikatsiya_TM', mssql.NVarChar(50), o.Spetsifikatsiya_TM)
       .input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar(50), o.Formirovanie_Pallet_Otgruzki)
       .input('Upakovochnyi_Material', mssql.NVarChar(50), o.Upakovochnyi_Material)
       .input('Markirovka_Palleta_TM', mssql.NVarChar(50), o.Markirovka_Palleta_TM)
@@ -669,6 +672,7 @@ const duplicateRecord = async (req, res) => {
           Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara, Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler,
           Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob,
           Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara, Markirovka_Transportnogo_Koroba,
+          Spetsifikatsiya_TM,
           Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material, Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona,
           Khranenie_tovara, tipPostavki, Mono,
           Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent
@@ -684,6 +688,7 @@ const duplicateRecord = async (req, res) => {
           @Prochie_raboty_vklyuchaya_ustranenie_anomalii, @Razbrakovka_tovara, @Sborka_naborov_ot_2_shtuk_raznykh_tovarov, @Upakovka_tovara_v_gofromeyler,
           @Primeryka_SHK, @Proverka_Sroka_Godnosti, @Upakovka_v_Babl_Plenku, @Upakovka_v_Ind_Korob,
           @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara, @Markirovka_Transportnogo_Koroba,
+          @Spetsifikatsiya_TM,
           @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material, @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona,
           @Khranenie_tovara, @tipPostavki, @Mono,
           @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent
@@ -848,6 +853,7 @@ const updateRecordsBySHKWPS = async (req, res) => {
     Udalenie_Stikera_Markirovki,
     Dopolnitelnaya_Zashchita_Tovara,
     Markirovka_Transportnogo_Koroba,
+    Spetsifikatsiya_TM,
     Formirovanie_Pallet_Otgruzki,
     Upakovochnyi_Material,
     Markirovka_Palleta_TM,
@@ -896,6 +902,7 @@ const updateRecordsBySHKWPS = async (req, res) => {
       .input('Udalenie_Stikera_Markirovki', mssql.NVarChar(10), Udalenie_Stikera_Markirovki ?? '0')
       .input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar(10), Dopolnitelnaya_Zashchita_Tovara ?? '0')
       .input('Markirovka_Transportnogo_Koroba', mssql.NVarChar(10), Markirovka_Transportnogo_Koroba ?? '0')
+      .input('Spetsifikatsiya_TM', mssql.NVarChar(10), Spetsifikatsiya_TM ?? '0')
       .input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar(10), Formirovanie_Pallet_Otgruzki ?? '0')
       .input('Upakovochnyi_Material', mssql.NVarChar(10), Upakovochnyi_Material ?? '0')
       .input('Markirovka_Palleta_TM', mssql.NVarChar(10), Markirovka_Palleta_TM ?? '0')
@@ -936,6 +943,7 @@ const updateRecordsBySHKWPS = async (req, res) => {
           Udalenie_Stikera_Markirovki = @Udalenie_Stikera_Markirovki,
           Dopolnitelnaya_Zashchita_Tovara = @Dopolnitelnaya_Zashchita_Tovara,
           Markirovka_Transportnogo_Koroba = @Markirovka_Transportnogo_Koroba,
+          Spetsifikatsiya_TM = @Spetsifikatsiya_TM,
           Formirovanie_Pallet_Otgruzki = @Formirovanie_Pallet_Otgruzki,
           Upakovochnyi_Material = @Upakovochnyi_Material,
           Markirovka_Palleta_TM = @Markirovka_Palleta_TM,
@@ -1006,6 +1014,7 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
     Udalenie_Stikera_Markirovki,
     Dopolnitelnaya_Zashchita_Tovara,
     Markirovka_Transportnogo_Koroba,
+    Spetsifikatsiya_TM,
     Formirovanie_Pallet_Otgruzki,
     Upakovochnyi_Material,
     Markirovka_Palleta_TM,
@@ -1054,6 +1063,7 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
       .input('Udalenie_Stikera_Markirovki', mssql.NVarChar(10), Udalenie_Stikera_Markirovki ?? '0')
       .input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar(10), Dopolnitelnaya_Zashchita_Tovara ?? '0')
       .input('Markirovka_Transportnogo_Koroba', mssql.NVarChar(10), Markirovka_Transportnogo_Koroba ?? '0')
+      .input('Spetsifikatsiya_TM', mssql.NVarChar(10), Spetsifikatsiya_TM ?? '0')
       .input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar(10), Formirovanie_Pallet_Otgruzki ?? '0')
       .input('Upakovochnyi_Material', mssql.NVarChar(10), Upakovochnyi_Material ?? '0')
       .input('Markirovka_Palleta_TM', mssql.NVarChar(10), Markirovka_Palleta_TM ?? '0')
@@ -1094,6 +1104,7 @@ const updateRecordsBySHKWPSNEW = async (req, res) => {
           Udalenie_Stikera_Markirovki = @Udalenie_Stikera_Markirovki,
           Dopolnitelnaya_Zashchita_Tovara = @Dopolnitelnaya_Zashchita_Tovara,
           Markirovka_Transportnogo_Koroba = @Markirovka_Transportnogo_Koroba,
+          Spetsifikatsiya_TM = @Spetsifikatsiya_TM,
           Formirovanie_Pallet_Otgruzki = @Formirovanie_Pallet_Otgruzki,
           Upakovochnyi_Material = @Upakovochnyi_Material,
           Markirovka_Palleta_TM = @Markirovka_Palleta_TM,

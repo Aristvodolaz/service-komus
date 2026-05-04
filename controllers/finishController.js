@@ -214,6 +214,7 @@ const updateOrAddRecord = async (req, res) => {
           Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara, Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler,
           Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob,
           Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara, Markirovka_Transportnogo_Koroba,
+          Spetsifikatsiya_TM,
           Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material, Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona,
           Khranenie_tovara, tipPostavki, Mono,
           Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent, SHK_WPS
@@ -229,6 +230,7 @@ const updateOrAddRecord = async (req, res) => {
           @Prochie_raboty_vklyuchaya_ustranenie_anomalii, @Razbrakovka_tovara, @Sborka_naborov_ot_2_shtuk_raznykh_tovarov, @Upakovka_tovara_v_gofromeyler,
           @Primeryka_SHK, @Proverka_Sroka_Godnosti, @Upakovka_v_Babl_Plenku, @Upakovka_v_Ind_Korob,
           @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara, @Markirovka_Transportnogo_Koroba,
+          @Spetsifikatsiya_TM,
           @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material, @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona,
           @Khranenie_tovara, @tipPostavki, @Mono,
           @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent, @SHK_WPS
@@ -288,6 +290,7 @@ const updateOrAddRecord = async (req, res) => {
         .input('Udalenie_Stikera_Markirovki', mssql.NVarChar(50), o.Udalenie_Stikera_Markirovki)
         .input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar(50), o.Dopolnitelnaya_Zashchita_Tovara)
         .input('Markirovka_Transportnogo_Koroba', mssql.NVarChar(50), o.Markirovka_Transportnogo_Koroba)
+        .input('Spetsifikatsiya_TM', mssql.NVarChar(50), o.Spetsifikatsiya_TM)
         .input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar(50), o.Formirovanie_Pallet_Otgruzki)
         .input('Upakovochnyi_Material', mssql.NVarChar(50), o.Upakovochnyi_Material)
         .input('Markirovka_Palleta_TM', mssql.NVarChar(50), o.Markirovka_Palleta_TM)

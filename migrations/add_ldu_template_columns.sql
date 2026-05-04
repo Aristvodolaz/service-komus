@@ -17,6 +17,9 @@ IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'Test_MP')
   ALTER TABLE Test_MP ADD Dopolnitelnaya_Zashchita_Tovara NVARCHAR(10) NULL;
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'Test_MP') AND name = N'Markirovka_Transportnogo_Koroba')
   ALTER TABLE Test_MP ADD Markirovka_Transportnogo_Koroba NVARCHAR(10) NULL;
+-- Контракт ТСД: ключ JSON Spetsifikatsiya_TM (замена удалённой Op_469_Spetsifikatsiya_TM после drop_legacy_op_columns).
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'Test_MP') AND name = N'Spetsifikatsiya_TM')
+  ALTER TABLE Test_MP ADD Spetsifikatsiya_TM NVARCHAR(10) NULL;
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'Test_MP') AND name = N'Formirovanie_Pallet_Otgruzki')
   ALTER TABLE Test_MP ADD Formirovanie_Pallet_Otgruzki NVARCHAR(10) NULL;
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'Test_MP') AND name = N'Upakovochnyi_Material')

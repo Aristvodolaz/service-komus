@@ -76,6 +76,7 @@ const updateStatusNew = async (req, res) => {
           Udalenie_Stikera_Markirovki,
           Dopolnitelnaya_Zashchita_Tovara,
           Markirovka_Transportnogo_Koroba,
+          Spetsifikatsiya_TM,
           Formirovanie_Pallet_Otgruzki,
           Upakovochnyi_Material,
           Markirovka_Palleta_TM,
@@ -170,6 +171,7 @@ const updateStatusNew = async (req, res) => {
         .input('Udalenie_Stikera_Markirovki', mssql.NVarChar(10), originalRecord.Udalenie_Stikera_Markirovki)
         .input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar(10), originalRecord.Dopolnitelnaya_Zashchita_Tovara)
         .input('Markirovka_Transportnogo_Koroba', mssql.NVarChar(10), originalRecord.Markirovka_Transportnogo_Koroba)
+        .input('Spetsifikatsiya_TM', mssql.NVarChar(10), originalRecord.Spetsifikatsiya_TM)
         .input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar(10), originalRecord.Formirovanie_Pallet_Otgruzki)
         .input('Upakovochnyi_Material', mssql.NVarChar(10), originalRecord.Upakovochnyi_Material)
         .input('Markirovka_Palleta_TM', mssql.NVarChar(10), originalRecord.Markirovka_Palleta_TM)
@@ -210,7 +212,7 @@ const updateStatusNew = async (req, res) => {
         Khranenie_tovara,
         Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob,
         Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara,
-        Markirovka_Transportnogo_Koroba, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material,
+        Markirovka_Transportnogo_Koroba, Spetsifikatsiya_TM, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material,
         Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona,
             vp, Plan_Otkaz, tipPostavki, Mono
           ) VALUES (
@@ -233,7 +235,7 @@ const updateStatusNew = async (req, res) => {
         @Khranenie_tovara,
         @Primeryka_SHK, @Proverka_Sroka_Godnosti, @Upakovka_v_Babl_Plenku, @Upakovka_v_Ind_Korob,
         @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara,
-        @Markirovka_Transportnogo_Koroba, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material,
+        @Markirovka_Transportnogo_Koroba, @Spetsifikatsiya_TM, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material,
         @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona,
             @vp, @Plan_Otkaz, @tipPostavki, @Mono
           )
@@ -335,96 +337,111 @@ const updateStatusNew = async (req, res) => {
   };
 
   const updateLduNEW = async (req, res) => {
-    const { id } = req.query; // Получаем параметры запроса
-    const {
-      Sortiruemyi_Tovar,
-      Ne_Sortiruemyi_Tovar,
-      Produkty,
-      Opasnyi_Tovar,
-      Zakrytaya_Zona,
-      Krupnogabaritnyi_Tovar,
-      Yuvelirnye_Izdelia,
-      Pechat_Etiketki_s_SHK,
-      Pechat_Etiketki_s_Opisaniem,
-      PriznakSortirovki,
-      Upakovka_v_Gofro, Upakovka_v_PE_Paket,
-      Vlozhit_v_upakovku_pechatnyi_material,
-      Izmerenie_VGH_i_peredacha_informatsii,
-      Indeks_za_srochnost_koeff_1_5,
-      Kompleksnaya_priemka_tovara,
-      Priemka_tovara_v_transportnykh_korobakh,
-      Priemka_tovara_palletnaya,
-      Prochie_raboty_vklyuchaya_ustranenie_anomalii,
-      Razbrakovka_tovara,
-      Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
-      Upakovka_tovara_v_gofromeyler,
-      Khranenie_tovara,
-      Primeryka_SHK,
-      Proverka_Sroka_Godnosti,
-      Upakovka_v_Babl_Plenku,
-      Upakovka_v_Ind_Korob,
-      Markirovka_Tovara_Stiker_CHZ,
-      Udalenie_Stikera_Markirovki,
-      Dopolnitelnaya_Zashchita_Tovara,
-      Markirovka_Transportnogo_Koroba,
-      Formirovanie_Pallet_Otgruzki,
-      Upakovochnyi_Material,
-      Markirovka_Palleta_TM,
-      Raskomplekt_Zakaza,
-      Tip_Operatsii_LDU,
-      Zamorozhennaya_Zona
-      
-    } = req.body; // Получаем данные из тела запроса
-  
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({ success: false, value: 'Поле id пусто!', errorCode: 400 });
+    }
+
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+
     try {
       const pool = await connectToDatabase();
       if (!pool) {
         throw new Error('Ошибка подключения к базе данных');
       }
-  
-      // Запрос к базе данных
+
+      const existing = await pool.request()
+        .input('ID', mssql.BigInt, id)
+        .query(`
+          SELECT TOP 1
+            Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona,
+            Krupnogabaritnyi_Tovar, Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem,
+            PriznakSortirovki, CAST(Upakovka_v_Gofro AS NVARCHAR(255)) AS Upakovka_v_Gofro,
+            Upakovka_v_PE_Paket, Vlozhit_v_upakovku_pechatnyi_material, Izmerenie_VGH_i_peredacha_informatsii,
+            Indeks_za_srochnost_koeff_1_5, Kompleksnaya_priemka_tovara, Priemka_tovara_v_transportnykh_korobakh,
+            Priemka_tovara_palletnaya, Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara,
+            Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler, Khranenie_tovara,
+            Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob,
+            Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara,
+            Markirovka_Transportnogo_Koroba, Spetsifikatsiya_TM, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material,
+            Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona
+          FROM Test_MP
+          WHERE ID = @ID
+        `);
+
+      if (!existing.recordset.length) {
+        return res.status(404).json({ success: false, value: 'Запись не найдена', errorCode: 404 });
+      }
+
+      const row = existing.recordset[0];
+
+      // Тело ТСД — часть ключей; отсутствующие свойства берём из БД, чтобы не обнулять поля вне экранной формы ЛДУ.
+
+      const pickFlag = (col) => {
+        if (Object.prototype.hasOwnProperty.call(body, col)) {
+          const v = body[col];
+          if (v === null || v === undefined || v === '') return '0';
+          return String(v);
+        }
+        const r = row[col];
+        if (r === null || r === undefined || r === '') return '0';
+        return String(r);
+      };
+
+      const pickFreeText = (col) => {
+        if (Object.prototype.hasOwnProperty.call(body, col)) {
+          const v = body[col];
+          if (v === null || v === undefined) return '';
+          return String(v);
+        }
+        const r = row[col];
+        return r != null ? String(r) : '';
+      };
+
       await pool.request()
-      .input('ID', mssql.BigInt, id)
-        .input('Sortiruemyi_Tovar', mssql.NVarChar(10), Sortiruemyi_Tovar ?? '0')
-        .input('Ne_Sortiruemyi_Tovar', mssql.NVarChar(10), Ne_Sortiruemyi_Tovar ?? '0')
-        .input('Produkty', mssql.NVarChar(10), Produkty ?? '0')
-        .input('Opasnyi_Tovar', mssql.NVarChar(10), Opasnyi_Tovar ?? '0')
-        .input('Zakrytaya_Zona', mssql.NVarChar(10), Zakrytaya_Zona ?? '0')
-        .input('Krupnogabaritnyi_Tovar', mssql.NVarChar(10), Krupnogabaritnyi_Tovar ?? '0')
-        .input('Yuvelirnye_Izdelia', mssql.NVarChar(10), Yuvelirnye_Izdelia ?? '0')
-        .input('Pechat_Etiketki_s_SHK', mssql.NVarChar(10), Pechat_Etiketki_s_SHK ?? '0')
-        .input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar(10), Pechat_Etiketki_s_Opisaniem ?? '0')
-        .input('PriznakSortirovki', mssql.NVarChar(10), PriznakSortirovki ?? '0')
-        .input('Upakovka_v_Gofro', mssql.NVarChar(255), Upakovka_v_Gofro ?? '0')
-        .input('Upakovka_v_PE_Paket', mssql.NVarChar(10), Upakovka_v_PE_Paket ?? '0')
-        .input('Vlozhit_v_upakovku_pechatnyi_material', mssql.NVarChar(10), Vlozhit_v_upakovku_pechatnyi_material ?? '0')
-        .input('Izmerenie_VGH_i_peredacha_informatsii', mssql.NVarChar(10), Izmerenie_VGH_i_peredacha_informatsii ?? '0')
-        .input('Indeks_za_srochnost_koeff_1_5', mssql.NVarChar(10), Indeks_za_srochnost_koeff_1_5 ?? '0')
-        .input('Kompleksnaya_priemka_tovara', mssql.NVarChar(10), Kompleksnaya_priemka_tovara ?? '0')
-        .input('Priemka_tovara_v_transportnykh_korobakh', mssql.NVarChar(10), Priemka_tovara_v_transportnykh_korobakh ?? '0')
-        .input('Priemka_tovara_palletnaya', mssql.NVarChar(10), Priemka_tovara_palletnaya ?? '0')
-        .input('Prochie_raboty_vklyuchaya_ustranenie_anomalii', mssql.NVarChar(10), Prochie_raboty_vklyuchaya_ustranenie_anomalii ?? '0')
-        .input('Razbrakovka_tovara', mssql.NVarChar(10), Razbrakovka_tovara ?? '0')
-        .input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar(10), Sborka_naborov_ot_2_shtuk_raznykh_tovarov ?? '0')
-        .input('Upakovka_tovara_v_gofromeyler', mssql.NVarChar(10), Upakovka_tovara_v_gofromeyler ?? '0')
-        .input('Khranenie_tovara', mssql.NVarChar(10), Khranenie_tovara ?? '0')
-        .input('Primeryka_SHK', mssql.NVarChar(10), Primeryka_SHK ?? '0')
-        .input('Proverka_Sroka_Godnosti', mssql.NVarChar(10), Proverka_Sroka_Godnosti ?? '0')
-        .input('Upakovka_v_Babl_Plenku', mssql.NVarChar(10), Upakovka_v_Babl_Plenku ?? '0')
-        .input('Upakovka_v_Ind_Korob', mssql.NVarChar(10), Upakovka_v_Ind_Korob ?? '0')
-        .input('Markirovka_Tovara_Stiker_CHZ', mssql.NVarChar(10), Markirovka_Tovara_Stiker_CHZ ?? '0')
-        .input('Udalenie_Stikera_Markirovki', mssql.NVarChar(10), Udalenie_Stikera_Markirovki ?? '0')
-        .input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar(10), Dopolnitelnaya_Zashchita_Tovara ?? '0')
-        .input('Markirovka_Transportnogo_Koroba', mssql.NVarChar(10), Markirovka_Transportnogo_Koroba ?? '0')
-        .input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar(10), Formirovanie_Pallet_Otgruzki ?? '0')
-        .input('Upakovochnyi_Material', mssql.NVarChar(10), Upakovochnyi_Material ?? '0')
-        .input('Markirovka_Palleta_TM', mssql.NVarChar(10), Markirovka_Palleta_TM ?? '0')
-        .input('Raskomplekt_Zakaza', mssql.NVarChar(10), Raskomplekt_Zakaza ?? '0')
-        .input('Tip_Operatsii_LDU', mssql.NVarChar(255), Tip_Operatsii_LDU ?? '')
-        .input('Zamorozhennaya_Zona', mssql.NVarChar(10), Zamorozhennaya_Zona ?? '0')
+        .input('ID', mssql.BigInt, id)
+        .input('Sortiruemyi_Tovar', mssql.NVarChar(10), pickFlag('Sortiruemyi_Tovar'))
+        .input('Ne_Sortiruemyi_Tovar', mssql.NVarChar(10), pickFlag('Ne_Sortiruemyi_Tovar'))
+        .input('Produkty', mssql.NVarChar(10), pickFlag('Produkty'))
+        .input('Opasnyi_Tovar', mssql.NVarChar(10), pickFlag('Opasnyi_Tovar'))
+        .input('Zakrytaya_Zona', mssql.NVarChar(10), pickFlag('Zakrytaya_Zona'))
+        .input('Krupnogabaritnyi_Tovar', mssql.NVarChar(10), pickFlag('Krupnogabaritnyi_Tovar'))
+        .input('Yuvelirnye_Izdelia', mssql.NVarChar(10), pickFlag('Yuvelirnye_Izdelia'))
+        .input('Pechat_Etiketki_s_SHK', mssql.NVarChar(10), pickFlag('Pechat_Etiketki_s_SHK'))
+        .input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar(10), pickFlag('Pechat_Etiketki_s_Opisaniem'))
+        .input('PriznakSortirovki', mssql.NVarChar(10), pickFlag('PriznakSortirovki'))
+        .input('Upakovka_v_Gofro', mssql.NVarChar(255), pickFreeText('Upakovka_v_Gofro'))
+        .input('Upakovka_v_PE_Paket', mssql.NVarChar(10), pickFlag('Upakovka_v_PE_Paket'))
+        .input('Vlozhit_v_upakovku_pechatnyi_material', mssql.NVarChar(10), pickFlag('Vlozhit_v_upakovku_pechatnyi_material'))
+        .input('Izmerenie_VGH_i_peredacha_informatsii', mssql.NVarChar(10), pickFlag('Izmerenie_VGH_i_peredacha_informatsii'))
+        .input('Indeks_za_srochnost_koeff_1_5', mssql.NVarChar(10), pickFlag('Indeks_za_srochnost_koeff_1_5'))
+        .input('Kompleksnaya_priemka_tovara', mssql.NVarChar(10), pickFlag('Kompleksnaya_priemka_tovara'))
+        .input('Priemka_tovara_v_transportnykh_korobakh', mssql.NVarChar(10), pickFlag('Priemka_tovara_v_transportnykh_korobakh'))
+        .input('Priemka_tovara_palletnaya', mssql.NVarChar(10), pickFlag('Priemka_tovara_palletnaya'))
+        .input('Prochie_raboty_vklyuchaya_ustranenie_anomalii', mssql.NVarChar(10), pickFlag('Prochie_raboty_vklyuchaya_ustranenie_anomalii'))
+        .input('Razbrakovka_tovara', mssql.NVarChar(10), pickFlag('Razbrakovka_tovara'))
+        .input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar(10), pickFlag('Sborka_naborov_ot_2_shtuk_raznykh_tovarov'))
+        .input('Upakovka_tovara_v_gofromeyler', mssql.NVarChar(10), pickFlag('Upakovka_tovara_v_gofromeyler'))
+        .input('Khranenie_tovara', mssql.NVarChar(10), pickFlag('Khranenie_tovara'))
+        .input('Primeryka_SHK', mssql.NVarChar(10), pickFlag('Primeryka_SHK'))
+        .input('Proverka_Sroka_Godnosti', mssql.NVarChar(10), pickFlag('Proverka_Sroka_Godnosti'))
+        .input('Upakovka_v_Babl_Plenku', mssql.NVarChar(10), pickFlag('Upakovka_v_Babl_Plenku'))
+        .input('Upakovka_v_Ind_Korob', mssql.NVarChar(10), pickFlag('Upakovka_v_Ind_Korob'))
+        .input('Markirovka_Tovara_Stiker_CHZ', mssql.NVarChar(10), pickFlag('Markirovka_Tovara_Stiker_CHZ'))
+        .input('Udalenie_Stikera_Markirovki', mssql.NVarChar(10), pickFlag('Udalenie_Stikera_Markirovki'))
+        .input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar(10), pickFlag('Dopolnitelnaya_Zashchita_Tovara'))
+        .input('Markirovka_Transportnogo_Koroba', mssql.NVarChar(10), pickFlag('Markirovka_Transportnogo_Koroba'))
+        .input('Spetsifikatsiya_TM', mssql.NVarChar(10), pickFlag('Spetsifikatsiya_TM'))
+        .input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar(10), pickFlag('Formirovanie_Pallet_Otgruzki'))
+        .input('Upakovochnyi_Material', mssql.NVarChar(10), pickFlag('Upakovochnyi_Material'))
+        .input('Markirovka_Palleta_TM', mssql.NVarChar(10), pickFlag('Markirovka_Palleta_TM'))
+        .input('Raskomplekt_Zakaza', mssql.NVarChar(10), pickFlag('Raskomplekt_Zakaza'))
+        .input('Tip_Operatsii_LDU', mssql.NVarChar(255), pickFreeText('Tip_Operatsii_LDU'))
+        .input('Zamorozhennaya_Zona', mssql.NVarChar(10), pickFlag('Zamorozhennaya_Zona'))
         .query(`
           UPDATE Test_MP
-          SET 
+          SET
             Sortiruemyi_Tovar = @Sortiruemyi_Tovar,
             Ne_Sortiruemyi_Tovar = @Ne_Sortiruemyi_Tovar,
             Produkty = @Produkty,
@@ -434,36 +451,38 @@ const updateStatusNew = async (req, res) => {
             Yuvelirnye_Izdelia = @Yuvelirnye_Izdelia,
             Pechat_Etiketki_s_SHK = @Pechat_Etiketki_s_SHK,
             Pechat_Etiketki_s_Opisaniem = @Pechat_Etiketki_s_Opisaniem,
-              PriznakSortirovki = @PriznakSortirovki,
-            Upakovka_v_Gofro = @Upakovka_v_Gofro, Upakovka_v_PE_Paket = @Upakovka_v_PE_Paket,
-                    Vlozhit_v_upakovku_pechatnyi_material = @Vlozhit_v_upakovku_pechatnyi_material,
-        Izmerenie_VGH_i_peredacha_informatsii = @Izmerenie_VGH_i_peredacha_informatsii,
-        Indeks_za_srochnost_koeff_1_5 = @Indeks_za_srochnost_koeff_1_5,
-        Kompleksnaya_priemka_tovara = @Kompleksnaya_priemka_tovara,
-        Priemka_tovara_v_transportnykh_korobakh = @Priemka_tovara_v_transportnykh_korobakh,
-        Priemka_tovara_palletnaya = @Priemka_tovara_palletnaya,
-        Prochie_raboty_vklyuchaya_ustranenie_anomalii = @Prochie_raboty_vklyuchaya_ustranenie_anomalii,
-        Razbrakovka_tovara = @Razbrakovka_tovara,
-        Sborka_naborov_ot_2_shtuk_raznykh_tovarov = @Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
-        Upakovka_tovara_v_gofromeyler = @Upakovka_tovara_v_gofromeyler,
-        Khranenie_tovara = @Khranenie_tovara,
-        Primeryka_SHK = @Primeryka_SHK,
-        Proverka_Sroka_Godnosti = @Proverka_Sroka_Godnosti,
-        Upakovka_v_Babl_Plenku = @Upakovka_v_Babl_Plenku,
-        Upakovka_v_Ind_Korob = @Upakovka_v_Ind_Korob,
-        Markirovka_Tovara_Stiker_CHZ = @Markirovka_Tovara_Stiker_CHZ,
-        Udalenie_Stikera_Markirovki = @Udalenie_Stikera_Markirovki,
-        Dopolnitelnaya_Zashchita_Tovara = @Dopolnitelnaya_Zashchita_Tovara,
-        Markirovka_Transportnogo_Koroba = @Markirovka_Transportnogo_Koroba,
-        Formirovanie_Pallet_Otgruzki = @Formirovanie_Pallet_Otgruzki,
-        Upakovochnyi_Material = @Upakovochnyi_Material,
-        Markirovka_Palleta_TM = @Markirovka_Palleta_TM,
-        Raskomplekt_Zakaza = @Raskomplekt_Zakaza,
-        Tip_Operatsii_LDU = @Tip_Operatsii_LDU,
-        Zamorozhennaya_Zona = @Zamorozhennaya_Zona
+            PriznakSortirovki = @PriznakSortirovki,
+            Upakovka_v_Gofro = @Upakovka_v_Gofro,
+            Upakovka_v_PE_Paket = @Upakovka_v_PE_Paket,
+            Vlozhit_v_upakovku_pechatnyi_material = @Vlozhit_v_upakovku_pechatnyi_material,
+            Izmerenie_VGH_i_peredacha_informatsii = @Izmerenie_VGH_i_peredacha_informatsii,
+            Indeks_za_srochnost_koeff_1_5 = @Indeks_za_srochnost_koeff_1_5,
+            Kompleksnaya_priemka_tovara = @Kompleksnaya_priemka_tovara,
+            Priemka_tovara_v_transportnykh_korobakh = @Priemka_tovara_v_transportnykh_korobakh,
+            Priemka_tovara_palletnaya = @Priemka_tovara_palletnaya,
+            Prochie_raboty_vklyuchaya_ustranenie_anomalii = @Prochie_raboty_vklyuchaya_ustranenie_anomalii,
+            Razbrakovka_tovara = @Razbrakovka_tovara,
+            Sborka_naborov_ot_2_shtuk_raznykh_tovarov = @Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
+            Upakovka_tovara_v_gofromeyler = @Upakovka_tovara_v_gofromeyler,
+            Khranenie_tovara = @Khranenie_tovara,
+            Primeryka_SHK = @Primeryka_SHK,
+            Proverka_Sroka_Godnosti = @Proverka_Sroka_Godnosti,
+            Upakovka_v_Babl_Plenku = @Upakovka_v_Babl_Plenku,
+            Upakovka_v_Ind_Korob = @Upakovka_v_Ind_Korob,
+            Markirovka_Tovara_Stiker_CHZ = @Markirovka_Tovara_Stiker_CHZ,
+            Udalenie_Stikera_Markirovki = @Udalenie_Stikera_Markirovki,
+            Dopolnitelnaya_Zashchita_Tovara = @Dopolnitelnaya_Zashchita_Tovara,
+            Markirovka_Transportnogo_Koroba = @Markirovka_Transportnogo_Koroba,
+            Spetsifikatsiya_TM = @Spetsifikatsiya_TM,
+            Formirovanie_Pallet_Otgruzki = @Formirovanie_Pallet_Otgruzki,
+            Upakovochnyi_Material = @Upakovochnyi_Material,
+            Markirovka_Palleta_TM = @Markirovka_Palleta_TM,
+            Raskomplekt_Zakaza = @Raskomplekt_Zakaza,
+            Tip_Operatsii_LDU = @Tip_Operatsii_LDU,
+            Zamorozhennaya_Zona = @Zamorozhennaya_Zona
           WHERE ID = @ID
         `);
-        
+
       res.status(200).json({ success: true, value: 'Данные успешно обновлены', errorCode: 200 });
     } catch (error) {
       console.error('Ошибка при обновлении записей:', error);
@@ -883,6 +902,7 @@ const updateStatusNew = async (req, res) => {
         .input('Udalenie_Stikera_Markirovki', mssql.NVarChar(10), originalRecord.Udalenie_Stikera_Markirovki)
         .input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar(10), originalRecord.Dopolnitelnaya_Zashchita_Tovara)
         .input('Markirovka_Transportnogo_Koroba', mssql.NVarChar(10), originalRecord.Markirovka_Transportnogo_Koroba)
+        .input('Spetsifikatsiya_TM', mssql.NVarChar(10), originalRecord.Spetsifikatsiya_TM)
         .input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar(10), originalRecord.Formirovanie_Pallet_Otgruzki)
         .input('Upakovochnyi_Material', mssql.NVarChar(10), originalRecord.Upakovochnyi_Material)
         .input('Markirovka_Palleta_TM', mssql.NVarChar(10), originalRecord.Markirovka_Palleta_TM)
@@ -923,7 +943,7 @@ const updateStatusNew = async (req, res) => {
         Khranenie_tovara,
         Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob,
         Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara,
-        Markirovka_Transportnogo_Koroba, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material,
+        Markirovka_Transportnogo_Koroba, Spetsifikatsiya_TM, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material,
         Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona,
             vp, Plan_Otkaz, tipPostavki, Mono
           ) VALUES (
@@ -946,7 +966,7 @@ const updateStatusNew = async (req, res) => {
         @Khranenie_tovara,
         @Primeryka_SHK, @Proverka_Sroka_Godnosti, @Upakovka_v_Babl_Plenku, @Upakovka_v_Ind_Korob,
         @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara,
-        @Markirovka_Transportnogo_Koroba, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material,
+        @Markirovka_Transportnogo_Koroba, @Spetsifikatsiya_TM, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material,
         @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona,
             @vp, @Plan_Otkaz, @tipPostavki, @Mono
           )

@@ -10,6 +10,7 @@ const RU_HEADER_TO_DB = {
   'Удаление стикера/маркировки с товара': 'Udalenie_Stikera_Markirovki',
   'Дополнительная защита товара': 'Dopolnitelnaya_Zashchita_Tovara',
   'Маркировка транспортного короба': 'Markirovka_Transportnogo_Koroba',
+  'Спецификация ТМ': 'Spetsifikatsiya_TM',
   'Формирование наборов (комплектов) от 2-х ед. товара': 'Sborka_naborov_ot_2_shtuk_raznykh_tovarov',
   'Формирование паллет для отгрузки': 'Formirovanie_Pallet_Otgruzki',
   'Упаковочный материал': 'Upakovochnyi_Material',

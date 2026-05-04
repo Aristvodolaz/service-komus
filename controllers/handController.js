@@ -60,6 +60,7 @@ async function getTaskRecords(req, res) {
         Udalenie_Stikera_Markirovki,
         Dopolnitelnaya_Zashchita_Tovara,
         Markirovka_Transportnogo_Koroba,
+        Spetsifikatsiya_TM,
         Formirovanie_Pallet_Otgruzki,
         Upakovochnyi_Material,
         Markirovka_Palleta_TM,

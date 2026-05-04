@@ -164,7 +164,7 @@ function processData(rows) {
     'Upakovka_tovara_v_gofromeyler',
     'Primeryka_SHK', 'Proverka_Sroka_Godnosti', 'Upakovka_v_Babl_Plenku', 'Upakovka_v_Ind_Korob',
     'Markirovka_Tovara_Stiker_CHZ', 'Udalenie_Stikera_Markirovki', 'Dopolnitelnaya_Zashchita_Tovara',
-    'Markirovka_Transportnogo_Koroba', 'Formirovanie_Pallet_Otgruzki', 'Upakovochnyi_Material',
+    'Markirovka_Transportnogo_Koroba', 'Spetsifikatsiya_TM', 'Formirovanie_Pallet_Otgruzki', 'Upakovochnyi_Material',
     'Markirovka_Palleta_TM', 'Raskomplekt_Zakaza', 'Zamorozhennaya_Zona',
   ];
 
@@ -199,7 +199,7 @@ function processData(rows) {
     'Upakovka_tovara_v_gofromeyler',
     'Primeryka_SHK', 'Proverka_Sroka_Godnosti', 'Upakovka_v_Babl_Plenku', 'Upakovka_v_Ind_Korob',
     'Markirovka_Tovara_Stiker_CHZ', 'Udalenie_Stikera_Markirovki', 'Dopolnitelnaya_Zashchita_Tovara',
-    'Markirovka_Transportnogo_Koroba', 'Formirovanie_Pallet_Otgruzki', 'Upakovochnyi_Material',
+    'Markirovka_Transportnogo_Koroba', 'Spetsifikatsiya_TM', 'Formirovanie_Pallet_Otgruzki', 'Upakovochnyi_Material',
     'Markirovka_Palleta_TM', 'Raskomplekt_Zakaza', 'Zamorozhennaya_Zona',
     
   ];
@@ -290,7 +290,7 @@ router.get('/download', async (req, res) => {
                Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem,
                Upakovka_v_Gofro, Upakovka_v_PE_Paket, PriznakSortirovki,
                Vlozhit_v_upakovku_pechatnyi_material, Izmerenie_VGH_i_peredacha_informatsii, Indeks_za_srochnost_koeff_1_5, Kompleksnaya_priemka_tovara, Priemka_tovara_v_transportnykh_korobakh, Priemka_tovara_palletnaya, Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara, Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler,
-               Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob, Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara, Markirovka_Transportnogo_Koroba, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material, Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona, Khranenie_tovara,
+               Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob, Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara, Markirovka_Transportnogo_Koroba, Spetsifikatsiya_TM, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material, Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona, Khranenie_tovara,
                Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
                Fakticheskoe_Kol_vo, Ubrano_iz_Zakaza, Time_Start, Time_End
         FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
@@ -304,7 +304,7 @@ router.get('/download', async (req, res) => {
                Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty,
                Upakovka_v_Gofro, Upakovka_v_PE_Paket, PriznakSortirovki,
                Vlozhit_v_upakovku_pechatnyi_material, Izmerenie_VGH_i_peredacha_informatsii, Indeks_za_srochnost_koeff_1_5, Kompleksnaya_priemka_tovara, Priemka_tovara_v_transportnykh_korobakh, Priemka_tovara_palletnaya, Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara, Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler,
-               Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob, Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara, Markirovka_Transportnogo_Koroba, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material, Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona, Khranenie_tovara,
+               Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob, Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara, Markirovka_Transportnogo_Koroba, Spetsifikatsiya_TM, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material, Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona, Khranenie_tovara,
                Mesto, Vlozhennost, Pallet_No, Ispolnitel, SHK_WPS, reason, comment,
                Time_Start, Time_End
         FROM Test_MP WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya
@@ -414,7 +414,7 @@ router.post('/upload-data', async (req, res) => {
            Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, vp, Plan_Otkaz, Upakovka_v_Gofro, Upakovka_v_PE_Paket, PriznakSortirovki
          , 
   Vlozhit_v_upakovku_pechatnyi_material, Izmerenie_VGH_i_peredacha_informatsii, Indeks_za_srochnost_koeff_1_5, Kompleksnaya_priemka_tovara, Priemka_tovara_v_transportnykh_korobakh, Priemka_tovara_palletnaya, Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara, Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler, Khranenie_tovara,
-          Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob, Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara, Markirovka_Transportnogo_Koroba, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material, Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona, tipPostavki, Mono
+          Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob, Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara, Markirovka_Transportnogo_Koroba, Spetsifikatsiya_TM, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material, Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona, tipPostavki, Mono
 
 )
         VALUES 
@@ -424,7 +424,7 @@ router.post('/upload-data', async (req, res) => {
            @Sortiruemyi_Tovar, @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
            @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @vp, @Plan_Otkaz, @Upakovka_v_Gofro, @Upakovka_v_PE_Paket, @PriznakSortirovki
             , @Vlozhit_v_upakovku_pechatnyi_material, @Izmerenie_VGH_i_peredacha_informatsii, @Indeks_za_srochnost_koeff_1_5, @Kompleksnaya_priemka_tovara, @Priemka_tovara_v_transportnykh_korobakh, @Priemka_tovara_palletnaya, @Prochie_raboty_vklyuchaya_ustranenie_anomalii, @Razbrakovka_tovara, @Sborka_naborov_ot_2_shtuk_raznykh_tovarov, @Upakovka_tovara_v_gofromeyler, @Khranenie_tovara,
-            @Primeryka_SHK, @Proverka_Sroka_Godnosti, @Upakovka_v_Babl_Plenku, @Upakovka_v_Ind_Korob, @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara, @Markirovka_Transportnogo_Koroba, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material, @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona, @tipPostavki, @Mono
+            @Primeryka_SHK, @Proverka_Sroka_Godnosti, @Upakovka_v_Babl_Plenku, @Upakovka_v_Ind_Korob, @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara, @Markirovka_Transportnogo_Koroba, @Spetsifikatsiya_TM, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material, @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona, @tipPostavki, @Mono
 
             )
       `;
@@ -487,6 +487,7 @@ router.post('/upload-data', async (req, res) => {
       request.input('Udalenie_Stikera_Markirovki', mssql.NVarChar, data.Udalenie_Stikera_Markirovki ?? null);
       request.input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar, data.Dopolnitelnaya_Zashchita_Tovara ?? null);
       request.input('Markirovka_Transportnogo_Koroba', mssql.NVarChar, data.Markirovka_Transportnogo_Koroba ?? null);
+      request.input('Spetsifikatsiya_TM', mssql.NVarChar, data.Spetsifikatsiya_TM ?? null);
       request.input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar, data.Formirovanie_Pallet_Otgruzki ?? null);
       request.input('Upakovochnyi_Material', mssql.NVarChar, data.Upakovochnyi_Material ?? null);
       request.input('Markirovka_Palleta_TM', mssql.NVarChar, data.Markirovka_Palleta_TM ?? null);
@@ -540,7 +541,7 @@ router.post('/upload-data-new', async (req, res) => {
           Sortiruemyi_Tovar, Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
           Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, vp, Plan_Otkaz, Upakovka_v_Gofro, Upakovka_v_PE_Paket, PriznakSortirovki, 
   Vlozhit_v_upakovku_pechatnyi_material, Izmerenie_VGH_i_peredacha_informatsii, Indeks_za_srochnost_koeff_1_5, Kompleksnaya_priemka_tovara, Priemka_tovara_v_transportnykh_korobakh, Priemka_tovara_palletnaya, Prochie_raboty_vklyuchaya_ustranenie_anomalii, Razbrakovka_tovara, Sborka_naborov_ot_2_shtuk_raznykh_tovarov, Upakovka_tovara_v_gofromeyler, Khranenie_tovara,
-          Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob, Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara, Markirovka_Transportnogo_Koroba, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material, Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona, tipPostavki, Mono
+          Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob, Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara, Markirovka_Transportnogo_Koroba, Spetsifikatsiya_TM, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material, Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona, tipPostavki, Mono
 )
           VALUES 
           (@Artikul, @Artikul_Syrya, @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @Kol_vo_Syrya, @Itog_Zakaz, @SOH,
@@ -549,7 +550,7 @@ router.post('/upload-data-new', async (req, res) => {
           @Sortiruemyi_Tovar, @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
           @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @vp, @Plan_Otkaz, @Upakovka_v_Gofro, @Upakovka_v_PE_Paket, @PriznakSortirovki
                       , @Vlozhit_v_upakovku_pechatnyi_material, @Izmerenie_VGH_i_peredacha_informatsii, @Indeks_za_srochnost_koeff_1_5, @Kompleksnaya_priemka_tovara, @Priemka_tovara_v_transportnykh_korobakh, @Priemka_tovara_palletnaya, @Prochie_raboty_vklyuchaya_ustranenie_anomalii, @Razbrakovka_tovara, @Sborka_naborov_ot_2_shtuk_raznykh_tovarov, @Upakovka_tovara_v_gofromeyler, @Khranenie_tovara,
-          @Primeryka_SHK, @Proverka_Sroka_Godnosti, @Upakovka_v_Babl_Plenku, @Upakovka_v_Ind_Korob, @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara, @Markirovka_Transportnogo_Koroba, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material, @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona, @tipPostavki, @Mono
+          @Primeryka_SHK, @Proverka_Sroka_Godnosti, @Upakovka_v_Babl_Plenku, @Upakovka_v_Ind_Korob, @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara, @Markirovka_Transportnogo_Koroba, @Spetsifikatsiya_TM, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material, @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona, @tipPostavki, @Mono
 )
       `;
 
@@ -611,6 +612,7 @@ router.post('/upload-data-new', async (req, res) => {
       request.input('Udalenie_Stikera_Markirovki', mssql.NVarChar, data.Udalenie_Stikera_Markirovki ?? null);
       request.input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar, data.Dopolnitelnaya_Zashchita_Tovara ?? null);
       request.input('Markirovka_Transportnogo_Koroba', mssql.NVarChar, data.Markirovka_Transportnogo_Koroba ?? null);
+      request.input('Spetsifikatsiya_TM', mssql.NVarChar, data.Spetsifikatsiya_TM ?? null);
       request.input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar, data.Formirovanie_Pallet_Otgruzki ?? null);
       request.input('Upakovochnyi_Material', mssql.NVarChar, data.Upakovochnyi_Material ?? null);
       request.input('Markirovka_Palleta_TM', mssql.NVarChar, data.Markirovka_Palleta_TM ?? null);
