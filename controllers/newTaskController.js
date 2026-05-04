@@ -45,25 +45,6 @@ const updateStatusNew = async (req, res) => {
   
         .query(`
           SELECT 
-            Op_1_Bl_1_Sht,
-            Op_2_Bl_2_Sht,
-            Op_3_Bl_3_Sht,
-            Op_4_Bl_4_Sht,
-            Op_5_Bl_5_Sht,
-            Op_6_Blis_6_10_Sht,
-            Op_7_Pereschyot,
-            Op_9_Fasovka_Sborka,
-            Op_10_Markirovka_SHT,
-            Op_11_Markirovka_Prom,
-            Op_12_Markirovka_Prom,
-            Op_13_Markirovka_Fabr,
-            Op_14_TU_1_Sht,
-            Op_15_TU_2_Sht,
-            Op_16_TU_3_5,
-            Op_17_TU_6_8,
-            Op_468_Proverka_SHK,
-            Op_469_Spetsifikatsiya_TM,
-            Op_470_Dop_Upakovka,
             Sortiruemyi_Tovar,
             Ne_Sortiruemyi_Tovar,
             Produkty,
@@ -86,7 +67,21 @@ const updateStatusNew = async (req, res) => {
           Razbrakovka_tovara,
           Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
           Upakovka_tovara_v_gofromeyler,
-          Khranenie_tovara
+          Khranenie_tovara,
+          Primeryka_SHK,
+          Proverka_Sroka_Godnosti,
+          Upakovka_v_Babl_Plenku,
+          Upakovka_v_Ind_Korob,
+          Markirovka_Tovara_Stiker_CHZ,
+          Udalenie_Stikera_Markirovki,
+          Dopolnitelnaya_Zashchita_Tovara,
+          Markirovka_Transportnogo_Koroba,
+          Formirovanie_Pallet_Otgruzki,
+          Upakovochnyi_Material,
+          Markirovka_Palleta_TM,
+          Raskomplekt_Zakaza,
+          Tip_Operatsii_LDU,
+          Zamorozhennaya_Zona
           FROM Test_MP
           WHERE ID = @ID
         `);
@@ -130,8 +125,10 @@ const updateStatusNew = async (req, res) => {
         .input('Ispolnitel', mssql.NVarChar(255), originalRecord.Ispolnitel)
         .input('Artikul', mssql.Int, originalRecord.Artikul)
         .input('Artikul_Syrya', mssql.NVarChar(50), originalRecord.Artikul_Syrya)
+        .input('Nomenklatura', mssql.BigInt, originalRecord.Nomenklatura)
         .input('Nazvanie_Tovara', mssql.NVarChar(255), originalRecord.Nazvanie_Tovara)
         .input('SHK', mssql.NVarChar(255), originalRecord.SHK)
+        .input('SHK_Syrya', mssql.NVarChar(255), originalRecord.SHK_Syrya)
         .input('SHK_SPO', mssql.NVarChar(255), originalRecord.SHK_SPO)
         .input('SHK_SPO_1', mssql.NVarChar(255), originalRecord.SHK_SPO_1)
         .input('Kol_vo_Syrya', mssql.NVarChar(255), originalRecord.Kol_vo_Syrya)
@@ -142,25 +139,6 @@ const updateStatusNew = async (req, res) => {
         .input('Scklad_Pref', mssql.NVarChar(50), originalRecord.Scklad_Pref)
         .input('Tip_Postavki', mssql.NVarChar(50), originalRecord.Tip_Postavki)
         .input('Srok_Godnosti', mssql.NVarChar(50), originalRecord.Srok_Godnosti)
-        .input('Op_1_Bl_1_Sht', mssql.NVarChar(10), originalRecord.Op_1_Bl_1_Sht)
-        .input('Op_2_Bl_2_Sht', mssql.NVarChar(10), originalRecord.Op_2_Bl_2_Sht)
-        .input('Op_3_Bl_3_Sht', mssql.NVarChar(10), originalRecord.Op_3_Bl_3_Sht)
-        .input('Op_4_Bl_4_Sht', mssql.NVarChar(10), originalRecord.Op_4_Bl_4_Sht)
-        .input('Op_5_Bl_5_Sht', mssql.NVarChar(10), originalRecord.Op_5_Bl_5_Sht)
-        .input('Op_6_Blis_6_10_Sht', mssql.NVarChar(10), originalRecord.Op_6_Blis_6_10_Sht)
-        .input('Op_7_Pereschyot', mssql.NVarChar(10), originalRecord.Op_7_Pereschyot)
-        .input('Op_9_Fasovka_Sborka', mssql.NVarChar(10), originalRecord.Op_9_Fasovka_Sborka)
-        .input('Op_10_Markirovka_SHT', mssql.NVarChar(10), originalRecord.Op_10_Markirovka_SHT)
-        .input('Op_11_Markirovka_Prom', mssql.NVarChar(10), originalRecord.Op_11_Markirovka_Prom)
-        .input('Op_12_Markirovka_Prom', mssql.NVarChar(10), originalRecord.Op_12_Markirovka_Prom)
-        .input('Op_13_Markirovka_Fabr', mssql.NVarChar(10), originalRecord.Op_13_Markirovka_Fabr)
-        .input('Op_14_TU_1_Sht', mssql.NVarChar(10), originalRecord.Op_14_TU_1_Sht)
-        .input('Op_15_TU_2_Sht', mssql.NVarChar(10), originalRecord.Op_15_TU_2_Sht)
-        .input('Op_16_TU_3_5', mssql.NVarChar(10), originalRecord.Op_16_TU_3_5)
-        .input('Op_17_TU_6_8', mssql.NVarChar(10), originalRecord.Op_17_TU_6_8)
-        .input('Op_468_Proverka_SHK', mssql.NVarChar(10), originalRecord.Op_468_Proverka_SHK)
-        .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), originalRecord.Op_469_Spetsifikatsiya_TM)
-        .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), originalRecord.Op_470_Dop_Upakovka)
         .input('Sortiruemyi_Tovar', mssql.NVarChar(10), originalRecord.Sortiruemyi_Tovar)
         .input('Ne_Sortiruemyi_Tovar', mssql.NVarChar(10), originalRecord.Ne_Sortiruemyi_Tovar)
         .input('Produkty', mssql.NVarChar(10), originalRecord.Produkty)
@@ -172,18 +150,36 @@ const updateStatusNew = async (req, res) => {
         .input('Pechat_Etiketki_s_Opisaniem', mssql.NVarChar(10), originalRecord.Pechat_Etiketki_s_Opisaniem)
         .input('PriznakSortirovki', mssql.NVarChar(10), originalRecord.PriznakSortirovki)
         .input('Upakovka_v_PE_Paket', mssql.NVarChar(10), originalRecord.Upakovka_v_PE_Paket)
-        .input('Upakovka_v_Gofro', mssql.NVarChar(10), originalRecord.Upakovka_v_Gofro)
-        .input('Vlozhit_v_upakovku_pechatnyi_material', mssql.NVarChar(10), Vlozhit_v_upakovku_pechatnyi_material ?? '0')
-        .input('Izmerenie_VGH_i_peredacha_informatsii', mssql.NVarChar(10), Izmerenie_VGH_i_peredacha_informatsii ?? '0')
-        .input('Indeks_za_srochnost_koeff_1_5', mssql.NVarChar(10), Indeks_za_srochnost_koeff_1_5 ?? '0')
-        .input('Kompleksnaya_priemka_tovara', mssql.NVarChar(10), Kompleksnaya_priemka_tovara ?? '0')
-        .input('Priemka_tovara_v_transportnykh_korobakh', mssql.NVarChar(10), Priemka_tovara_v_transportnykh_korobakh ?? '0')
-        .input('Priemka_tovara_palletnaya', mssql.NVarChar(10), Priemka_tovara_palletnaya ?? '0')
-        .input('Prochie_raboty_vklyuchaya_ustranenie_anomalii', mssql.NVarChar(10), Prochie_raboty_vklyuchaya_ustranenie_anomalii ?? '0')
-        .input('Razbrakovka_tovara', mssql.NVarChar(10), Razbrakovka_tovara ?? '0')
-        .input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar(10), Sborka_naborov_ot_2_shtuk_raznykh_tovarov ?? '0')
-        .input('Upakovka_tovara_v_gofromeyler', mssql.NVarChar(10), Upakovka_tovara_v_gofromeyler ?? '0')
-        .input('Khranenie_tovara', mssql.NVarChar(10), Khranenie_tovara ?? '0')
+        .input('Upakovka_v_Gofro', mssql.NVarChar(255), originalRecord.Upakovka_v_Gofro)
+        .input('Vlozhit_v_upakovku_pechatnyi_material', mssql.NVarChar(10), originalRecord.Vlozhit_v_upakovku_pechatnyi_material ?? '0')
+        .input('Izmerenie_VGH_i_peredacha_informatsii', mssql.NVarChar(10), originalRecord.Izmerenie_VGH_i_peredacha_informatsii ?? '0')
+        .input('Indeks_za_srochnost_koeff_1_5', mssql.NVarChar(10), originalRecord.Indeks_za_srochnost_koeff_1_5 ?? '0')
+        .input('Kompleksnaya_priemka_tovara', mssql.NVarChar(10), originalRecord.Kompleksnaya_priemka_tovara ?? '0')
+        .input('Priemka_tovara_v_transportnykh_korobakh', mssql.NVarChar(10), originalRecord.Priemka_tovara_v_transportnykh_korobakh ?? '0')
+        .input('Priemka_tovara_palletnaya', mssql.NVarChar(10), originalRecord.Priemka_tovara_palletnaya ?? '0')
+        .input('Prochie_raboty_vklyuchaya_ustranenie_anomalii', mssql.NVarChar(10), originalRecord.Prochie_raboty_vklyuchaya_ustranenie_anomalii ?? '0')
+        .input('Razbrakovka_tovara', mssql.NVarChar(10), originalRecord.Razbrakovka_tovara ?? '0')
+        .input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar(10), originalRecord.Sborka_naborov_ot_2_shtuk_raznykh_tovarov ?? '0')
+        .input('Upakovka_tovara_v_gofromeyler', mssql.NVarChar(10), originalRecord.Upakovka_tovara_v_gofromeyler ?? '0')
+        .input('Khranenie_tovara', mssql.NVarChar(10), originalRecord.Khranenie_tovara ?? '0')
+        .input('Primeryka_SHK', mssql.NVarChar(10), originalRecord.Primeryka_SHK)
+        .input('Proverka_Sroka_Godnosti', mssql.NVarChar(10), originalRecord.Proverka_Sroka_Godnosti)
+        .input('Upakovka_v_Babl_Plenku', mssql.NVarChar(10), originalRecord.Upakovka_v_Babl_Plenku)
+        .input('Upakovka_v_Ind_Korob', mssql.NVarChar(10), originalRecord.Upakovka_v_Ind_Korob)
+        .input('Markirovka_Tovara_Stiker_CHZ', mssql.NVarChar(10), originalRecord.Markirovka_Tovara_Stiker_CHZ)
+        .input('Udalenie_Stikera_Markirovki', mssql.NVarChar(10), originalRecord.Udalenie_Stikera_Markirovki)
+        .input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar(10), originalRecord.Dopolnitelnaya_Zashchita_Tovara)
+        .input('Markirovka_Transportnogo_Koroba', mssql.NVarChar(10), originalRecord.Markirovka_Transportnogo_Koroba)
+        .input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar(10), originalRecord.Formirovanie_Pallet_Otgruzki)
+        .input('Upakovochnyi_Material', mssql.NVarChar(10), originalRecord.Upakovochnyi_Material)
+        .input('Markirovka_Palleta_TM', mssql.NVarChar(10), originalRecord.Markirovka_Palleta_TM)
+        .input('Raskomplekt_Zakaza', mssql.NVarChar(10), originalRecord.Raskomplekt_Zakaza)
+        .input('Tip_Operatsii_LDU', mssql.NVarChar(255), originalRecord.Tip_Operatsii_LDU)
+        .input('Zamorozhennaya_Zona', mssql.NVarChar(10), originalRecord.Zamorozhennaya_Zona)
+        .input('vp', mssql.NVarChar(50), originalRecord.vp)
+        .input('Plan_Otkaz', mssql.NVarChar(50), originalRecord.Plan_Otkaz)
+        .input('tipPostavki', mssql.Bit, originalRecord.tipPostavki)
+        .input('Mono', mssql.Bit, originalRecord.Mono)
         .input('Fakticheskoe_Kol_vo', mssql.Int, originalRecord.Fakticheskoe_Kol_vo)
         .input('Mesto', mssql.NVarChar(50), mesto)
         .input('Vlozhennost', mssql.NVarChar(50), vlozhennost)
@@ -194,13 +190,9 @@ const updateStatusNew = async (req, res) => {
         .input('Persent', mssql.NVarChar(50), originalRecord.Persent)
         .query(`
           INSERT INTO Test_MP (
-            Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel, Artikul, Artikul_Syrya, 
-             Nazvanie_Tovara, SHK, SHK_SPO, SHK_SPO_1, Kol_vo_Syrya, Itog_Zakaz,
-            Sht_v_MP, Itog_MP, SOH, Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, 
-            Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht, Op_7_Pereschyot, 
-            Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_12_Markirovka_Prom, Scklad_Pref,
-            Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, 
-            Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Sortiruemyi_Tovar, 
+            Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel, Artikul, Artikul_Syrya,
+            Nomenklatura, Nazvanie_Tovara, SHK, SHK_Syrya, SHK_SPO, SHK_SPO_1, Kol_vo_Syrya, Itog_Zakaz,
+            Sht_v_MP, Itog_MP, SOH, Tip_Postavki, Srok_Godnosti, Scklad_Pref, Sortiruemyi_Tovar, 
             Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
             Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, Fakticheskoe_Kol_vo, 
             Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent,       PriznakSortirovki,
@@ -216,16 +208,17 @@ const updateStatusNew = async (req, res) => {
         Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
         Upakovka_tovara_v_gofromeyler,
         Khranenie_tovara,
+        Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob,
+        Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara,
+        Markirovka_Transportnogo_Koroba, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material,
+        Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona,
+            vp, Plan_Otkaz, tipPostavki, Mono
           ) VALUES (
-            @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, 
-            @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, 
-            @Sht_v_MP, @Itog_MP, @SOH, @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, 
-            @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht, @Op_7_Pereschyot, 
-            @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_12_Markirovka_Prom,@Scklad_Pref, 
-            @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, 
-            @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Sortiruemyi_Tovar, 
-            @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
-            @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @Fakticheskoe_Kol_vo, 
+            @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya,
+            @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz,
+            @Sht_v_MP, @Itog_MP, @SOH, @Tip_Postavki, @Srok_Godnosti, @Scklad_Pref, @Sortiruemyi_Tovar,
+            @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar,
+            @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @Fakticheskoe_Kol_vo,
             @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent ,       @PriznakSortirovki,
             @Upakovka_v_Gofro, @Upakovka_v_PE_Paket, @Vlozhit_v_upakovku_pechatnyi_material,
         @Izmerenie_VGH_i_peredacha_informatsii,
@@ -237,7 +230,12 @@ const updateStatusNew = async (req, res) => {
         @Razbrakovka_tovara,
         @Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
         @Upakovka_tovara_v_gofromeyler,
-        @Khranenie_tovara
+        @Khranenie_tovara,
+        @Primeryka_SHK, @Proverka_Sroka_Godnosti, @Upakovka_v_Babl_Plenku, @Upakovka_v_Ind_Korob,
+        @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara,
+        @Markirovka_Transportnogo_Koroba, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material,
+        @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona,
+            @vp, @Plan_Otkaz, @tipPostavki, @Mono
           )
         `);
   
@@ -339,25 +337,6 @@ const updateStatusNew = async (req, res) => {
   const updateLduNEW = async (req, res) => {
     const { id } = req.query; // Получаем параметры запроса
     const {
-      Op_1_Bl_1_Sht,
-      Op_2_Bl_2_Sht,
-      Op_3_Bl_3_Sht,
-      Op_4_Bl_4_Sht,
-      Op_5_Bl_5_Sht,
-      Op_6_Blis_6_10_Sht,
-      Op_7_Pereschyot,
-      Op_9_Fasovka_Sborka,
-      Op_10_Markirovka_SHT,
-      Op_11_Markirovka_Prom,
-      Op_12_Markirovka_Prom,
-      Op_13_Markirovka_Fabr,
-      Op_14_TU_1_Sht,
-      Op_15_TU_2_Sht,
-      Op_16_TU_3_5,
-      Op_17_TU_6_8,
-      Op_468_Proverka_SHK,
-      Op_469_Spetsifikatsiya_TM,
-      Op_470_Dop_Upakovka,
       Sortiruemyi_Tovar,
       Ne_Sortiruemyi_Tovar,
       Produkty,
@@ -379,12 +358,24 @@ const updateStatusNew = async (req, res) => {
       Razbrakovka_tovara,
       Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
       Upakovka_tovara_v_gofromeyler,
-      Khranenie_tovara
+      Khranenie_tovara,
+      Primeryka_SHK,
+      Proverka_Sroka_Godnosti,
+      Upakovka_v_Babl_Plenku,
+      Upakovka_v_Ind_Korob,
+      Markirovka_Tovara_Stiker_CHZ,
+      Udalenie_Stikera_Markirovki,
+      Dopolnitelnaya_Zashchita_Tovara,
+      Markirovka_Transportnogo_Koroba,
+      Formirovanie_Pallet_Otgruzki,
+      Upakovochnyi_Material,
+      Markirovka_Palleta_TM,
+      Raskomplekt_Zakaza,
+      Tip_Operatsii_LDU,
+      Zamorozhennaya_Zona
       
     } = req.body; // Получаем данные из тела запроса
   
-    console.log(Op_1_Bl_1_Sht);
-    
     try {
       const pool = await connectToDatabase();
       if (!pool) {
@@ -394,25 +385,6 @@ const updateStatusNew = async (req, res) => {
       // Запрос к базе данных
       await pool.request()
       .input('ID', mssql.BigInt, id)
-        .input('Op_1_Bl_1_Sht', mssql.NVarChar(10), Op_1_Bl_1_Sht ?? '0')
-        .input('Op_2_Bl_2_Sht', mssql.NVarChar(10), Op_2_Bl_2_Sht ?? '0')
-        .input('Op_3_Bl_3_Sht', mssql.NVarChar(10), Op_3_Bl_3_Sht ?? '0')
-        .input('Op_4_Bl_4_Sht', mssql.NVarChar(10), Op_4_Bl_4_Sht ?? '0')
-        .input('Op_5_Bl_5_Sht', mssql.NVarChar(10), Op_5_Bl_5_Sht ?? '0')
-        .input('Op_6_Blis_6_10_Sht', mssql.NVarChar(10), Op_6_Blis_6_10_Sht ?? '0')
-        .input('Op_7_Pereschyot', mssql.NVarChar(10), Op_7_Pereschyot ?? '0')
-        .input('Op_9_Fasovka_Sborka', mssql.NVarChar(10), Op_9_Fasovka_Sborka ?? '0')
-        .input('Op_10_Markirovka_SHT', mssql.NVarChar(10), Op_10_Markirovka_SHT ?? '0')
-        .input('Op_11_Markirovka_Prom', mssql.NVarChar(10), Op_11_Markirovka_Prom ?? '0')
-        .input('Op_12_Markirovka_Prom', mssql.NVarChar(10), Op_12_Markirovka_Prom ?? '0')
-        .input('Op_13_Markirovka_Fabr', mssql.NVarChar(10), Op_13_Markirovka_Fabr ?? '0')
-        .input('Op_14_TU_1_Sht', mssql.NVarChar(10), Op_14_TU_1_Sht ?? '0')
-        .input('Op_15_TU_2_Sht', mssql.NVarChar(10), Op_15_TU_2_Sht ?? '0')
-        .input('Op_16_TU_3_5', mssql.NVarChar(10), Op_16_TU_3_5 ?? '0')
-        .input('Op_17_TU_6_8', mssql.NVarChar(10), Op_17_TU_6_8 ?? '0')
-        .input('Op_468_Proverka_SHK', mssql.NVarChar(10), Op_468_Proverka_SHK ?? '0')
-        .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), Op_469_Spetsifikatsiya_TM ?? '0')
-        .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), Op_470_Dop_Upakovka ?? '0')
         .input('Sortiruemyi_Tovar', mssql.NVarChar(10), Sortiruemyi_Tovar ?? '0')
         .input('Ne_Sortiruemyi_Tovar', mssql.NVarChar(10), Ne_Sortiruemyi_Tovar ?? '0')
         .input('Produkty', mssql.NVarChar(10), Produkty ?? '0')
@@ -436,28 +408,23 @@ const updateStatusNew = async (req, res) => {
         .input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar(10), Sborka_naborov_ot_2_shtuk_raznykh_tovarov ?? '0')
         .input('Upakovka_tovara_v_gofromeyler', mssql.NVarChar(10), Upakovka_tovara_v_gofromeyler ?? '0')
         .input('Khranenie_tovara', mssql.NVarChar(10), Khranenie_tovara ?? '0')
+        .input('Primeryka_SHK', mssql.NVarChar(10), Primeryka_SHK ?? '0')
+        .input('Proverka_Sroka_Godnosti', mssql.NVarChar(10), Proverka_Sroka_Godnosti ?? '0')
+        .input('Upakovka_v_Babl_Plenku', mssql.NVarChar(10), Upakovka_v_Babl_Plenku ?? '0')
+        .input('Upakovka_v_Ind_Korob', mssql.NVarChar(10), Upakovka_v_Ind_Korob ?? '0')
+        .input('Markirovka_Tovara_Stiker_CHZ', mssql.NVarChar(10), Markirovka_Tovara_Stiker_CHZ ?? '0')
+        .input('Udalenie_Stikera_Markirovki', mssql.NVarChar(10), Udalenie_Stikera_Markirovki ?? '0')
+        .input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar(10), Dopolnitelnaya_Zashchita_Tovara ?? '0')
+        .input('Markirovka_Transportnogo_Koroba', mssql.NVarChar(10), Markirovka_Transportnogo_Koroba ?? '0')
+        .input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar(10), Formirovanie_Pallet_Otgruzki ?? '0')
+        .input('Upakovochnyi_Material', mssql.NVarChar(10), Upakovochnyi_Material ?? '0')
+        .input('Markirovka_Palleta_TM', mssql.NVarChar(10), Markirovka_Palleta_TM ?? '0')
+        .input('Raskomplekt_Zakaza', mssql.NVarChar(10), Raskomplekt_Zakaza ?? '0')
+        .input('Tip_Operatsii_LDU', mssql.NVarChar(255), Tip_Operatsii_LDU ?? '')
+        .input('Zamorozhennaya_Zona', mssql.NVarChar(10), Zamorozhennaya_Zona ?? '0')
         .query(`
           UPDATE Test_MP
           SET 
-            Op_1_Bl_1_Sht = @Op_1_Bl_1_Sht,
-            Op_2_Bl_2_Sht = @Op_2_Bl_2_Sht,
-            Op_3_Bl_3_Sht = @Op_3_Bl_3_Sht,
-            Op_4_Bl_4_Sht = @Op_4_Bl_4_Sht,
-            Op_5_Bl_5_Sht = @Op_5_Bl_5_Sht,
-            Op_6_Blis_6_10_Sht = @Op_6_Blis_6_10_Sht,
-            Op_7_Pereschyot = @Op_7_Pereschyot,
-            Op_9_Fasovka_Sborka = @Op_9_Fasovka_Sborka,
-            Op_10_Markirovka_SHT = @Op_10_Markirovka_SHT,
-            Op_11_Markirovka_Prom = @Op_11_Markirovka_Prom,
-            Op_12_Markirovka_Prom = @Op_12_Markirovka_Prom,
-            Op_13_Markirovka_Fabr = @Op_13_Markirovka_Fabr,
-            Op_14_TU_1_Sht = @Op_14_TU_1_Sht,
-            Op_15_TU_2_Sht = @Op_15_TU_2_Sht,
-            Op_16_TU_3_5 = @Op_16_TU_3_5,
-            Op_17_TU_6_8 = @Op_17_TU_6_8,
-            Op_468_Proverka_SHK = @Op_468_Proverka_SHK,
-            Op_469_Spetsifikatsiya_TM = @Op_469_Spetsifikatsiya_TM,
-            Op_470_Dop_Upakovka = @Op_470_Dop_Upakovka,
             Sortiruemyi_Tovar = @Sortiruemyi_Tovar,
             Ne_Sortiruemyi_Tovar = @Ne_Sortiruemyi_Tovar,
             Produkty = @Produkty,
@@ -479,7 +446,21 @@ const updateStatusNew = async (req, res) => {
         Razbrakovka_tovara = @Razbrakovka_tovara,
         Sborka_naborov_ot_2_shtuk_raznykh_tovarov = @Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
         Upakovka_tovara_v_gofromeyler = @Upakovka_tovara_v_gofromeyler,
-        Khranenie_tovara = @Khranenie_tovara
+        Khranenie_tovara = @Khranenie_tovara,
+        Primeryka_SHK = @Primeryka_SHK,
+        Proverka_Sroka_Godnosti = @Proverka_Sroka_Godnosti,
+        Upakovka_v_Babl_Plenku = @Upakovka_v_Babl_Plenku,
+        Upakovka_v_Ind_Korob = @Upakovka_v_Ind_Korob,
+        Markirovka_Tovara_Stiker_CHZ = @Markirovka_Tovara_Stiker_CHZ,
+        Udalenie_Stikera_Markirovki = @Udalenie_Stikera_Markirovki,
+        Dopolnitelnaya_Zashchita_Tovara = @Dopolnitelnaya_Zashchita_Tovara,
+        Markirovka_Transportnogo_Koroba = @Markirovka_Transportnogo_Koroba,
+        Formirovanie_Pallet_Otgruzki = @Formirovanie_Pallet_Otgruzki,
+        Upakovochnyi_Material = @Upakovochnyi_Material,
+        Markirovka_Palleta_TM = @Markirovka_Palleta_TM,
+        Raskomplekt_Zakaza = @Raskomplekt_Zakaza,
+        Tip_Operatsii_LDU = @Tip_Operatsii_LDU,
+        Zamorozhennaya_Zona = @Zamorozhennaya_Zona
           WHERE ID = @ID
         `);
         
@@ -857,8 +838,10 @@ const updateStatusNew = async (req, res) => {
         .input('Ispolnitel', mssql.NVarChar(255), originalRecord.Ispolnitel)
         .input('Artikul', mssql.Int, originalRecord.Artikul)
         .input('Artikul_Syrya', mssql.NVarChar(50), originalRecord.Artikul_Syrya)
+        .input('Nomenklatura', mssql.BigInt, originalRecord.Nomenklatura)
         .input('Nazvanie_Tovara', mssql.NVarChar(255), originalRecord.Nazvanie_Tovara)
         .input('SHK', mssql.NVarChar(255), originalRecord.SHK)
+        .input('SHK_Syrya', mssql.NVarChar(255), originalRecord.SHK_Syrya)
         .input('SHK_SPO', mssql.NVarChar(255), originalRecord.SHK_SPO)
         .input('SHK_SPO_1', mssql.NVarChar(255), originalRecord.SHK_SPO_1)
         .input('Kol_vo_Syrya', mssql.NVarChar(255), originalRecord.Kol_vo_Syrya)
@@ -869,25 +852,6 @@ const updateStatusNew = async (req, res) => {
         .input('Scklad_Pref', mssql.NVarChar(50), originalRecord.Scklad_Pref)
         .input('Tip_Postavki', mssql.NVarChar(50), originalRecord.Tip_Postavki)
         .input('Srok_Godnosti', mssql.NVarChar(50), originalRecord.Srok_Godnosti)
-        .input('Op_1_Bl_1_Sht', mssql.NVarChar(10), originalRecord.Op_1_Bl_1_Sht)
-        .input('Op_2_Bl_2_Sht', mssql.NVarChar(10), originalRecord.Op_2_Bl_2_Sht)
-        .input('Op_3_Bl_3_Sht', mssql.NVarChar(10), originalRecord.Op_3_Bl_3_Sht)
-        .input('Op_4_Bl_4_Sht', mssql.NVarChar(10), originalRecord.Op_4_Bl_4_Sht)
-        .input('Op_5_Bl_5_Sht', mssql.NVarChar(10), originalRecord.Op_5_Bl_5_Sht)
-        .input('Op_6_Blis_6_10_Sht', mssql.NVarChar(10), originalRecord.Op_6_Blis_6_10_Sht)
-        .input('Op_7_Pereschyot', mssql.NVarChar(10), originalRecord.Op_7_Pereschyot)
-        .input('Op_9_Fasovka_Sborka', mssql.NVarChar(10), originalRecord.Op_9_Fasovka_Sborka)
-        .input('Op_10_Markirovka_SHT', mssql.NVarChar(10), originalRecord.Op_10_Markirovka_SHT)
-        .input('Op_11_Markirovka_Prom', mssql.NVarChar(10), originalRecord.Op_11_Markirovka_Prom)
-        .input('Op_12_Markirovka_Prom', mssql.NVarChar(10), originalRecord.Op_12_Markirovka_Prom)
-        .input('Op_13_Markirovka_Fabr', mssql.NVarChar(10), originalRecord.Op_13_Markirovka_Fabr)
-        .input('Op_14_TU_1_Sht', mssql.NVarChar(10), originalRecord.Op_14_TU_1_Sht)
-        .input('Op_15_TU_2_Sht', mssql.NVarChar(10), originalRecord.Op_15_TU_2_Sht)
-        .input('Op_16_TU_3_5', mssql.NVarChar(10), originalRecord.Op_16_TU_3_5)
-        .input('Op_17_TU_6_8', mssql.NVarChar(10), originalRecord.Op_17_TU_6_8)
-        .input('Op_468_Proverka_SHK', mssql.NVarChar(10), originalRecord.Op_468_Proverka_SHK)
-        .input('Op_469_Spetsifikatsiya_TM', mssql.NVarChar(10), originalRecord.Op_469_Spetsifikatsiya_TM)
-        .input('Op_470_Dop_Upakovka', mssql.NVarChar(10), originalRecord.Op_470_Dop_Upakovka)
         .input('Sortiruemyi_Tovar', mssql.NVarChar(10), originalRecord.Sortiruemyi_Tovar)
         .input('Ne_Sortiruemyi_Tovar', mssql.NVarChar(10), originalRecord.Ne_Sortiruemyi_Tovar)
         .input('Produkty', mssql.NVarChar(10), originalRecord.Produkty)
@@ -911,6 +875,24 @@ const updateStatusNew = async (req, res) => {
         .input('Sborka_naborov_ot_2_shtuk_raznykh_tovarov', mssql.NVarChar(10), originalRecord.Sborka_naborov_ot_2_shtuk_raznykh_tovarov)
         .input('Upakovka_tovara_v_gofromeyler',             mssql.NVarChar(10), originalRecord.Upakovka_tovara_v_gofromeyler)
         .input('Khranenie_tovara',                          mssql.NVarChar(10), originalRecord.Khranenie_tovara)
+        .input('Primeryka_SHK', mssql.NVarChar(10), originalRecord.Primeryka_SHK)
+        .input('Proverka_Sroka_Godnosti', mssql.NVarChar(10), originalRecord.Proverka_Sroka_Godnosti)
+        .input('Upakovka_v_Babl_Plenku', mssql.NVarChar(10), originalRecord.Upakovka_v_Babl_Plenku)
+        .input('Upakovka_v_Ind_Korob', mssql.NVarChar(10), originalRecord.Upakovka_v_Ind_Korob)
+        .input('Markirovka_Tovara_Stiker_CHZ', mssql.NVarChar(10), originalRecord.Markirovka_Tovara_Stiker_CHZ)
+        .input('Udalenie_Stikera_Markirovki', mssql.NVarChar(10), originalRecord.Udalenie_Stikera_Markirovki)
+        .input('Dopolnitelnaya_Zashchita_Tovara', mssql.NVarChar(10), originalRecord.Dopolnitelnaya_Zashchita_Tovara)
+        .input('Markirovka_Transportnogo_Koroba', mssql.NVarChar(10), originalRecord.Markirovka_Transportnogo_Koroba)
+        .input('Formirovanie_Pallet_Otgruzki', mssql.NVarChar(10), originalRecord.Formirovanie_Pallet_Otgruzki)
+        .input('Upakovochnyi_Material', mssql.NVarChar(10), originalRecord.Upakovochnyi_Material)
+        .input('Markirovka_Palleta_TM', mssql.NVarChar(10), originalRecord.Markirovka_Palleta_TM)
+        .input('Raskomplekt_Zakaza', mssql.NVarChar(10), originalRecord.Raskomplekt_Zakaza)
+        .input('Tip_Operatsii_LDU', mssql.NVarChar(255), originalRecord.Tip_Operatsii_LDU)
+        .input('Zamorozhennaya_Zona', mssql.NVarChar(10), originalRecord.Zamorozhennaya_Zona)
+        .input('vp', mssql.NVarChar(50), originalRecord.vp)
+        .input('Plan_Otkaz', mssql.NVarChar(50), originalRecord.Plan_Otkaz)
+        .input('tipPostavki', mssql.Bit, originalRecord.tipPostavki)
+        .input('Mono', mssql.Bit, originalRecord.Mono)
         .input('Fakticheskoe_Kol_vo', mssql.Int, originalRecord.Fakticheskoe_Kol_vo)
         .input('Mesto', mssql.Int, Mesto)
         .input('Vlozhennost', mssql.Int, Vlozhennost)
@@ -921,15 +903,11 @@ const updateStatusNew = async (req, res) => {
         .input('Persent', mssql.NVarChar(50), originalRecord.Persent)
         .query(`
           INSERT INTO Test_MP (
-            Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel, Artikul, Artikul_Syrya, 
-             Nazvanie_Tovara, SHK, SHK_SPO, SHK_SPO_1, Kol_vo_Syrya, Itog_Zakaz,
-            Sht_v_MP, Itog_MP, SOH, Tip_Postavki, Srok_Godnosti, Op_1_Bl_1_Sht, Op_2_Bl_2_Sht, 
-            Op_3_Bl_3_Sht, Op_4_Bl_4_Sht, Op_5_Bl_5_Sht, Op_6_Blis_6_10_Sht, Op_7_Pereschyot, 
-            Op_9_Fasovka_Sborka, Op_10_Markirovka_SHT, Op_11_Markirovka_Prom, Op_12_Markirovka_Prom, Scklad_Pref,
-            Op_13_Markirovka_Fabr, Op_14_TU_1_Sht, Op_15_TU_2_Sht, Op_16_TU_3_5, Op_17_TU_6_8, 
-            Op_468_Proverka_SHK, Op_469_Spetsifikatsiya_TM, Op_470_Dop_Upakovka, Sortiruemyi_Tovar, 
-            Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar, 
-            Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, Fakticheskoe_Kol_vo, 
+            Pref, Nazvanie_Zadaniya, Status_Zadaniya, Status, Ispolnitel, Artikul, Artikul_Syrya,
+            Nomenklatura, Nazvanie_Tovara, SHK, SHK_Syrya, SHK_SPO, SHK_SPO_1, Kol_vo_Syrya, Itog_Zakaz,
+            Sht_v_MP, Itog_MP, SOH, Tip_Postavki, Srok_Godnosti, Scklad_Pref, Sortiruemyi_Tovar,
+            Ne_Sortiruemyi_Tovar, Produkty, Opasnyi_Tovar, Zakrytaya_Zona, Krupnogabaritnyi_Tovar,
+            Yuvelirnye_Izdelia, Pechat_Etiketki_s_SHK, Pechat_Etiketki_s_Opisaniem, Fakticheskoe_Kol_vo,
             Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent,         PriznakSortirovki ,
             Upakovka_v_Gofro , Upakovka_v_PE_Paket,
                     Vlozhit_v_upakovku_pechatnyi_material,
@@ -942,17 +920,18 @@ const updateStatusNew = async (req, res) => {
         Razbrakovka_tovara,
         Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
         Upakovka_tovara_v_gofromeyler,
-        Khranenie_tovara
+        Khranenie_tovara,
+        Primeryka_SHK, Proverka_Sroka_Godnosti, Upakovka_v_Babl_Plenku, Upakovka_v_Ind_Korob,
+        Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara,
+        Markirovka_Transportnogo_Koroba, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material,
+        Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona,
+            vp, Plan_Otkaz, tipPostavki, Mono
           ) VALUES (
-            @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya, 
-            @Nazvanie_Tovara, @SHK, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz, 
-            @Sht_v_MP, @Itog_MP, @SOH, @Tip_Postavki, @Srok_Godnosti, @Op_1_Bl_1_Sht, @Op_2_Bl_2_Sht, 
-            @Op_3_Bl_3_Sht, @Op_4_Bl_4_Sht, @Op_5_Bl_5_Sht, @Op_6_Blis_6_10_Sht, @Op_7_Pereschyot, 
-            @Op_9_Fasovka_Sborka, @Op_10_Markirovka_SHT, @Op_11_Markirovka_Prom, @Op_12_Markirovka_Prom,@Scklad_Pref, 
-            @Op_13_Markirovka_Fabr, @Op_14_TU_1_Sht, @Op_15_TU_2_Sht, @Op_16_TU_3_5, @Op_17_TU_6_8, 
-            @Op_468_Proverka_SHK, @Op_469_Spetsifikatsiya_TM, @Op_470_Dop_Upakovka, @Sortiruemyi_Tovar, 
-            @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar, 
-            @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @Fakticheskoe_Kol_vo, 
+            @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya,
+            @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz,
+            @Sht_v_MP, @Itog_MP, @SOH, @Tip_Postavki, @Srok_Godnosti, @Scklad_Pref, @Sortiruemyi_Tovar,
+            @Ne_Sortiruemyi_Tovar, @Produkty, @Opasnyi_Tovar, @Zakrytaya_Zona, @Krupnogabaritnyi_Tovar,
+            @Yuvelirnye_Izdelia, @Pechat_Etiketki_s_SHK, @Pechat_Etiketki_s_Opisaniem, @Fakticheskoe_Kol_vo,
             @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent, @PriznakSortirovki, @Upakovka_v_Gofro,
            @Upakovka_v_PE_Paket, @Vlozhit_v_upakovku_pechatnyi_material,
         @Izmerenie_VGH_i_peredacha_informatsii,
@@ -964,7 +943,12 @@ const updateStatusNew = async (req, res) => {
         @Razbrakovka_tovara,
         @Sborka_naborov_ot_2_shtuk_raznykh_tovarov,
         @Upakovka_tovara_v_gofromeyler,
-        @Khranenie_tovara
+        @Khranenie_tovara,
+        @Primeryka_SHK, @Proverka_Sroka_Godnosti, @Upakovka_v_Babl_Plenku, @Upakovka_v_Ind_Korob,
+        @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara,
+        @Markirovka_Transportnogo_Koroba, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material,
+        @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona,
+            @vp, @Plan_Otkaz, @tipPostavki, @Mono
           )
         `);
   
