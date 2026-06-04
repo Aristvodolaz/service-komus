@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const swaggerUi = require('swagger-ui-express');
@@ -14,6 +15,7 @@ const otkazController = require('./routes/market_place/otkaz');
 const tasksNewController = require('./routes/market_place/newTasks');
 const srokNewController = require('./routes/srok');
 const taskNameRouter = require('./routes/taskName');
+const photoControllerRoutes = require('./routes/market_place/photo');
 
 /* for excel*/
 const fileController = require('./routes/market_place/file');
@@ -53,6 +55,7 @@ app.use('/market/tasks', tasksController);
 app.use('/market/tasks/name', taskNameRouter);
 app.use('/market/new', tasksNewController);
 app.use('/market/otkaz', otkazController);
+app.use('/market/photo', photoControllerRoutes);
 app.use('/srok', srokNewController);
 /* for excel download*/
 app.use('/download/excel', fileController);

@@ -1,18 +1,18 @@
 const mssql = require('mssql');
 
 const config = {
-    user: 'sa',
-    password: 'icY2eGuyfU',
-    server: 'PRM-SRV-MSSQL-01.komus.net',
-    port: 59587,
-    database: 'SPOe_rc',
+    user: process.env.DB_USER || 'sa',
+    password: process.env.DB_PASSWORD || 'icY2eGuyfU',
+    server: process.env.DB_SERVER || 'PRM-SRV-MSSQL-01.komus.net',
+    port: parseInt(process.env.DB_PORT) || 59587,
+    database: process.env.DB_NAME || 'SPOe_rc',
     pool:{
         max: 500,
         min: 0,
         idleTimeoutMillis: 30000
     },
     options: {
-      encrypt: true,
+      encrypt: process.env.DB_ENCRYPT === 'true',
       enableArithAbort: true,
       trustServerCertificate: true 
     }
