@@ -68,7 +68,9 @@ async function getTaskRecords(req, res) {
         Tip_Operatsii_LDU,
         Zamorozhennaya_Zona,
         tipPostavki,
-        Mono
+        Mono,
+        SHK_Original,
+        SHK_Changed
       FROM [SPOe_rc].[dbo].[Test_MP]
       WHERE Nazvanie_Zadaniya = @nazvanie_zadaniya
     `;

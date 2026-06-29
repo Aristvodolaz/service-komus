@@ -82,7 +82,9 @@ const updateStatusNew = async (req, res) => {
           Markirovka_Palleta_TM,
           Raskomplekt_Zakaza,
           Tip_Operatsii_LDU,
-          Zamorozhennaya_Zona
+          Zamorozhennaya_Zona,
+          SHK_Original,
+          SHK_Changed
           FROM Test_MP
           WHERE ID = @ID
         `);
@@ -182,6 +184,8 @@ const updateStatusNew = async (req, res) => {
         .input('Plan_Otkaz', mssql.NVarChar(50), originalRecord.Plan_Otkaz)
         .input('tipPostavki', mssql.Bit, originalRecord.tipPostavki)
         .input('Mono', mssql.Bit, originalRecord.Mono)
+        .input('SHK_Original', mssql.NVarChar(255), originalRecord.SHK_Original)
+        .input('SHK_Changed', mssql.NVarChar(255), originalRecord.SHK_Changed)
         .input('Fakticheskoe_Kol_vo', mssql.Int, originalRecord.Fakticheskoe_Kol_vo)
         .input('Mesto', mssql.NVarChar(50), mesto)
         .input('Vlozhennost', mssql.NVarChar(50), vlozhennost)
@@ -214,7 +218,8 @@ const updateStatusNew = async (req, res) => {
         Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara,
         Markirovka_Transportnogo_Koroba, Spetsifikatsiya_TM, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material,
         Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona,
-            vp, Plan_Otkaz, tipPostavki, Mono
+            vp, Plan_Otkaz, tipPostavki, Mono,
+            SHK_Original, SHK_Changed
           ) VALUES (
             @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya,
             @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz,
@@ -237,7 +242,8 @@ const updateStatusNew = async (req, res) => {
         @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara,
         @Markirovka_Transportnogo_Koroba, @Spetsifikatsiya_TM, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material,
         @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona,
-            @vp, @Plan_Otkaz, @tipPostavki, @Mono
+        @vp, @Plan_Otkaz, @tipPostavki, @Mono,
+        @SHK_Original, @SHK_Changed
           )
         `);
   
@@ -280,20 +286,31 @@ const updateStatusNew = async (req, res) => {
   
   const updateSHKNew = async (req, res) => {
     const { id, newSHK } = req.query;
-  
+
     try {
       const pool = await connectToDatabase();
       if (!pool) {
         return res.status(500).json({ success: false, value: null, errorCode:500 });
       }
-  
-      // Обновление записи по названию задания и артиклу
-      await pool.request()
-      .input('ID', mssql.BigInt, id)
+
+      // Обновление записи: устанавливаем новый ШК, сохраняем изначальный (если еще не был сохранен) и текущий измененный
+      const result = await pool.request()
+        .input('ID', mssql.BigInt, id)
         .input('NewSHK', mssql.NVarChar(255), newSHK)
-        .query('UPDATE Test_MP SET SHK = @NewSHK WHERE ID = @ID');
-  
-      res.json({ success: true, value: 'ШК успешно обновлен', errorCode: 200 });
+        .query(`
+          UPDATE Test_MP 
+          SET 
+            SHK_Original = ISNULL(SHK_Original, SHK), 
+            SHK_Changed = @NewSHK, 
+            SHK = @NewSHK 
+          WHERE ID = @ID
+        `);
+
+      if (result.rowsAffected[0] > 0) {
+        res.json({ success: true, value: 'ШК успешно обновлен', errorCode: 200 });
+      } else {
+        res.status(404).json({ success: false, value: 'Запись не найдена', errorCode: 404 });
+      }
     } catch (error) {
       console.error('Ошибка при обновлении ШК:', error);
       res.status(500).json({ success: false, value: null, errorCode: 500 });
@@ -913,6 +930,8 @@ const updateStatusNew = async (req, res) => {
         .input('Plan_Otkaz', mssql.NVarChar(50), originalRecord.Plan_Otkaz)
         .input('tipPostavki', mssql.Bit, originalRecord.tipPostavki)
         .input('Mono', mssql.Bit, originalRecord.Mono)
+        .input('SHK_Original', mssql.NVarChar(255), originalRecord.SHK_Original)
+        .input('SHK_Changed', mssql.NVarChar(255), originalRecord.SHK_Changed)
         .input('Fakticheskoe_Kol_vo', mssql.Int, originalRecord.Fakticheskoe_Kol_vo)
         .input('Mesto', mssql.Int, Mesto)
         .input('Vlozhennost', mssql.Int, Vlozhennost)
@@ -945,7 +964,8 @@ const updateStatusNew = async (req, res) => {
         Markirovka_Tovara_Stiker_CHZ, Udalenie_Stikera_Markirovki, Dopolnitelnaya_Zashchita_Tovara,
         Markirovka_Transportnogo_Koroba, Spetsifikatsiya_TM, Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material,
         Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona,
-            vp, Plan_Otkaz, tipPostavki, Mono
+            vp, Plan_Otkaz, tipPostavki, Mono,
+            SHK_Original, SHK_Changed
           ) VALUES (
             @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya,
             @Nomenklatura, @Nazvanie_Tovara, @SHK, @SHK_Syrya, @SHK_SPO, @SHK_SPO_1, @Kol_vo_Syrya, @Itog_Zakaz,
@@ -968,7 +988,8 @@ const updateStatusNew = async (req, res) => {
         @Markirovka_Tovara_Stiker_CHZ, @Udalenie_Stikera_Markirovki, @Dopolnitelnaya_Zashchita_Tovara,
         @Markirovka_Transportnogo_Koroba, @Spetsifikatsiya_TM, @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material,
         @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona,
-            @vp, @Plan_Otkaz, @tipPostavki, @Mono
+            @vp, @Plan_Otkaz, @tipPostavki, @Mono,
+            @SHK_Original, @SHK_Changed
           )
         `);
   

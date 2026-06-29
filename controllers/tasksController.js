@@ -161,12 +161,19 @@ const getByShk = async (req, res) => {
       return res.status(200).json({ success: false, value: null, errorCode: 200 });
     }
 
-    // Обновление найденных записей
+    // Обновление найденных записей с сохранением истории
     await pool.request()
     .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
     .input('Old_SHK', mssql.NVarChar(50), `%${shk}%`)
     .input('New_SHK', mssql.NVarChar(50), shk)
-    .query('UPDATE Test_MP SET SHK = @New_SHK WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @Old_SHK');
+    .query(`
+      UPDATE Test_MP 
+      SET 
+        SHK_Original = ISNULL(SHK_Original, SHK), 
+        SHK_Changed = @New_SHK, 
+        SHK = @New_SHK 
+      WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND SHK LIKE @Old_SHK
+    `);
 
     res.status(200).json({
       success: true,
@@ -410,7 +417,9 @@ const getLDUBySHK = async (req, res) => {
           Markirovka_Palleta_TM,
           Raskomplekt_Zakaza,
           Tip_Operatsii_LDU,
-          Zamorozhennaya_Zona
+          Zamorozhennaya_Zona,
+          SHK_Original,
+          SHK_Changed
         FROM Test_MP
         WHERE Artikul = @Artikul and Nazvanie_Zadaniya = @Nazvanie_Zadaniya 
       `);
@@ -476,7 +485,9 @@ const getRecordsBySHKWPS = async (req, res) => {
           Markirovka_Palleta_TM,
           Raskomplekt_Zakaza,
           Tip_Operatsii_LDU,
-          Zamorozhennaya_Zona
+          Zamorozhennaya_Zona,
+          SHK_Original,
+          SHK_Changed
         FROM Test_MP
         WHERE SHK = @SHK
       `);
@@ -652,6 +663,8 @@ const duplicateRecord = async (req, res) => {
       .input('Khranenie_tovara', mssql.NVarChar(50), o.Khranenie_tovara)
       .input('tipPostavki', mssql.Bit, o.tipPostavki)
       .input('Mono', mssql.Bit, o.Mono)
+      .input('SHK_Original', mssql.NVarChar(255), o.SHK_Original)
+      .input('SHK_Changed', mssql.NVarChar(255), o.SHK_Changed)
       .input('Mesto', mssql.NVarChar(50), mesto)
       .input('Vlozhennost', mssql.NVarChar(50), vlozhennost)
       .input('Pallet_No', mssql.NVarChar(50), palletNo)
@@ -675,6 +688,7 @@ const duplicateRecord = async (req, res) => {
           Spetsifikatsiya_TM,
           Formirovanie_Pallet_Otgruzki, Upakovochnyi_Material, Markirovka_Palleta_TM, Raskomplekt_Zakaza, Tip_Operatsii_LDU, Zamorozhennaya_Zona,
           Khranenie_tovara, tipPostavki, Mono,
+          SHK_Original, SHK_Changed,
           Mesto, Vlozhennost, Pallet_No, Time_Start, Time_Middle, Time_End, Persent
         ) VALUES (
           @Pref, @Nazvanie_Zadaniya, @Status_Zadaniya, @Status, @Ispolnitel, @Artikul, @Artikul_Syrya,
@@ -691,6 +705,7 @@ const duplicateRecord = async (req, res) => {
           @Spetsifikatsiya_TM,
           @Formirovanie_Pallet_Otgruzki, @Upakovochnyi_Material, @Markirovka_Palleta_TM, @Raskomplekt_Zakaza, @Tip_Operatsii_LDU, @Zamorozhennaya_Zona,
           @Khranenie_tovara, @tipPostavki, @Mono,
+          @SHK_Original, @SHK_Changed,
           @Mesto, @Vlozhennost, @Pallet_No, @Time_Start, @Time_Middle, @Time_End, @Persent
         )
       `);
@@ -741,14 +756,25 @@ const updateSHKByTaskAndArticul = async (req, res) => {
       return res.status(500).json({ success: false, value: null, errorCode:500 });
     }
 
-    // Обновление записи по названию задания и артиклу
-    await pool.request()
+    // Обновление записи: устанавливаем новый ШК, сохраняем изначальный (если еще не был сохранен) и текущий измененный
+    const result = await pool.request()
       .input('Nazvanie_Zadaniya', mssql.NVarChar(255), taskName)
       .input('Artikul', mssql.Int, articul)
       .input('NewSHK', mssql.NVarChar(255), newSHK)
-      .query('UPDATE Test_MP SET SHK = @NewSHK WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul');
+      .query(`
+        UPDATE Test_MP 
+        SET 
+          SHK_Original = ISNULL(SHK_Original, SHK), 
+          SHK_Changed = @NewSHK, 
+          SHK = @NewSHK 
+        WHERE Nazvanie_Zadaniya = @Nazvanie_Zadaniya AND Artikul = @Artikul
+      `);
 
-    res.json({ success: true, value: 'ШК успешно обновлен', errorCode: 200 });
+    if (result.rowsAffected[0] > 0) {
+      res.json({ success: true, value: 'ШК успешно обновлен', errorCode: 200 });
+    } else {
+      res.status(404).json({ success: false, value: 'Запись не найдена', errorCode: 404 });
+    }
   } catch (error) {
     console.error('Ошибка при обновлении ШК:', error);
     res.status(500).json({ success: false, value: null, errorCode: 500 });
